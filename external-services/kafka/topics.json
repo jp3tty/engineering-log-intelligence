@@ -1,0 +1,169 @@
+{
+  "topics": [
+    {
+      "name": "log-ingestion",
+      "partitions": 12,
+      "replication_factor": 3,
+      "config": {
+        "retention.ms": "604800000",
+        "compression.type": "lz4",
+        "cleanup.policy": "delete",
+        "segment.ms": "3600000",
+        "min.insync.replicas": "2"
+      },
+      "description": "Raw log ingestion from various sources"
+    },
+    {
+      "name": "log-processing",
+      "partitions": 12,
+      "replication_factor": 3,
+      "config": {
+        "retention.ms": "2592000000",
+        "compression.type": "lz4",
+        "cleanup.policy": "delete",
+        "segment.ms": "3600000",
+        "min.insync.replicas": "2"
+      },
+      "description": "Processed and enriched log data"
+    },
+    {
+      "name": "alerts",
+      "partitions": 6,
+      "replication_factor": 3,
+      "config": {
+        "retention.ms": "2592000000",
+        "compression.type": "lz4",
+        "cleanup.policy": "delete",
+        "segment.ms": "3600000",
+        "min.insync.replicas": "2"
+      },
+      "description": "Alert notifications and updates"
+    },
+    {
+      "name": "analytics",
+      "partitions": 6,
+      "replication_factor": 3,
+      "config": {
+        "retention.ms": "2592000000",
+        "compression.type": "lz4",
+        "cleanup.policy": "delete",
+        "segment.ms": "3600000",
+        "min.insync.replicas": "2"
+      },
+      "description": "Analytics and metrics data"
+    },
+    {
+      "name": "ml-predictions",
+      "partitions": 6,
+      "replication_factor": 3,
+      "config": {
+        "retention.ms": "604800000",
+        "compression.type": "lz4",
+        "cleanup.policy": "delete",
+        "segment.ms": "3600000",
+        "min.insync.replicas": "2"
+      },
+      "description": "ML model predictions and results"
+    },
+    {
+      "name": "user-activity",
+      "partitions": 3,
+      "replication_factor": 3,
+      "config": {
+        "retention.ms": "2592000000",
+        "compression.type": "lz4",
+        "cleanup.policy": "delete",
+        "segment.ms": "3600000",
+        "min.insync.replicas": "2"
+      },
+      "description": "User activity and behavior tracking"
+    }
+  ],
+  "schemas": {
+    "log-ingestion": {
+      "type": "json",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "source_id": {"type": "string", "format": "uuid"},
+          "log_id": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "raw_log": {"type": "string"},
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "source_type": {"type": "string"},
+              "host": {"type": "string"},
+              "service": {"type": "string"},
+              "environment": {"type": "string"}
+            }
+          }
+        },
+        "required": ["source_id", "log_id", "timestamp", "raw_log"]
+      }
+    },
+    "log-processing": {
+      "type": "json",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "log_id": {"type": "string"},
+          "source_id": {"type": "string", "format": "uuid"},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "level": {"type": "string", "enum": ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"]},
+          "message": {"type": "string"},
+          "raw_log": {"type": "string"},
+          "category": {"type": "string"},
+          "tags": {"type": "array", "items": {"type": "string"}},
+          "parsed_fields": {"type": "object"},
+          "metadata": {"type": "object"},
+          "processing_status": {"type": "string"}
+        },
+        "required": ["log_id", "source_id", "timestamp", "level", "message"]
+      }
+    },
+    "alerts": {
+      "type": "json",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "alert_id": {"type": "string", "format": "uuid"},
+          "title": {"type": "string"},
+          "description": {"type": "string"},
+          "severity": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+          "status": {"type": "string", "enum": ["OPEN", "ACKNOWLEDGED", "RESOLVED", "CLOSED"]},
+          "source_id": {"type": "string", "format": "uuid"},
+          "log_entry_id": {"type": "string", "format": "uuid"},
+          "rule_id": {"type": "string", "format": "uuid"},
+          "triggered_at": {"type": "string", "format": "date-time"},
+          "metadata": {"type": "object"}
+        },
+        "required": ["alert_id", "title", "severity", "status", "triggered_at"]
+      }
+    },
+    "analytics": {
+      "type": "json",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "metric_name": {"type": "string"},
+          "metric_type": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "value": {"type": "number"},
+          "dimensions": {
+            "type": "object",
+            "properties": {
+              "source_id": {"type": "string", "format": "uuid"},
+              "level": {"type": "string"},
+              "category": {"type": "string"},
+              "host": {"type": "string"},
+              "service": {"type": "string"}
+            }
+          },
+          "aggregation_period": {"type": "string"}
+        },
+        "required": ["metric_name", "metric_type", "timestamp", "value"]
+      }
+    }
+  }
+}

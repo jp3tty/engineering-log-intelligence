@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "name": "engineering-log-intelligence",
+  "buildCommand": "./scripts/build.sh",
+  "builds": [
+    {
+      "src": "api/**/*.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    }
+  ],
+  "env": {
+    "PYTHONPATH": "."
+  },
+  "functions": {
+    "api/**/*.py": {
+      "runtime": "python3.9"
+    }
+  },
+  "hooks": {
+    "afterDeploy": "./scripts/post-deploy.sh"
+  }
+}
