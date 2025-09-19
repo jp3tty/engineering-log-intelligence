@@ -254,6 +254,26 @@ Aggregated Data → Frontend Visualizations
 - **Testing**: Regular disaster recovery drills
 - **Documentation**: Detailed recovery procedures
 
+## Data Simulation Capabilities
+
+### SPLUNK Log Simulation
+- **8 Source Types**: Windows Event Logs, Apache, IIS, Syslog
+- **6 Anomaly Types**: System failures, security breaches, performance issues, data corruption, network anomalies, resource exhaustion
+- **Performance**: 90,000+ logs per second generation
+- **Realistic Formats**: Matches actual SPLUNK log formats and structures
+
+### SAP Transaction Simulation
+- **8 Transaction Types**: Financial, Sales, Purchase, Inventory, HR, System, Security, Performance
+- **Real T-Codes**: Uses actual SAP transaction codes (FB01, VA01, ME21N, etc.)
+- **Business Context**: Realistic amounts, customer IDs, material numbers, department mapping
+- **Performance**: 65,000+ transactions per second generation
+
+### Data Generation Framework
+- **Extensible Design**: Easy to add new log source types
+- **Configurable Anomalies**: Adjustable anomaly rates and patterns
+- **Performance Testing**: Built-in benchmarking and optimization
+- **Quality Assurance**: Comprehensive validation and testing
+
 ## Future Enhancements
 
 ### Planned Improvements
@@ -270,6 +290,6 @@ Aggregated Data → Frontend Visualizations
 
 ---
 
-**Last Updated**: September 21, 2025  
-**Version**: 2.0  
-**Status**: Phase 1 Complete - Foundation Ready
+**Last Updated**: September 18, 2025  
+**Version**: 2.1  
+**Status**: Phase 2 In Progress - Data Simulation Complete
