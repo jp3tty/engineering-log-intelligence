@@ -11,6 +11,8 @@ import structlog
 
 from .base_generator import BaseLogGenerator
 from .splunk_generator import SplunkLogGenerator
+from .sap_generator import SAPLogGenerator
+from .application_generator import ApplicationLogGenerator
 
 logger = structlog.get_logger(__name__)
 
@@ -46,14 +48,15 @@ class DataSimulator:
             splunk_config = self.config.get('splunk', {})
             self.generators['splunk'] = SplunkLogGenerator(splunk_config)
         
-        # TODO: Add other generators (SAP, Application, etc.)
-        # if self.config.get('enable_sap', True):
-        #     sap_config = self.config.get('sap', {})
-        #     self.generators['sap'] = SAPLogGenerator(sap_config)
+        # SAP generator
+        if self.config.get('enable_sap', True):
+            sap_config = self.config.get('sap', {})
+            self.generators['sap'] = SAPLogGenerator(sap_config)
         
-        # if self.config.get('enable_application', True):
-        #     app_config = self.config.get('application', {})
-        #     self.generators['application'] = ApplicationLogGenerator(app_config)
+        # Application generator
+        if self.config.get('enable_application', True):
+            app_config = self.config.get('application', {})
+            self.generators['application'] = ApplicationLogGenerator(app_config)
     
     def start_simulation(self, duration_minutes: int = 60, logs_per_minute: int = 100):
         """
@@ -250,10 +253,12 @@ def create_default_config() -> Dict[str, Any]:
     """Create default configuration for the simulator."""
     return {
         "enable_splunk": True,
-        "enable_sap": False,
-        "enable_application": False,
+        "enable_sap": True,
+        "enable_application": True,
         "generator_weights": {
-            "splunk": 1.0
+            "splunk": 0.4,
+            "sap": 0.3,
+            "application": 0.3
         },
         "splunk": {
             "log_levels": ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
@@ -265,5 +270,27 @@ def create_default_config() -> Dict[str, Any]:
             "error_rate": 0.02,
             "environment": "development",
             "random_tags": ["production", "staging", "test", "critical", "monitoring"]
+        },
+        "sap": {
+            "log_levels": ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
+            "log_level_weights": [0.1, 0.7, 0.15, 0.04, 0.01],
+            "categories": ["financial", "sales", "purchase", "inventory", "hr", "system", "security", "performance"],
+            "hosts": ["sap-erp-01", "sap-crm-01", "sap-scm-01", "sap-hcm-01"],
+            "services": ["sap_erp", "sap_crm", "sap_scm", "sap_hcm"],
+            "anomaly_rate": 0.05,
+            "error_rate": 0.02,
+            "environment": "development",
+            "random_tags": ["production", "staging", "test", "critical", "financial"]
+        },
+        "application": {
+            "log_levels": ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
+            "log_level_weights": [0.1, 0.7, 0.15, 0.04, 0.01],
+            "categories": ["application", "security", "performance", "business"],
+            "hosts": ["web-server-01", "api-server-01", "auth-server-01", "microservice-01"],
+            "services": ["webapp", "api", "auth", "microservice"],
+            "anomaly_rate": 0.05,
+            "error_rate": 0.02,
+            "environment": "development",
+            "random_tags": ["production", "staging", "test", "critical", "api"]
         }
     }
