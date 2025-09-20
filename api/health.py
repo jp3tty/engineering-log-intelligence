@@ -7,17 +7,8 @@ import os
 import json
 from datetime import datetime, timezone
 from typing import Dict, Any
-import structlog
-
-from api.utils.monitoring import (
-    create_health_check_response,
-    create_error_response,
-    monitor_function,
-    logger
-)
 
 
-@monitor_function("health_check")
 def handler(request) -> Dict[str, Any]:
     """
     Health check handler for Vercel Functions.
@@ -49,7 +40,7 @@ def handler(request) -> Dict[str, Any]:
         }
 
     # Check environment variables
-    required_env_vars = ["JWT_SECRET_KEY", "DATABASE_URL", "ELASTICSEARCH_URL"]
+    required_env_vars = ["JWT_SECRET_KEY", "APP_NAME", "ENVIRONMENT"]
 
     env_status = "ok"
     missing_vars = []
