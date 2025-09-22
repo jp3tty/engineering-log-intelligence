@@ -102,3 +102,5 @@ external-services/*.pem
 .mypy_cache/
 .dmypy.json
 dmypy.json
+railway_aws.txt
+*.txt
