@@ -64,7 +64,7 @@ jobs:
         mypy api/ >> quality-report.md || true
         
     - name: Upload quality report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: quality-report
         path: quality-report.md
