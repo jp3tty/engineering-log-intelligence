@@ -52,10 +52,10 @@ Today we implemented a comprehensive **A/B Testing Framework** for ML models - t
 │   Log Entry     │───▶│ Traffic Router   │───▶│ Model Variant A │
 │                 │    │                  │    │ (50% traffic)   │
 └─────────────────┘    │                  │    └─────────────────┘
-                       │                  │
-                       │                  └──▶│ Model Variant B │
-                       │                       │ (50% traffic)   │
-                       └───────────────────────┘
+                       │                  │    ┌─────────────────┐
+                       │                  └-──▶│ Model Variant B │
+                       │                  |    │ (50% traffic)   │
+                       └──────────────────┘    └─────────────────┘
                                 │
                                 ▼
                        ┌──────────────────┐
