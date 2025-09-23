@@ -1,97 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Engineering Log Intelligence</title>
-    <meta name="description" content="AI-powered log analysis platform for engineering systems" />
-    <meta name="keywords" content="log analysis, AI, machine learning, monitoring, engineering" />
-    
-    <!-- Preload critical resources -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    
-    <!-- Security headers -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options" content="DENY" />
-    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
-    
     <style>
-      /* Critical CSS for initial load */
-      body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-      }
-      
-      .loading-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-      }
-      
-      .loading-spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid rgba(255, 255, 255, 0.3);
-        border-top: 4px solid white;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-      
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      
-      .loading-text {
-        color: white;
-        font-size: 18px;
-        font-weight: 500;
-        margin-top: 20px;
-        text-align: center;
-      }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo h1 {
+            color: #333;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .success {
+            color: #27ae60;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .demo-credentials {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .demo-credentials h3 {
+            margin: 0 0 0.5rem 0;
+            color: #333;
+        }
+        .demo-credentials p {
+            margin: 0.25rem 0;
+            color: #666;
+        }
     </style>
-    <script type="module" crossorigin src="/assets/index-DP7wYxPE.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Dpq8vX4E.css">
-  </head>
-  <body>
-    <div id="app">
-      <!-- Loading screen -->
-      <div class="loading-screen" id="loading-screen">
-        <div>
-          <div class="loading-spinner"></div>
-          <div class="loading-text">Loading Engineering Log Intelligence...</div>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🔍 Engineering Log Intelligence</h1>
         </div>
-      </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit">Login</button>
+        </form>
+        
+        <div id="message"></div>
+        
+        <div class="demo-credentials">
+            <h3>Demo Credentials:</h3>
+            <p><strong>Admin:</strong> admin / password123</p>
+            <p><strong>Analyst:</strong> analyst / password123</p>
+            <p><strong>User:</strong> user / password123</p>
+        </div>
     </div>
-    
-    
+
     <script>
-      // Hide loading screen when Vue app is ready
-      window.addEventListener('load', () => {
-        setTimeout(() => {
-          const loadingScreen = document.getElementById('loading-screen');
-          if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            loadingScreen.style.transition = 'opacity 0.5s ease-out';
-            setTimeout(() => {
-              loadingScreen.style.display = 'none';
-            }, 500);
-          }
-        }, 1000);
-      });
+        // Mock authentication
+        const validUsers = {
+            'admin': { password: 'password123', role: 'admin', name: 'Admin User' },
+            'analyst': { password: 'password123', role: 'analyst', name: 'Analyst User' },
+            'user': { password: 'password123', role: 'user', name: 'Regular User' }
+        };
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+            
+            if (validUsers[username] && validUsers[username].password === password) {
+                messageDiv.innerHTML = '<div class="success">✅ Login successful! Redirecting to dashboard...</div>';
+                
+                // Store user data
+                localStorage.setItem('user', JSON.stringify({
+                    username: username,
+                    role: validUsers[username].role,
+                    name: validUsers[username].name
+                }));
+                
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 1500);
+            } else {
+                messageDiv.innerHTML = '<div class="error">❌ Invalid credentials. Please try again.</div>';
+            }
+        });
     </script>
-  </body>
+</body>
 </html>

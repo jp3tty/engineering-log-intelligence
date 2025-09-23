@@ -2,11 +2,12 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "dashboard.html",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
