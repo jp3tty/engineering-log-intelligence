@@ -17,10 +17,10 @@ export default function handler(req, res) {
     
     // Mock authentication logic
     const validCredentials = {
-      'admin': 'admin123',
-      'analyst': 'analyst123',
-      'user': 'user123',
-      'demo': 'demo123'
+      'admin': 'password123',
+      'analyst': 'password123',
+      'user': 'password123',
+      'demo': 'password123'
     };
     
     if (validCredentials[username] && validCredentials[username] === password) {
