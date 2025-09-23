@@ -184,7 +184,7 @@ router.beforeEach(async (to, from, next) => {
 // After navigation
 router.afterEach((to, from) => {
   // Track page views (in production, you might send this to analytics)
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.log(`📄 Navigated to: ${to.name} (${to.path})`)
   }
   
@@ -210,7 +210,7 @@ router.onError((error) => {
   console.error('🚨 Router error:', error)
   
   // In production, you might want to send this to an error tracking service
-  if (process.env.NODE_ENV === 'production') {
+  if (import.meta.env.PROD) {
     // Send to error tracking service (e.g., Sentry)
     console.log('Router error would be sent to tracking service in production')
   }

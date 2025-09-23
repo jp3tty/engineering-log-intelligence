@@ -109,52 +109,56 @@
             <h3 class="text-lg font-semibold text-gray-900">Log Volume (Last 24 Hours)</h3>
           </div>
           <div class="card-body">
-            <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-              <div class="text-center">
-                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <p class="text-gray-500">Chart will be implemented with Chart.js</p>
-              </div>
-            </div>
+            <LineChart 
+              :data="logVolumeData" 
+              :options="logVolumeOptions"
+              :height="300"
+            />
           </div>
         </div>
 
-        <!-- Error Distribution -->
+        <!-- Error Distribution Pie Chart -->
         <div class="card">
           <div class="card-header">
-            <h3 class="text-lg font-semibold text-gray-900">Error Distribution</h3>
+            <h3 class="text-lg font-semibold text-gray-900">Log Distribution</h3>
           </div>
           <div class="card-body">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">ERROR</span>
-                <div class="flex items-center space-x-2">
-                  <div class="w-32 bg-gray-200 rounded-full h-2">
-                    <div class="bg-danger-500 h-2 rounded-full" style="width: 15%"></div>
-                  </div>
-                  <span class="text-sm font-medium text-gray-900">15%</span>
-                </div>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">WARN</span>
-                <div class="flex items-center space-x-2">
-                  <div class="w-32 bg-gray-200 rounded-full h-2">
-                    <div class="bg-warning-500 h-2 rounded-full" style="width: 25%"></div>
-                  </div>
-                  <span class="text-sm font-medium text-gray-900">25%</span>
-                </div>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-600">INFO</span>
-                <div class="flex items-center space-x-2">
-                  <div class="w-32 bg-gray-200 rounded-full h-2">
-                    <div class="bg-success-500 h-2 rounded-full" style="width: 60%"></div>
-                  </div>
-                  <span class="text-sm font-medium text-gray-900">60%</span>
-                </div>
-              </div>
-            </div>
+            <PieChart 
+              :data="logDistributionData" 
+              :options="pieChartOptions"
+              :height="300"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Response Time Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold text-gray-900">Response Time Trends</h3>
+          </div>
+          <div class="card-body">
+            <LineChart 
+              :data="responseTimeData" 
+              :options="responseTimeOptions"
+              :height="300"
+            />
+          </div>
+        </div>
+
+        <!-- Error Types Bar Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold text-gray-900">Error Types Distribution</h3>
+          </div>
+          <div class="card-body">
+            <BarChart 
+              :data="errorTypesData" 
+              :options="barChartOptions"
+              :height="300"
+            />
           </div>
         </div>
       </div>
@@ -202,9 +206,16 @@
 
 import { ref, computed, onMounted } from 'vue'
 import { useSystemStore } from '@/stores/system'
+import { LineChart, BarChart, PieChart } from '@/components/charts'
+import { fetchDashboardAnalytics } from '@/services/analytics'
 
 export default {
   name: 'Dashboard',
+  components: {
+    LineChart,
+    BarChart,
+    PieChart
+  },
   setup() {
     const systemStore = useSystemStore()
 
@@ -242,6 +253,152 @@ export default {
       },
     ])
 
+    // Chart data - For beginners: This is the data that will be displayed in our charts
+    const logVolumeData = ref({
+      labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+      datasets: [{
+        label: 'Logs per hour',
+        data: [1200, 1900, 3000, 5000, 4200, 3800, 2100],
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    })
+
+    const logDistributionData = ref({
+      labels: ['INFO', 'WARN', 'ERROR', 'DEBUG', 'FATAL'],
+      datasets: [{
+        data: [60, 25, 10, 4, 1],
+        backgroundColor: [
+          'rgb(34, 197, 94)',  // Green for INFO
+          'rgb(245, 158, 11)', // Yellow for WARN
+          'rgb(239, 68, 68)',  // Red for ERROR
+          'rgb(107, 114, 128)', // Gray for DEBUG
+          'rgb(147, 51, 234)'  // Purple for FATAL
+        ],
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      }]
+    })
+
+    const responseTimeData = ref({
+      labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+      datasets: [{
+        label: 'Average Response Time (ms)',
+        data: [85, 92, 78, 105, 88, 95, 82],
+        borderColor: 'rgb(16, 185, 129)',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    })
+
+    const errorTypesData = ref({
+      labels: ['Database', 'Network', 'Authentication', 'Validation', 'System'],
+      datasets: [{
+        label: 'Error Count',
+        data: [45, 32, 28, 15, 8],
+        backgroundColor: [
+          'rgba(239, 68, 68, 0.8)',
+          'rgba(245, 158, 11, 0.8)',
+          'rgba(147, 51, 234, 0.8)',
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(16, 185, 129, 0.8)'
+        ],
+        borderColor: [
+          'rgb(239, 68, 68)',
+          'rgb(245, 158, 11)',
+          'rgb(147, 51, 234)',
+          'rgb(59, 130, 246)',
+          'rgb(16, 185, 129)'
+        ],
+        borderWidth: 1
+      }]
+    })
+
+    // Chart options - For beginners: These control how the charts look and behave
+    const logVolumeOptions = ref({
+      plugins: {
+        title: {
+          display: true,
+          text: 'Log Volume Over Time'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Number of Logs'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Time (24h)'
+          }
+        }
+      }
+    })
+
+    const pieChartOptions = ref({
+      plugins: {
+        title: {
+          display: true,
+          text: 'Log Level Distribution'
+        }
+      }
+    })
+
+    const responseTimeOptions = ref({
+      plugins: {
+        title: {
+          display: true,
+          text: 'Response Time Trends'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Response Time (ms)'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Time (24h)'
+          }
+        }
+      }
+    })
+
+    const barChartOptions = ref({
+      plugins: {
+        title: {
+          display: true,
+          text: 'Error Types Distribution'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Error Count'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Error Type'
+          }
+        }
+      }
+    })
+
     // Computed properties
     const systemHealth = computed(() => systemStore.systemHealth)
 
@@ -249,11 +406,36 @@ export default {
     const refreshData = async () => {
       isLoading.value = true
       try {
+        console.log('🔄 Refreshing dashboard data...')
+        
+        // Fetch system health
         await systemStore.checkSystemHealth()
-        // In a real app, you'd fetch other data here
-        await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+        
+        // Fetch analytics data
+        const analyticsData = await fetchDashboardAnalytics()
+        console.log('📊 Analytics data received:', analyticsData)
+        
+        // Update chart data with real data
+        if (analyticsData) {
+          console.log('📈 Updating chart data...')
+          logVolumeData.value = analyticsData.logVolume
+          logDistributionData.value = analyticsData.logDistribution
+          responseTimeData.value = analyticsData.responseTime
+          errorTypesData.value = analyticsData.errorTypes
+          
+          // Update system metrics
+          if (analyticsData.systemMetrics) {
+            logsProcessed.value = analyticsData.systemMetrics.logsProcessed
+            activeAlerts.value = analyticsData.systemMetrics.activeAlerts
+            responseTime.value = analyticsData.systemMetrics.responseTime
+          }
+          console.log('✅ Chart data updated successfully')
+        } else {
+          console.log('❌ No analytics data received')
+        }
+        
       } catch (error) {
-        console.error('Failed to refresh data:', error)
+        console.error('❌ Failed to refresh data:', error)
       } finally {
         isLoading.value = false
       }
@@ -287,6 +469,7 @@ export default {
 
     // Lifecycle
     onMounted(() => {
+      console.log('🎯 Dashboard mounted, refreshing data...')
       refreshData()
     })
 
@@ -297,6 +480,18 @@ export default {
       activeAlerts,
       responseTime,
       recentActivity,
+      
+      // Chart data
+      logVolumeData,
+      logDistributionData,
+      responseTimeData,
+      errorTypesData,
+      
+      // Chart options
+      logVolumeOptions,
+      pieChartOptions,
+      responseTimeOptions,
+      barChartOptions,
       
       // Computed
       systemHealth,

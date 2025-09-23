@@ -1,107 +1,90 @@
-/**
- * Authentication endpoint for Vercel Functions (Node.js version)
- */
-
-module.exports = (req, res) => {
+// Mock Authentication API for Vercel Functions
+export default function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Content-Type', 'application/json');
-
+  
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ message: 'CORS preflight successful' });
+    res.status(200).end();
     return;
   }
 
-  try {
-    if (req.method === 'POST') {
-      // Handle login request
-      let body = '';
-      req.on('data', chunk => {
-        body += chunk.toString();
-      });
+  // Mock login endpoint
+  if (req.method === 'POST' && req.url === '/api/auth/login') {
+    const { username, password } = req.body;
+    
+    // Mock authentication logic
+    const validCredentials = {
+      'admin': 'admin123',
+      'analyst': 'analyst123',
+      'user': 'user123',
+      'demo': 'demo123'
+    };
+    
+    if (validCredentials[username] && validCredentials[username] === password) {
+      // Mock successful login
+      const mockUser = {
+        id: 1,
+        username: username,
+        email: `${username}@example.com`,
+        role: username === 'admin' ? 'admin' : username === 'analyst' ? 'analyst' : 'user',
+        permissions: username === 'admin' ? 
+          ['read_logs', 'manage_users', 'configure_alerts', 'analyze_logs'] :
+          username === 'analyst' ?
+          ['read_logs', 'analyze_logs', 'create_alerts'] :
+          ['read_logs', 'view_dashboard']
+      };
       
-      req.on('end', () => {
-        try {
-          const data = JSON.parse(body);
-          const username = data.username?.trim() || '';
-          const password = data.password?.trim() || '';
-
-          // Demo credentials for testing
-          const demoUsers = {
-            'admin': {
-              password: 'password123',
-              role: 'admin',
-              permissions: ['read_logs', 'view_dashboard', 'create_alerts', 'analyze_logs', 'export_data', 'manage_users', 'manage_system', 'configure_alerts']
-            },
-            'analyst': {
-              password: 'password123',
-              role: 'analyst',
-              permissions: ['read_logs', 'view_dashboard', 'create_alerts', 'analyze_logs', 'export_data']
-            },
-            'user': {
-              password: 'password123',
-              role: 'user',
-              permissions: ['read_logs', 'view_dashboard', 'create_alerts']
-            }
-          };
-
-          // Check credentials
-          if (username in demoUsers && demoUsers[username].password === password) {
-            // Generate tokens (simplified for demo)
-            const timestamp = Date.now();
-            const accessToken = `demo_access_token_${username}_${timestamp}`;
-            const refreshToken = `demo_refresh_token_${username}_${timestamp}`;
-
-            const userData = {
-              id: 1,
-              username: username,
-              email: `${username}@example.com`,
-              role: demoUsers[username].role,
-              permissions: demoUsers[username].permissions,
-              first_name: username.charAt(0).toUpperCase() + username.slice(1),
-              last_name: 'User'
-            };
-
-            res.status(200).json({
-              user: userData,
-              tokens: {
-                access_token: accessToken,
-                refresh_token: refreshToken,
-                expires_in: 1800
-              },
-              timestamp: new Date().toISOString()
-            });
-          } else {
-            res.status(401).json({
-              error: 'Invalid credentials',
-              message: 'Username or password is incorrect'
-            });
-          }
-        } catch (parseError) {
-          res.status(400).json({
-            error: 'Invalid JSON',
-            message: 'Request body must be valid JSON'
-          });
-        }
+      const mockToken = `mock_token_${username}_${Date.now()}`;
+      
+      res.status(200).json({
+        success: true,
+        user: mockUser,
+        token: mockToken,
+        message: 'Login successful'
       });
     } else {
-      // Handle GET request - return endpoint info
-      res.status(200).json({
-        message: 'Authentication endpoint',
-        timestamp: new Date().toISOString(),
-        status: 'success',
-        environment: process.env.NODE_ENV || 'development',
-        available_methods: ['POST', 'GET', 'OPTIONS']
+      res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
       });
     }
-  } catch (error) {
-    res.status(500).json({
-      error: 'Internal server error',
-      message: error.message,
-      timestamp: new Date().toISOString()
-    });
+    return;
   }
-};
+  
+  // Mock health check
+  if (req.method === 'GET' && req.url === '/api/health') {
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      service: 'Engineering Log Intelligence API',
+      version: '1.0.0'
+    });
+    return;
+  }
+  
+  // Mock analytics endpoint
+  if (req.method === 'GET' && req.url === '/api/analytics') {
+    res.status(200).json({
+      totalLogs: 125000,
+      errorRate: 2.3,
+      avgResponseTime: 145,
+      activeUsers: 47,
+      systemHealth: 'excellent',
+      recentAlerts: [
+        { id: 1, message: 'High error rate detected', severity: 'warning', timestamp: new Date().toISOString() },
+        { id: 2, message: 'Database connection restored', severity: 'info', timestamp: new Date().toISOString() }
+      ]
+    });
+    return;
+  }
+  
+  // Default response
+  res.status(404).json({
+    success: false,
+    message: 'Endpoint not found',
+    availableEndpoints: ['/api/auth/login', '/api/health', '/api/analytics']
+  });
+}

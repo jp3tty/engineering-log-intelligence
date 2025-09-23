@@ -37,7 +37,7 @@ app.config.errorHandler = (err, vm, info) => {
   console.error('Info:', info)
   
   // In production, you might want to send this to an error tracking service
-  if (process.env.NODE_ENV === 'production') {
+  if (import.meta.env.PROD) {
     // Send to error tracking service (e.g., Sentry)
     console.log('Error would be sent to tracking service in production')
   }
@@ -45,7 +45,7 @@ app.config.errorHandler = (err, vm, info) => {
 
 // Global properties
 app.config.globalProperties.$log = (message, ...args) => {
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.log(`[${new Date().toISOString()}] ${message}`, ...args)
   }
 }
@@ -54,7 +54,7 @@ app.config.globalProperties.$log = (message, ...args) => {
 app.mount('#app')
 
 // Development helpers
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.DEV) {
   // Make Vue app available globally for debugging
   window.VueApp = app
   
