@@ -53,8 +53,7 @@ export const useSystemStore = defineStore('system', () => {
         }
         lastUpdate.value = new Date()
         return { success: true, data: systemHealth.value }
-      }
-    } catch (err) {
+      } catch (err) {
       const errorMessage = err.message || 'Health check failed'
       error.value = errorMessage
       systemHealth.value.status = 'unhealthy'
