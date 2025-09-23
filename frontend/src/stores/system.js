@@ -39,23 +39,8 @@ export const useSystemStore = defineStore('system', () => {
       isLoading.value = true
       error.value = null
 
-      try {
-        const response = await axios.get('/api/health/check')
-        
-        if (response.data) {
-          systemHealth.value = {
-            status: response.data.status || 'unknown',
-            services: response.data.services || {},
-            lastChecked: new Date().toISOString(),
-          }
-          lastUpdate.value = new Date()
-          return { success: true, data: response.data }
-        } else {
-          throw new Error('Invalid health check response')
-        }
-      } catch (apiError) {
-        // If API fails, use mock health data
-        console.log('API not available, using mock system health')
+      // Always use mock health data for now
+      console.log('Using mock system health')
         systemHealth.value = {
           status: 'healthy',
           services: {
