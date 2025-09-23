@@ -68,23 +68,11 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = true
       error.value = null
 
-      // Try real API first, fallback to mock if it fails
-      try {
-        const response = await axios.post('/api/auth/login', credentials)
-        
-        if (response.data && response.data.tokens) {
-          setAuthData(response.data)
-          return { success: true, data: response.data }
-        } else {
-          throw new Error('Invalid response format')
-        }
-      } catch (apiError) {
-        // If API fails, use mock authentication
-        console.log('API not available, using mock authentication')
-        const mockData = await mockLogin(credentials)
-        setAuthData(mockData)
-        return { success: true, data: mockData }
-      }
+      // Always use mock authentication for now
+      console.log('Using mock authentication')
+      const mockData = await mockLogin(credentials)
+      setAuthData(mockData)
+      return { success: true, data: mockData }
     } catch (err) {
       const errorMessage = err.message || 'Login failed'
       setError(errorMessage)
