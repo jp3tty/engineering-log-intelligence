@@ -41,20 +41,19 @@ export const useSystemStore = defineStore('system', () => {
 
       // Always use mock health data for now
       console.log('Using mock system health')
-      try {
-        systemHealth.value = {
-          status: 'healthy',
-          services: {
-            database: { status: 'healthy', responseTime: 45 },
-            elasticsearch: { status: 'healthy', responseTime: 23 },
-            kafka: { status: 'healthy', responseTime: 12 },
-            api: { status: 'healthy', responseTime: 89 }
-          },
-          lastChecked: new Date().toISOString(),
-        }
-        lastUpdate.value = new Date()
-        return { success: true, data: systemHealth.value }
-      } catch (err) {
+      systemHealth.value = {
+        status: 'healthy',
+        services: {
+          database: { status: 'healthy', responseTime: 45 },
+          elasticsearch: { status: 'healthy', responseTime: 23 },
+          kafka: { status: 'healthy', responseTime: 12 },
+          api: { status: 'healthy', responseTime: 89 }
+        },
+        lastChecked: new Date().toISOString(),
+      }
+      lastUpdate.value = new Date()
+      return { success: true, data: systemHealth.value }
+    } catch (err) {
       const errorMessage = err.message || 'Health check failed'
       error.value = errorMessage
       systemHealth.value.status = 'unhealthy'
