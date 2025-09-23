@@ -17,13 +17,5 @@
       "src": "api/**/*.py",
       "use": "@vercel/python"
     }
-  ],
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "@vercel/node"
-    },
-    "api/**/*.py": {
-      "runtime": "@vercel/python"
-    }
-  }
+  ]
 }
