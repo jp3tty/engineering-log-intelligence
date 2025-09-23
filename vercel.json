@@ -18,18 +18,12 @@
       "use": "@vercel/python"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "@vercel/node"
     },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+    "api/**/*.py": {
+      "runtime": "@vercel/python"
     }
-  ]
+  }
 }
