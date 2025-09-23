@@ -41,7 +41,7 @@ export const useSystemStore = defineStore('system', () => {
 
       // Always use mock health data for now
       console.log('Using mock system health')
-        systemHealth.value = {
+      systemHealth.value = {
           status: 'healthy',
           services: {
             database: { status: 'healthy', responseTime: 45 },
