@@ -12,7 +12,7 @@ export default function handler(req, res) {
   }
 
   // Mock login endpoint
-  if (req.method === 'POST' && req.url === '/api/auth/login') {
+  if (req.method === 'POST') {
     const { username, password } = req.body;
     
     // Mock authentication logic
@@ -54,37 +54,9 @@ export default function handler(req, res) {
     return;
   }
   
-  // Mock health check
-  if (req.method === 'GET' && req.url === '/api/health') {
-    res.status(200).json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      service: 'Engineering Log Intelligence API',
-      version: '1.0.0'
-    });
-    return;
-  }
-  
-  // Mock analytics endpoint
-  if (req.method === 'GET' && req.url === '/api/analytics') {
-    res.status(200).json({
-      totalLogs: 125000,
-      errorRate: 2.3,
-      avgResponseTime: 145,
-      activeUsers: 47,
-      systemHealth: 'excellent',
-      recentAlerts: [
-        { id: 1, message: 'High error rate detected', severity: 'warning', timestamp: new Date().toISOString() },
-        { id: 2, message: 'Database connection restored', severity: 'info', timestamp: new Date().toISOString() }
-      ]
-    });
-    return;
-  }
-  
   // Default response
   res.status(404).json({
     success: false,
-    message: 'Endpoint not found',
-    availableEndpoints: ['/api/auth/login', '/api/health', '/api/analytics']
+    message: 'Endpoint not found'
   });
 }
