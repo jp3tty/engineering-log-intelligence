@@ -2,6 +2,17 @@
 
 An AI-powered log analysis platform that processes engineering logs from multiple sources (SPLUNK, SAP, custom systems), identifies patterns, and provides actionable insights for system optimization.
 
+## 🌐 **Live Application**
+
+**Production URL**: https://engineeringlogintelligence.vercel.app
+
+**Demo Credentials:**
+- **Admin**: `admin` / `password123`
+- **Analyst**: `analyst` / `password123`
+- **User**: `user` / `password123`
+
+**Status**: ✅ **Production Ready** - Full-stack application with authentication, dashboard, and real-time monitoring
+
 ## Features
 
 ### 🔍 **Log Intelligence**
