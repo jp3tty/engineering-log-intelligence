@@ -1,0 +1,87 @@
+{
+  "total_tests": 11,
+  "passed_tests": 0,
+  "failed_tests": 11,
+  "success_rate": 0.0,
+  "test_results": [
+    {
+      "test_name": "Create Incident: Database Connection Failure",
+      "success": false,
+      "details": "HTTP 200: <!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Engineering Log Intelligence</title>\n    <style>\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n            margin: 0;\n            padding: 0;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            min-height: 100vh;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n        }\n        .login-container {\n            background: white;\n            padding: 2rem;\n            border-radius: 10px;\n            box-shadow: 0 10px 25px rgba(0,0,0,0.1);\n            width: 100%;\n            max-width: 400px;\n        }\n        .logo {\n            text-align: center;\n            margin-bottom: 2rem;\n        }\n        .logo h1 {\n            color: #333;\n            margin: 0;\n            font-size: 1.5rem;\n        }\n        .form-group {\n            margin-bottom: 1rem;\n        }\n        label {\n            display: block;\n            margin-bottom: 0.5rem;\n            color: #555;\n            font-weight: 500;\n        }\n        input {\n            width: 100%;\n            padding: 0.75rem;\n            border: 2px solid #e1e5e9;\n            border-radius: 5px;\n            font-size: 1rem;\n            transition: border-color 0.3s;\n        }\n        input:focus {\n            outline: none;\n            border-color: #667eea;\n        }\n        button {\n            width: 100%;\n            padding: 0.75rem;\n            background: #667eea;\n            color: white;\n            border: none;\n            border-radius: 5px;\n            font-size: 1rem;\n            cursor: pointer;\n            transition: background 0.3s;\n        }\n        button:hover {\n            background: #5a6fd8;\n        }\n        .error {\n            color: #e74c3c;\n            margin-top: 1rem;\n            text-align: center;\n        }\n        .success {\n            color: #27ae60;\n            margin-top: 1rem;\n            text-align: center;\n        }\n        .demo-credentials {\n            background: #f8f9fa;\n            padding: 1rem;\n            border-radius: 5px;\n            margin-top: 1rem;\n            font-size: 0.9rem;\n        }\n        .demo-credentials h3 {\n            margin: 0 0 0.5rem 0;\n            color: #333;\n        }\n        .demo-credentials p {\n            margin: 0.25rem 0;\n            color: #666;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"login-container\">\n        <div class=\"logo\">\n            <h1>\ud83d\udd0d Engineering Log Intelligence</h1>\n        </div>\n        \n        <form id=\"loginForm\">\n            <div class=\"form-group\">\n                <label for=\"username\">Username</label>\n                <input type=\"text\" id=\"username\" name=\"username\" required>\n            </div>\n            \n            <div class=\"form-group\">\n                <label for=\"password\">Password</label>\n                <input type=\"password\" id=\"password\" name=\"password\" required>\n            </div>\n            \n            <button type=\"submit\">Login</button>\n        </form>\n        \n        <div id=\"message\"></div>\n        \n        <div class=\"demo-credentials\">\n            <h3>Demo Credentials:</h3>\n            <p><strong>Admin:</strong> admin / password123</p>\n            <p><strong>Analyst:</strong> analyst / password123</p>\n            <p><strong>User:</strong> user / password123</p>\n        </div>\n    </div>\n\n    <script>\n        // Mock authentication\n        const validUsers = {\n            'admin': { password: 'password123', role: 'admin', name: 'Admin User' },\n            'analyst': { password: 'password123', role: 'analyst', name: 'Analyst User' },\n            'user': { password: 'password123', role: 'user', name: 'Regular User' }\n        };\n\n        document.getElementById('loginForm').addEventListener('submit', function(e) {\n            e.preventDefault();\n            \n            const username = document.getElementById('username').value;\n            const password = document.getElementById('password').value;\n            const messageDiv = document.getElementById('message');\n            \n            if (validUsers[username] && validUsers[username].password === password) {\n                messageDiv.innerHTML = '<div class=\"success\">\u2705 Login successful! Redirecting to dashboard...</div>';\n                \n                // Store user data\n                localStorage.setItem('user', JSON.stringify({\n                    username: username,\n                    role: validUsers[username].role,\n                    name: validUsers[username].name\n                }));\n                \n                // Redirect to dashboard\n                setTimeout(() => {\n                    window.location.href = '/dashboard';\n                }, 1500);\n            } else {\n                messageDiv.innerHTML = '<div class=\"error\">\u274c Invalid credentials. Please try again.</div>';\n            }\n        });\n    </script>\n</body>\n</html>",
+      "timestamp": "2025-09-26T00:18:37.122258+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Incident Retrieval",
+      "success": false,
+      "details": "Exception: Expecting value: line 1 column 1 (char 0)",
+      "timestamp": "2025-09-26T00:18:37.126137+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Alert Processing",
+      "success": false,
+      "details": "Exception: Expecting value: line 1 column 1 (char 0)",
+      "timestamp": "2025-09-26T00:18:37.128920+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Incident from Alert",
+      "success": false,
+      "details": "HTTP 200: <!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Engineering Log Intelligence</title>\n    <style>\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n            margin: 0;\n            padding: 0;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            min-height: 100vh;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n        }\n        .login-container {\n            background: white;\n            padding: 2rem;\n            border-radius: 10px;\n            box-shadow: 0 10px 25px rgba(0,0,0,0.1);\n            width: 100%;\n            max-width: 400px;\n        }\n        .logo {\n            text-align: center;\n            margin-bottom: 2rem;\n        }\n        .logo h1 {\n            color: #333;\n            margin: 0;\n            font-size: 1.5rem;\n        }\n        .form-group {\n            margin-bottom: 1rem;\n        }\n        label {\n            display: block;\n            margin-bottom: 0.5rem;\n            color: #555;\n            font-weight: 500;\n        }\n        input {\n            width: 100%;\n            padding: 0.75rem;\n            border: 2px solid #e1e5e9;\n            border-radius: 5px;\n            font-size: 1rem;\n            transition: border-color 0.3s;\n        }\n        input:focus {\n            outline: none;\n            border-color: #667eea;\n        }\n        button {\n            width: 100%;\n            padding: 0.75rem;\n            background: #667eea;\n            color: white;\n            border: none;\n            border-radius: 5px;\n            font-size: 1rem;\n            cursor: pointer;\n            transition: background 0.3s;\n        }\n        button:hover {\n            background: #5a6fd8;\n        }\n        .error {\n            color: #e74c3c;\n            margin-top: 1rem;\n            text-align: center;\n        }\n        .success {\n            color: #27ae60;\n            margin-top: 1rem;\n            text-align: center;\n        }\n        .demo-credentials {\n            background: #f8f9fa;\n            padding: 1rem;\n            border-radius: 5px;\n            margin-top: 1rem;\n            font-size: 0.9rem;\n        }\n        .demo-credentials h3 {\n            margin: 0 0 0.5rem 0;\n            color: #333;\n        }\n        .demo-credentials p {\n            margin: 0.25rem 0;\n            color: #666;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"login-container\">\n        <div class=\"logo\">\n            <h1>\ud83d\udd0d Engineering Log Intelligence</h1>\n        </div>\n        \n        <form id=\"loginForm\">\n            <div class=\"form-group\">\n                <label for=\"username\">Username</label>\n                <input type=\"text\" id=\"username\" name=\"username\" required>\n            </div>\n            \n            <div class=\"form-group\">\n                <label for=\"password\">Password</label>\n                <input type=\"password\" id=\"password\" name=\"password\" required>\n            </div>\n            \n            <button type=\"submit\">Login</button>\n        </form>\n        \n        <div id=\"message\"></div>\n        \n        <div class=\"demo-credentials\">\n            <h3>Demo Credentials:</h3>\n            <p><strong>Admin:</strong> admin / password123</p>\n            <p><strong>Analyst:</strong> analyst / password123</p>\n            <p><strong>User:</strong> user / password123</p>\n        </div>\n    </div>\n\n    <script>\n        // Mock authentication\n        const validUsers = {\n            'admin': { password: 'password123', role: 'admin', name: 'Admin User' },\n            'analyst': { password: 'password123', role: 'analyst', name: 'Analyst User' },\n            'user': { password: 'password123', role: 'user', name: 'Regular User' }\n        };\n\n        document.getElementById('loginForm').addEventListener('submit', function(e) {\n            e.preventDefault();\n            \n            const username = document.getElementById('username').value;\n            const password = document.getElementById('password').value;\n            const messageDiv = document.getElementById('message');\n            \n            if (validUsers[username] && validUsers[username].password === password) {\n                messageDiv.innerHTML = '<div class=\"success\">\u2705 Login successful! Redirecting to dashboard...</div>';\n                \n                // Store user data\n                localStorage.setItem('user', JSON.stringify({\n                    username: username,\n                    role: validUsers[username].role,\n                    name: validUsers[username].name\n                }));\n                \n                // Redirect to dashboard\n                setTimeout(() => {\n                    window.location.href = '/dashboard';\n                }, 1500);\n            } else {\n                messageDiv.innerHTML = '<div class=\"error\">\u274c Invalid credentials. Please try again.</div>';\n            }\n        });\n    </script>\n</body>\n</html>",
+      "timestamp": "2025-09-26T00:18:37.132673+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Escalation Workflows",
+      "success": false,
+      "details": "Exception: Expecting value: line 1 column 1 (char 0)",
+      "timestamp": "2025-09-26T00:18:37.136042+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Response Playbooks",
+      "success": false,
+      "details": "Exception: Expecting value: line 1 column 1 (char 0)",
+      "timestamp": "2025-09-26T00:18:37.138837+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Alert Rules",
+      "success": false,
+      "details": "Exception: Expecting value: line 1 column 1 (char 0)",
+      "timestamp": "2025-09-26T00:18:37.141742+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Notification Templates",
+      "success": false,
+      "details": "Exception: Expecting value: line 1 column 1 (char 0)",
+      "timestamp": "2025-09-26T00:18:37.145623+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Alert Correlation",
+      "success": false,
+      "details": "Exception: Expecting value: line 1 column 1 (char 0)",
+      "timestamp": "2025-09-26T00:18:37.149814+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Bulk Alert Processing",
+      "success": false,
+      "details": "Exception: Expecting value: line 1 column 1 (char 0)",
+      "timestamp": "2025-09-26T00:18:37.153508+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Incident Updates",
+      "success": false,
+      "details": "No incidents available for update",
+      "timestamp": "2025-09-26T00:18:37.153545+00:00",
+      "data": {}
+    }
+  ],
+  "created_incidents": 0,
+  "processed_alerts": 0
+}
