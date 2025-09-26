@@ -1,0 +1,136 @@
+{
+  "total_tests": 9,
+  "passed_tests": 6,
+  "failed_tests": 3,
+  "success_rate": 66.66666666666666,
+  "test_results": [
+    {
+      "test_name": "Incident Creation",
+      "success": false,
+      "details": "Exception: 'Incident' object has no attribute 'validate'",
+      "timestamp": "2025-09-26T00:21:26.940866+00:00",
+      "data": {}
+    },
+    {
+      "test_name": "Escalation Rules",
+      "success": true,
+      "details": "Found 6 escalation rules",
+      "timestamp": "2025-09-26T00:21:26.940877+00:00",
+      "data": {
+        "rules_count": 6,
+        "rule_conditions": [
+          "severity == 'emergency'",
+          "severity == 'critical' AND status == 'open'",
+          "severity == 'high' AND status == 'open'",
+          "severity == 'medium' AND status == 'open'",
+          "(severity == 'high' OR severity == 'critical') AND escalation_level == 1 AND status == 'open'",
+          "severity == 'critical' AND escalation_level == 2 AND status == 'open'"
+        ]
+      }
+    },
+    {
+      "test_name": "Escalation Evaluation",
+      "success": false,
+      "details": "Found 0 escalation actions",
+      "timestamp": "2025-09-26T00:21:26.940925+00:00",
+      "data": {
+        "escalation_actions": 0,
+        "actions": []
+      }
+    },
+    {
+      "test_name": "Response Playbooks",
+      "success": true,
+      "details": "Retrieved playbook: Generic Incident Response",
+      "timestamp": "2025-09-26T00:21:26.940948+00:00",
+      "data": {
+        "playbook_title": "Generic Incident Response",
+        "steps_count": 6,
+        "estimated_duration": 60
+      }
+    },
+    {
+      "test_name": "Alert Processing",
+      "success": true,
+      "details": "Processed alert 7d344dc3-2579-4e0b-b818-e9fe6f722438",
+      "timestamp": "2025-09-26T00:21:26.941092+00:00",
+      "data": {
+        "success": true,
+        "alert_id": "7d344dc3-2579-4e0b-b818-e9fe6f722438",
+        "correlation_result": "create_new",
+        "notifications_sent": 3
+      }
+    },
+    {
+      "test_name": "Alert Correlation",
+      "success": true,
+      "details": "Correlation actions: create_new, update_existing",
+      "timestamp": "2025-09-26T00:21:26.941109+00:00",
+      "data": {
+        "first_alert_action": "create_new",
+        "second_alert_action": "update_existing",
+        "correlation_id": "test-correlation-002"
+      }
+    },
+    {
+      "test_name": "Notification Service",
+      "success": true,
+      "details": "Email: True, Slack: True",
+      "timestamp": "2025-09-26T00:21:26.941163+00:00",
+      "data": {
+        "email_success": true,
+        "slack_success": true,
+        "email_channel": "email",
+        "slack_channel": "slack"
+      }
+    },
+    {
+      "test_name": "Incident from Alert",
+      "success": false,
+      "details": "Created incident 3b1afffa-5764-4b6c-ae6b-4f1426da68d1 with 0 escalation actions",
+      "timestamp": "2025-09-26T00:21:26.941214+00:00",
+      "data": {
+        "incident_id": "3b1afffa-5764-4b6c-ae6b-4f1426da68d1",
+        "severity": "critical",
+        "assigned_team": "platform_team",
+        "escalation_actions": 0,
+        "playbook_title": "Generic Incident Response"
+      }
+    },
+    {
+      "test_name": "Alert Rules",
+      "success": true,
+      "details": "Found 4 alert rules",
+      "timestamp": "2025-09-26T00:21:26.941225+00:00",
+      "data": {
+        "rules_count": 4,
+        "rule_names": [
+          "High Error Rate",
+          "Database Connection Failure",
+          "Security Incident",
+          "Slow Response Time"
+        ],
+        "enabled_rules": 4
+      }
+    },
+    {
+      "test_name": "Notification Templates",
+      "success": true,
+      "details": "Found 4 notification templates",
+      "timestamp": "2025-09-26T00:21:26.941241+00:00",
+      "data": {
+        "templates_count": 4,
+        "template_names": [
+          "critical_alert_email",
+          "high_alert_slack",
+          "incident_created",
+          "escalation_notification"
+        ],
+        "channels": [
+          "email",
+          "slack"
+        ]
+      }
+    }
+  ]
+}
