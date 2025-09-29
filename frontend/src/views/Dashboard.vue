@@ -148,15 +148,14 @@
           </div>
         </div>
 
-        <!-- Error Types Bar Chart -->
+        <!-- Service Health TreeMap -->
         <div class="card">
           <div class="card-header">
-            <h3 class="text-lg font-semibold text-gray-900">Error Types Distribution</h3>
+            <h3 class="text-lg font-semibold text-gray-900">Service Health Overview</h3>
           </div>
           <div class="card-body">
-            <BarChart 
-              :data="errorTypesData" 
-              :options="barChartOptions"
+            <TreeMapChart 
+              :data="serviceHealthData" 
               :height="300"
             />
           </div>
@@ -206,7 +205,7 @@
 
 import { ref, computed, onMounted } from 'vue'
 import { useSystemStore } from '@/stores/system'
-import { LineChart, BarChart, PieChart } from '@/components/charts'
+import { LineChart, BarChart, PieChart, TreeMapChart } from '@/components/charts'
 import { fetchDashboardAnalytics } from '@/services/analytics'
 
 export default {
@@ -214,7 +213,8 @@ export default {
   components: {
     LineChart,
     BarChart,
-    PieChart
+    PieChart,
+    TreeMapChart
   },
   setup() {
     const systemStore = useSystemStore()
@@ -294,28 +294,73 @@ export default {
       }]
     })
 
-    const errorTypesData = ref({
-      labels: ['Database', 'Network', 'Authentication', 'Validation', 'System'],
-      datasets: [{
-        label: 'Error Count',
-        data: [45, 32, 28, 15, 8],
-        backgroundColor: [
-          'rgba(239, 68, 68, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
-          'rgba(147, 51, 234, 0.8)',
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)'
-        ],
-        borderColor: [
-          'rgb(239, 68, 68)',
-          'rgb(245, 158, 11)',
-          'rgb(147, 51, 234)',
-          'rgb(59, 130, 246)',
-          'rgb(16, 185, 129)'
-        ],
-        borderWidth: 1
-      }]
-    })
+    // Service health data for TreeMap
+    const serviceHealthData = ref([
+      {
+        name: 'PostgreSQL Database',
+        status: 'healthy',
+        importance: 100,
+        responseTime: 15,
+        uptime: 99.9,
+        description: 'Primary database for structured data storage'
+      },
+      {
+        name: 'Elasticsearch Cluster',
+        status: 'healthy',
+        importance: 95,
+        responseTime: 45,
+        uptime: 99.8,
+        description: 'Search engine for log analysis and queries'
+      },
+      {
+        name: 'Kafka Streaming',
+        status: 'degraded',
+        importance: 90,
+        responseTime: 120,
+        uptime: 98.5,
+        description: 'Real-time message streaming platform'
+      },
+      {
+        name: 'Vercel Functions',
+        status: 'healthy',
+        importance: 85,
+        responseTime: 89,
+        uptime: 99.9,
+        description: 'Serverless API functions'
+      },
+      {
+        name: 'Vue.js Frontend',
+        status: 'healthy',
+        importance: 80,
+        responseTime: 65,
+        uptime: 99.7,
+        description: 'User interface and dashboard'
+      },
+      {
+        name: 'ML Models',
+        status: 'healthy',
+        importance: 75,
+        responseTime: 150,
+        uptime: 99.5,
+        description: 'Machine learning inference engine'
+      },
+      {
+        name: 'Monitoring System',
+        status: 'warning',
+        importance: 70,
+        responseTime: 200,
+        uptime: 97.2,
+        description: 'System health monitoring and alerting'
+      },
+      {
+        name: 'Authentication',
+        status: 'healthy',
+        importance: 65,
+        responseTime: 25,
+        uptime: 99.8,
+        description: 'JWT authentication and authorization'
+      }
+    ])
 
     // Chart options - For beginners: These control how the charts look and behave
     const logVolumeOptions = ref({
@@ -375,29 +420,6 @@ export default {
       }
     })
 
-    const barChartOptions = ref({
-      plugins: {
-        title: {
-          display: true,
-          text: 'Error Types Distribution'
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: 'Error Count'
-          }
-        },
-        x: {
-          title: {
-            display: true,
-            text: 'Error Type'
-          }
-        }
-      }
-    })
 
     // Computed properties
     const systemHealth = computed(() => systemStore.systemHealth)
@@ -421,7 +443,11 @@ export default {
           logVolumeData.value = analyticsData.logVolume
           logDistributionData.value = analyticsData.logDistribution
           responseTimeData.value = analyticsData.responseTime
-          errorTypesData.value = analyticsData.errorTypes
+          
+          // Update service health data if available
+          if (analyticsData.serviceHealth) {
+            serviceHealthData.value = analyticsData.serviceHealth
+          }
           
           // Update system metrics
           if (analyticsData.systemMetrics) {
@@ -485,13 +511,12 @@ export default {
       logVolumeData,
       logDistributionData,
       responseTimeData,
-      errorTypesData,
+      serviceHealthData,
       
       // Chart options
       logVolumeOptions,
       pieChartOptions,
       responseTimeOptions,
-      barChartOptions,
       
       // Computed
       systemHealth,
