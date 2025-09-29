@@ -48,10 +48,6 @@
     {
       "src": "api/ml/ab_testing.py",
       "use": "@vercel/python"
-    },
-    {
-      "src": "api/analytics_consolidated.py",
-      "use": "@vercel/python"
     }
   ],
   "rewrites": [
@@ -64,7 +60,7 @@
       "destination": "/dashboard.html"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api).*)",
       "destination": "/index.html"
     }
   ],
