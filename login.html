@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Engineering Log Intelligence</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo h1 {
+            color: #333;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background: #5a67d8;
+        }
+        .demo-credentials {
+            background: #f7fafc;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .demo-credentials h3 {
+            margin: 0 0 0.5rem 0;
+            color: #2d3748;
+        }
+        .demo-credentials p {
+            margin: 0.25rem 0;
+            color: #4a5568;
+        }
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🔍 Engineering Log Intelligence</h1>
+        </div>
+        
+        <div class="error" id="errorMessage"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn">Login</button>
+        </form>
+        
+        <div class="demo-credentials">
+            <h3>Demo Credentials:</h3>
+            <p><strong>Admin:</strong> admin / password123</p>
+            <p><strong>Analyst:</strong> analyst / password123</p>
+            <p><strong>User:</strong> user / password123</p>
+        </div>
+    </div>
+
+    <script>
+        // Demo users database
+        const users = {
+            'admin': { password: 'password123', role: 'admin', name: 'Admin User' },
+            'analyst': { password: 'password123', role: 'analyst', name: 'Analyst User' },
+            'user': { password: 'password123', role: 'user', name: 'Regular User' }
+        };
+
+        // Generate a simple token
+        function generateToken(user) {
+            return btoa(JSON.stringify({
+                username: user.username,
+                role: user.role,
+                name: user.name,
+                timestamp: Date.now()
+            }));
+        }
+
+        // Handle form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            
+            // Clear previous errors
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+            
+            // Check credentials
+            if (users[username] && users[username].password === password) {
+                // Create user object
+                const user = {
+                    username: username,
+                    role: users[username].role,
+                    name: users[username].name
+                };
+                
+                // Store user data in localStorage
+                localStorage.setItem('user', JSON.stringify(user));
+                localStorage.setItem('auth_token', generateToken({username, role: user.role, name: user.name}));
+                
+                // Redirect to dashboard
+                window.location.href = '/dashboard';
+            } else {
+                // Show error
+                errorDiv.textContent = 'Invalid username or password';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Check if user is already logged in
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            // Redirect to dashboard if already logged in
+            window.location.href = '/dashboard';
+        }
+    </script>
+</body>
+</html>
