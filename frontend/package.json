@@ -13,14 +13,17 @@
   "dependencies": {
     "@headlessui/vue": "^1.7.16",
     "@heroicons/vue": "^2.0.18",
+    "@types/d3": "^7.4.3",
     "axios": "^1.5.0",
     "chart.js": "^4.4.0",
+    "d3": "^7.9.0",
     "date-fns": "^2.30.0",
     "lodash-es": "^4.17.21",
     "pinia": "^2.1.6",
     "vue": "^3.3.4",
     "vue-chartjs": "^5.2.0",
-    "vue-router": "^4.2.4"
+    "vue-router": "^4.2.4",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.4",

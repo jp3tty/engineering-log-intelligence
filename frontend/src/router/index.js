@@ -24,6 +24,8 @@ import Monitoring from '@/views/Monitoring.vue'
 import Settings from '@/views/Settings.vue'
 import Login from '@/views/Login.vue'
 import NotFound from '@/views/NotFound.vue'
+import DashboardBuilder from '@/components/dashboard/DashboardBuilder.vue'
+import AnalyticsDashboard from '@/components/analytics/AnalyticsDashboard.vue'
 
 // Define routes
 const routes = [
@@ -45,6 +47,29 @@ const routes = [
       description: 'Overview of system health and log analysis',
       requiresAuth: true,
       icon: 'chart-bar',
+    },
+  },
+  {
+    path: '/dashboard-builder',
+    name: 'DashboardBuilder',
+    component: DashboardBuilder,
+    meta: {
+      title: 'Dashboard Builder',
+      description: 'Create and customize your own dashboards',
+      requiresAuth: true,
+      icon: 'puzzle-piece',
+    },
+  },
+  {
+    path: '/analytics',
+    name: 'AnalyticsDashboard',
+    component: AnalyticsDashboard,
+    meta: {
+      title: 'Analytics',
+      description: 'AI-powered insights and advanced analytics',
+      requiresAuth: true,
+      icon: 'chart-bar',
+      roles: ['analyst', 'admin'],
     },
   },
   {

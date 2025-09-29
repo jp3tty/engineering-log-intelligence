@@ -48,6 +48,22 @@
     {
       "src": "api/ml/ab_testing.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "api/analytics/insights.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/analytics/reports.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/analytics/export.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/analytics/performance.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
