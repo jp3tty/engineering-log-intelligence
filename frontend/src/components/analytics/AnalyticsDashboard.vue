@@ -1,0 +1,556 @@
+<template>
+  <div class="analytics-dashboard">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h1 class="dashboard-title">
+            <ChartBarIcon class="w-8 h-8 text-blue-600" />
+            Analytics Dashboard
+          </h1>
+          <p class="dashboard-subtitle">
+            AI-powered insights, trend analysis, and business intelligence
+          </p>
+        </div>
+        <div class="header-actions">
+          <button
+            @click="refreshData"
+            :disabled="loading"
+            class="btn-secondary"
+          >
+            <ArrowPathIcon class="w-4 h-4" :class="{ 'animate-spin': loading }" />
+            Refresh
+          </button>
+          <button @click="generateReport" class="btn-primary">
+            <DocumentArrowDownIcon class="w-4 h-4" />
+            Generate Report
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="loading && !analyticsData" class="loading-container">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading analytics data...</p>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div v-if="error" class="error-container">
+      <div class="error-content">
+        <ExclamationTriangleIcon class="w-12 h-12 text-red-500" />
+        <h3>Error Loading Analytics</h3>
+        <p>{{ error }}</p>
+        <button @click="refreshData" class="btn-primary mt-4">
+          Try Again
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div v-if="analyticsData && !loading" class="dashboard-content">
+      <!-- Key Metrics Overview -->
+      <div class="metrics-overview">
+        <h2 class="section-title">Key Metrics</h2>
+        <div class="metrics-grid">
+          <MetricCard
+            v-for="metric in keyMetrics"
+            :key="metric.id"
+            :metric="metric"
+            :trend="metric.trend"
+          />
+        </div>
+      </div>
+
+      <!-- Analytics Tabs -->
+      <div class="analytics-tabs">
+        <nav class="tab-navigation">
+          <button
+            v-for="tab in tabs"
+            :key="tab.id"
+            @click="activeTab = tab.id"
+            :class="[
+              'tab-button',
+              { 'tab-active': activeTab === tab.id }
+            ]"
+          >
+            <component :is="tab.icon" class="w-5 h-5" />
+            {{ tab.name }}
+          </button>
+        </nav>
+
+        <div class="tab-content">
+          <!-- Insights Tab -->
+          <div v-if="activeTab === 'insights'" class="tab-panel">
+            <AnalyticsInsights
+              :insights="analyticsData.insights"
+              :loading="insightsLoading"
+              @refresh="refreshInsights"
+            />
+          </div>
+
+          <!-- Reports Tab -->
+          <div v-if="activeTab === 'reports'" class="tab-panel">
+            <ReportGeneration
+              :templates="reportTemplates"
+              :reports="generatedReports"
+              :loading="reportsLoading"
+              @generate="generateReport"
+              @schedule="scheduleReport"
+            />
+          </div>
+
+          <!-- Export Tab -->
+          <div v-if="activeTab === 'export'" class="tab-panel">
+            <DataExport
+              :formats="exportFormats"
+              :filters="exportFilters"
+              :loading="exportLoading"
+              @export="exportData"
+            />
+          </div>
+
+          <!-- Performance Tab -->
+          <div v-if="activeTab === 'performance'" class="tab-panel">
+            <PerformanceAnalytics
+              :metrics="analyticsData.performance"
+              :forecasts="analyticsData.forecasts"
+              :loading="performanceLoading"
+              @refresh="refreshPerformance"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useAnalyticsStore } from '@/stores/analytics'
+import { useNotificationStore } from '@/stores/notifications'
+import {
+  ChartBarIcon,
+  ArrowPathIcon,
+  DocumentArrowDownIcon,
+  ExclamationTriangleIcon,
+  LightBulbIcon,
+  DocumentTextIcon,
+  ArrowDownTrayIcon,
+  ChartLineIcon
+} from '@heroicons/vue/24/outline'
+
+import MetricCard from '@/components/analytics/MetricCard.vue'
+import AnalyticsInsights from '@/components/analytics/AnalyticsInsights.vue'
+import ReportGeneration from '@/components/analytics/ReportGeneration.vue'
+import DataExport from '@/components/analytics/DataExport.vue'
+import PerformanceAnalytics from '@/components/analytics/PerformanceAnalytics.vue'
+
+export default {
+  name: 'AnalyticsDashboard',
+  props: {},
+  emits: [],
+  components: {
+    ChartBarIcon,
+    ArrowPathIcon,
+    DocumentArrowDownIcon,
+    ExclamationTriangleIcon,
+    LightBulbIcon,
+    DocumentTextIcon,
+    ArrowDownTrayIcon,
+    ChartLineIcon,
+    MetricCard,
+    AnalyticsInsights,
+    ReportGeneration,
+    DataExport,
+    PerformanceAnalytics
+  },
+  setup() {
+    const analyticsStore = useAnalyticsStore()
+    const notificationStore = useNotificationStore()
+
+    // Reactive state
+    const loading = ref(false)
+    const error = ref(null)
+    const activeTab = ref('insights')
+    const insightsLoading = ref(false)
+    const reportsLoading = ref(false)
+    const exportLoading = ref(false)
+    const performanceLoading = ref(false)
+
+    // Analytics data
+    const analyticsData = ref(null)
+
+    // Tabs configuration
+    const tabs = [
+      {
+        id: 'insights',
+        name: 'AI Insights',
+        icon: 'LightBulbIcon'
+      },
+      {
+        id: 'reports',
+        name: 'Reports',
+        icon: 'DocumentTextIcon'
+      },
+      {
+        id: 'export',
+        name: 'Data Export',
+        icon: 'ArrowDownTrayIcon'
+      },
+      {
+        id: 'performance',
+        name: 'Performance',
+        icon: 'ChartLineIcon'
+      }
+    ]
+
+    // Key metrics (computed from analytics data)
+    const keyMetrics = computed(() => {
+      if (!analyticsData.value) return []
+      
+      return [
+        {
+          id: 'total_logs',
+          title: 'Total Logs Processed',
+          value: analyticsData.value.overview?.total_logs || 0,
+          format: 'number',
+          trend: analyticsData.value.overview?.logs_trend || 0,
+          color: 'blue'
+        },
+        {
+          id: 'anomalies_detected',
+          title: 'Anomalies Detected',
+          value: analyticsData.value.overview?.anomalies_detected || 0,
+          format: 'number',
+          trend: analyticsData.value.overview?.anomalies_trend || 0,
+          color: 'red'
+        },
+        {
+          id: 'avg_response_time',
+          title: 'Avg Response Time',
+          value: analyticsData.value.overview?.avg_response_time || 0,
+          format: 'duration',
+          trend: analyticsData.value.overview?.response_trend || 0,
+          color: 'green'
+        },
+        {
+          id: 'system_health',
+          title: 'System Health',
+          value: analyticsData.value.overview?.system_health || 0,
+          format: 'percentage',
+          trend: analyticsData.value.overview?.health_trend || 0,
+          color: 'emerald'
+        }
+      ]
+    })
+
+    // Report templates
+    const reportTemplates = ref([
+      {
+        id: 'executive_summary',
+        name: 'Executive Summary',
+        description: 'High-level overview for executives',
+        duration: 'daily'
+      },
+      {
+        id: 'technical_details',
+        name: 'Technical Details',
+        description: 'Detailed technical analysis',
+        duration: 'weekly'
+      },
+      {
+        id: 'performance_report',
+        name: 'Performance Report',
+        description: 'System performance analysis',
+        duration: 'daily'
+      },
+      {
+        id: 'security_report',
+        name: 'Security Report',
+        description: 'Security events and anomalies',
+        duration: 'daily'
+      }
+    ])
+
+    // Export formats
+    const exportFormats = ref([
+      { id: 'json', name: 'JSON', icon: '📄' },
+      { id: 'csv', name: 'CSV', icon: '📊' },
+      { id: 'excel', name: 'Excel', icon: '📈' },
+      { id: 'pdf', name: 'PDF', icon: '📋' }
+    ])
+
+    // Export filters
+    const exportFilters = ref({
+      dateRange: '7d',
+      logTypes: ['all'],
+      severity: ['all'],
+      systems: ['all']
+    })
+
+    // Generated reports
+    const generatedReports = ref([])
+
+    // Methods
+    const loadAnalyticsData = async () => {
+      try {
+        loading.value = true
+        error.value = null
+        
+        await analyticsStore.fetchOverview()
+        analyticsData.value = analyticsStore.overview
+        
+      } catch (err) {
+        error.value = err.message || 'Failed to load analytics data'
+        notificationStore.addNotification({
+          type: 'error',
+          message: error.value
+        })
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const refreshData = async () => {
+      await loadAnalyticsData()
+      notificationStore.addNotification({
+        type: 'success',
+        message: 'Analytics data refreshed successfully'
+      })
+    }
+
+    const refreshInsights = async () => {
+      try {
+        insightsLoading.value = true
+        await analyticsStore.fetchInsights()
+      } catch (err) {
+        notificationStore.addNotification({
+          type: 'error',
+          message: 'Failed to refresh insights'
+        })
+      } finally {
+        insightsLoading.value = false
+      }
+    }
+
+    const refreshPerformance = async () => {
+      try {
+        performanceLoading.value = true
+        await analyticsStore.fetchPerformance()
+      } catch (err) {
+        notificationStore.addNotification({
+          type: 'error',
+          message: 'Failed to refresh performance data'
+        })
+      } finally {
+        performanceLoading.value = false
+      }
+    }
+
+    const generateReport = async (templateId) => {
+      try {
+        reportsLoading.value = true
+        const report = await analyticsStore.generateReport(templateId)
+        
+        generatedReports.value.unshift(report)
+        
+        notificationStore.addNotification({
+          type: 'success',
+          message: 'Report generated successfully'
+        })
+      } catch (err) {
+        notificationStore.addNotification({
+          type: 'error',
+          message: 'Failed to generate report'
+        })
+      } finally {
+        reportsLoading.value = false
+      }
+    }
+
+    const scheduleReport = async (scheduleData) => {
+      try {
+        await analyticsStore.scheduleReport(scheduleData)
+        
+        notificationStore.addNotification({
+          type: 'success',
+          message: 'Report scheduled successfully'
+        })
+      } catch (err) {
+        notificationStore.addNotification({
+          type: 'error',
+          message: 'Failed to schedule report'
+        })
+      }
+    }
+
+    const exportData = async (exportConfig) => {
+      try {
+        exportLoading.value = true
+        const result = await analyticsStore.exportData(exportConfig)
+        
+        // Trigger download
+        const blob = new Blob([result.data], { type: result.mimeType })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = result.filename
+        link.click()
+        window.URL.revokeObjectURL(url)
+        
+        notificationStore.addNotification({
+          type: 'success',
+          message: 'Data exported successfully'
+        })
+      } catch (err) {
+        notificationStore.addNotification({
+          type: 'error',
+          message: 'Failed to export data'
+        })
+      } finally {
+        exportLoading.value = false
+      }
+    }
+
+    // Lifecycle
+    onMounted(() => {
+      loadAnalyticsData()
+    })
+
+    return {
+      // State
+      loading,
+      error,
+      activeTab,
+      insightsLoading,
+      reportsLoading,
+      exportLoading,
+      performanceLoading,
+      analyticsData,
+      
+      // Computed
+      keyMetrics,
+      
+      // Data
+      tabs,
+      reportTemplates,
+      exportFormats,
+      exportFilters,
+      generatedReports,
+      
+      // Methods
+      refreshData,
+      refreshInsights,
+      refreshPerformance,
+      generateReport,
+      scheduleReport,
+      exportData
+    }
+  }
+}
+</script>
+
+<style scoped>
+.analytics-dashboard {
+  @apply min-h-screen bg-gray-50;
+}
+
+.dashboard-header {
+  @apply bg-white border-b border-gray-200 px-6 py-4;
+}
+
+.header-content {
+  @apply flex items-center justify-between;
+}
+
+.title-section h1 {
+  @apply text-2xl font-bold text-gray-900 flex items-center gap-3;
+}
+
+.dashboard-subtitle {
+  @apply text-gray-600 mt-1;
+}
+
+.header-actions {
+  @apply flex items-center gap-3;
+}
+
+.loading-container {
+  @apply flex items-center justify-center py-12;
+}
+
+.loading-spinner {
+  @apply text-center;
+}
+
+.spinner {
+  @apply w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4;
+}
+
+.error-container {
+  @apply flex items-center justify-center py-12;
+}
+
+.error-content {
+  @apply text-center max-w-md;
+}
+
+.error-content h3 {
+  @apply text-lg font-semibold text-gray-900 mt-4;
+}
+
+.error-content p {
+  @apply text-gray-600 mt-2;
+}
+
+.dashboard-content {
+  @apply p-6 space-y-8;
+}
+
+.metrics-overview {
+  @apply space-y-4;
+}
+
+.section-title {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+.metrics-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+}
+
+.analytics-tabs {
+  @apply bg-white rounded-lg shadow-sm;
+}
+
+.tab-navigation {
+  @apply flex border-b border-gray-200;
+}
+
+.tab-button {
+  @apply flex items-center gap-2 px-6 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-b-2 border-transparent transition-colors;
+}
+
+.tab-button.tab-active {
+  @apply text-blue-600 border-blue-600 bg-blue-50;
+}
+
+.tab-content {
+  @apply p-6;
+}
+
+.tab-panel {
+  @apply space-y-6;
+}
+
+.btn-primary {
+  @apply inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+</style>
