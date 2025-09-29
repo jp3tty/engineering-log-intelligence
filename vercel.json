@@ -2,7 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/dist/**",
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/**",
       "use": "@vercel/static"
     },
     {
@@ -53,7 +57,7 @@
   "rewrites": [
     {
       "source": "/dashboard",
-      "destination": "/frontend/dist/index.html"
+      "destination": "/index.html"
     },
     {
       "source": "/simple-dashboard",
@@ -61,7 +65,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/frontend/dist/index.html"
+      "destination": "/index.html"
     }
   ],
   "headers": [
