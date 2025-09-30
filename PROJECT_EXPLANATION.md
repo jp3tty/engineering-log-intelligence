@@ -2,7 +2,7 @@
 
 **For Portfolio Reviewers, Technical Audiences, and Beginners**  
 **Last Updated:** September 29, 2025  
-**Version:** 2.0.0
+**Version:** 2.1.0
 
 ## What This Project Is About
 
@@ -1396,7 +1396,8 @@ summary = {
 - A system that you can run, modify, and learn from
 - Documentation that explains complex concepts in simple terms
 - A portfolio project that showcases enterprise-level skills
-- **Live Production Application**: https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app
+- **Live Production Application**: https://engineering-log-intelligence.vercel.app
+- **Public Health Check**: https://engineering-log-intelligence.vercel.app/api/health_public
 
 **The project is ready for:**
 - Portfolio demonstrations

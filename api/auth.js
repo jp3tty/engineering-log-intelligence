@@ -1,4 +1,4 @@
-// Mock Authentication API for Vercel Functions
+// Simple Authentication API for Vercel Functions
 export default function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -59,4 +59,4 @@ export default function handler(req, res) {
     success: false,
     message: 'Endpoint not found'
   });
-}
+};

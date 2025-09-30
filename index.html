@@ -15,7 +15,6 @@
     
     <!-- Security headers -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
     
     <style>
@@ -63,8 +62,8 @@
         text-align: center;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-DP7wYxPE.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Dpq8vX4E.css">
+    <script type="module" crossorigin src="/assets/index-BrI1dgEx.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CrYr-WY9.css">
   </head>
   <body>
     <div id="app">
@@ -80,18 +79,25 @@
     
     <script>
       // Hide loading screen when Vue app is ready
-      window.addEventListener('load', () => {
-        setTimeout(() => {
-          const loadingScreen = document.getElementById('loading-screen');
-          if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            loadingScreen.style.transition = 'opacity 0.5s ease-out';
-            setTimeout(() => {
-              loadingScreen.style.display = 'none';
-            }, 500);
-          }
-        }, 1000);
+      function hideLoadingScreen() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.opacity = '0';
+          loadingScreen.style.transition = 'opacity 0.5s ease-out';
+          setTimeout(() => {
+            loadingScreen.style.display = 'none';
+          }, 500);
+        }
+      }
+      
+      // Hide loading screen when page loads
+      window.addEventListener('load', hideLoadingScreen);
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(hideLoadingScreen, 1000);
       });
+      
+      // Fallback timeout
+      setTimeout(hideLoadingScreen, 2000);
     </script>
   </body>
 </html>

@@ -19,7 +19,7 @@ git checkout main
 git pull origin main
 
 # Verify the application is running
-curl -I https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app/api/health_public
+curl -I https://engineering-log-intelligence.vercel.app/api/health_public
 ```
 
 ### **2. Demo Data Setup**
@@ -48,7 +48,7 @@ Regular User:   user / password123
 - ✅ **AI/ML integration** with 85% accuracy in log classification
 - ✅ **Real-time processing** of 90,000+ logs per second
 
-**Live URL**: [https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app](https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app)
+**Live URL**: [https://engineering-log-intelligence.vercel.app](https://engineering-log-intelligence.vercel.app)
 
 ---
 
@@ -252,7 +252,7 @@ Regular User:   user / password123
 
 ### **Code Repository**
 - **GitHub**: [https://github.com/jp3tty/engineering-log-intelligence](https://github.com/jp3tty/engineering-log-intelligence)
-- **Live Demo**: [https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app](https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app)
+- **Live Demo**: [https://engineering-log-intelligence.vercel.app](https://engineering-log-intelligence.vercel.app)
 
 ### **Test Results**
 - **Day 27 Test**: `python3 test_day27_analytics_frontend.py`

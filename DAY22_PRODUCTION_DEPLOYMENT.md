@@ -6,7 +6,7 @@
 - **Vercel Configuration**: Fixed Vercel configuration to support both frontend and API
 - **Function Consolidation**: Streamlined API functions to fit Hobby plan limits (12 functions max)
 - **Deployment Success**: Successfully deployed to production with all core functionality
-- **Production URL**: https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app
+- **Production URL**: https://engineering-log-intelligence.vercel.app
 
 ### 2. **API Function Optimization** ✅
 - **Core Functions**: Deployed 12 essential API functions:
@@ -94,7 +94,7 @@
 
 ### **Production Deployment** ✅
 - **Status**: Successfully deployed and running
-- **URL**: https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app
+- **URL**: https://engineering-log-intelligence.vercel.app
 - **Functions**: 12/12 API functions deployed
 - **Frontend**: Vue.js SPA with interactive charts
 - **Databases**: All production databases connected
@@ -161,8 +161,8 @@ This represents a **major milestone** - we now have a **production-ready, enterp
 
 ## 🔗 Production URLs
 
-- **Main Application**: https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app
-- **API Health Check**: https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app/api/health_public
+- **Main Application**: https://engineering-log-intelligence.vercel.app
+- **API Health Check**: https://engineering-log-intelligence.vercel.app/api/health_public
 - **Vercel Dashboard**: https://vercel.com/jp3ttys-projects/engineering_log_intelligence
 
 ## 📊 Production Metrics

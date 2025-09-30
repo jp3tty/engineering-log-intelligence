@@ -2,15 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "assets/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "dashboard.html",
+      "src": "frontend/dist/**",
       "use": "@vercel/static"
     },
     {
@@ -30,7 +22,15 @@
       "use": "@vercel/python"
     },
     {
+      "src": "api/monitoring.py",
+      "use": "@vercel/python"
+    },
+    {
       "src": "api/dashboard_analytics.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/alerting.py",
       "use": "@vercel/python"
     },
     {
@@ -52,12 +52,12 @@
   ],
   "rewrites": [
     {
-      "source": "/simple-dashboard",
-      "destination": "/dashboard.html"
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     },
     {
-      "source": "/((?!api).*)",
-      "destination": "/index.html"
+      "source": "/(.*)",
+      "destination": "/frontend/dist/$1"
     }
   ],
   "headers": [

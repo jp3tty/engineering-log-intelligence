@@ -39,7 +39,7 @@ We need to disable Vercel's authentication protection so that our application is
 ## 🧪 **Test the Fix**
 
 After disabling the protection:
-1. Visit: https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app
+1. Visit: https://engineering-log-intelligence.vercel.app
 2. You should see our Vue.js application instead of the authentication screen
 3. The application should load normally
 

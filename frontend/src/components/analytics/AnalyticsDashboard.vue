@@ -138,8 +138,7 @@ import {
   ExclamationTriangleIcon,
   LightBulbIcon,
   DocumentTextIcon,
-  ArrowDownTrayIcon,
-  ChartLineIcon
+  ArrowDownTrayIcon
 } from '@heroicons/vue/24/outline'
 
 import MetricCard from '@/components/analytics/MetricCard.vue'
@@ -160,7 +159,7 @@ export default {
     LightBulbIcon,
     DocumentTextIcon,
     ArrowDownTrayIcon,
-    ChartLineIcon,
+    ChartBarIcon,
     MetricCard,
     AnalyticsInsights,
     ReportGeneration,
@@ -203,7 +202,7 @@ export default {
       {
         id: 'performance',
         name: 'Performance',
-        icon: 'ChartLineIcon'
+        icon: 'ChartBarIcon'
       }
     ]
 

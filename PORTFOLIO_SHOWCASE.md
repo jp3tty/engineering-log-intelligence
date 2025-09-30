@@ -2,9 +2,9 @@
 
 > **An AI-powered log analysis platform that processes engineering logs from multiple sources, identifies patterns, and provides actionable insights for system optimization.**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Available-brightgreen)](https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Available-brightgreen)](https://engineering-log-intelligence.vercel.app)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/jp3tty/engineering-log-intelligence)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-success)](https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-success)](https://engineering-log-intelligence.vercel.app)
 
 ## 🎯 **Project Overview**
 
@@ -105,7 +105,7 @@
 
 ## 🚀 **Live Demo**
 
-**Production Application**: [https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app](https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app)
+**Production Application**: [https://engineering-log-intelligence.vercel.app](https://engineering-log-intelligence.vercel.app)
 
 **Demo Credentials:**
 - **Admin**: `admin` / `password123`
@@ -228,7 +228,7 @@ This project demonstrates proficiency in:
 ## 📞 **Contact & Links**
 
 - **GitHub Repository**: [https://github.com/jp3tty/engineering-log-intelligence](https://github.com/jp3tty/engineering-log-intelligence)
-- **Live Demo**: [https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app](https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app)
+- **Live Demo**: [https://engineering-log-intelligence.vercel.app](https://engineering-log-intelligence.vercel.app)
 - **Documentation**: See `/docs` folder for comprehensive guides
 
 ---

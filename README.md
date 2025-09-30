@@ -4,7 +4,8 @@ An AI-powered log analysis platform that processes engineering logs from multipl
 
 ## 🌐 **Live Application**
 
-**Production URL**: https://engineeringlogintelligence.vercel.app
+**Production URL**: https://engineering-log-intelligence.vercel.app  
+*Note: This stable URL automatically updates to the latest deployment*
 
 **Demo Credentials:**
 - **Admin**: `admin` / `password123`
@@ -12,6 +13,8 @@ An AI-powered log analysis platform that processes engineering logs from multipl
 - **User**: `user` / `password123`
 
 **Status**: ✅ **Production Ready** - Full-stack application with authentication, dashboard, and real-time monitoring
+
+**Latest Test Results** (Day 24): 66.7% success rate - Some incident response features need refinement
 
 ## Features
 
@@ -355,7 +358,7 @@ MIT License - see LICENSE file for details
 - **Production Configuration**: All 25+ environment variables configured for production ✅
 - **CORS Headers**: Proper cross-origin resource sharing configuration ✅
 - **Error Handling**: Graceful error handling and fallbacks implemented ✅
-- **Production URL**: https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app ✅
+- **Production URL**: https://engineering-log-intelligence.vercel.app ✅
 
 ### Available Endpoints
 
@@ -401,6 +404,23 @@ MIT License - see LICENSE file for details
 - **Solution**: Consolidated API functions and removed non-essential endpoints
 - **Authentication**: Vercel protection enabled by default (requires bypass token for public access)
 - **Solution**: Created public health check endpoint and documented authentication bypass process
+
+## 🔧 Troubleshooting
+
+### Production Access Issues
+- **Authentication Required**: The production URL may require Vercel authentication
+- **Solution**: Use the public health check endpoint: `/api/health_public`
+- **Alternative**: Access via Vercel dashboard with proper authentication
+
+### Known Issues (Day 24 Test Results)
+- **Incident Response**: Some escalation rules not functioning properly (66.7% success rate)
+- **Incident Creation**: Validation errors in incident creation process
+- **Escalation Actions**: Limited escalation action execution
+
+### Development Setup Issues
+- **Frontend Loading**: If you see a blue-purple loading screen, wait for initialization
+- **API Connection**: Ensure backend services are running for full functionality
+- **Chart Display**: Charts may show mock data if API is unavailable
 
 ### External Service Free Tier Limitations
 - **PostgreSQL (Railway)**: $5/month for production database

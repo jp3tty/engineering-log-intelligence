@@ -1,6 +1,6 @@
 <template>
   <div class="treemap-chart">
-    <div ref="chartContainer" class="w-full h-full"></div>
+    <div ref="chartContainer" class="w-full h-full relative"></div>
   </div>
 </template>
 
@@ -144,10 +144,12 @@ const createTreeMap = () => {
   svg.setAttribute('viewBox', `0 0 ${containerWidth} ${containerHeight}`)
   svg.style.overflow = 'visible'
 
-  // Calculate grid layout (simple grid approach)
+  // Calculate grid layout (simple grid approach) - leave space for legend
+  const legendWidth = 120
+  const availableWidth = containerWidth - legendWidth - 20 // 20px margin
   const cols = Math.ceil(Math.sqrt(servicesData.value.length))
   const rows = Math.ceil(servicesData.value.length / cols)
-  const cellWidth = containerWidth / cols
+  const cellWidth = availableWidth / cols
   const cellHeight = containerHeight / rows
 
   // Sort services by importance (largest first)
@@ -220,8 +222,8 @@ const createTreeMap = () => {
     svg.appendChild(statusCircle)
   })
 
-  // Add legend
-  const legend = createLegend(containerWidth - 120, 20)
+  // Add legend to the right side
+  const legend = createLegend(availableWidth + 20, 20)
   svg.appendChild(legend)
 
   chartContainer.value.appendChild(svg)
