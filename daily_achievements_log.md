@@ -384,7 +384,7 @@ AI-powered log analysis platform that processes engineering logs from multiple s
 - **Production Configuration**: All 25+ environment variables configured for production ✅
 - **CORS Headers**: Proper cross-origin resource sharing configuration ✅
 - **Error Handling**: Graceful error handling and fallbacks implemented ✅
-- **Production URL**: https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app ✅
+- **Production URL**: https://engineeringlogintelligence-7onbau5j3-jp3ttys-projects.vercel.app ✅
 
 #### Day 23 (September 23, 2025) ✅ COMPLETED
 - [x] Implement natural language query interface
@@ -748,7 +748,7 @@ We've built a **complete enterprise-grade log intelligence platform** that inclu
 - **[Architecture Guide](docs/TECHNICAL_ARCHITECTURE.md)** - Technical architecture details
 
 ### **Live Application**
-- **Production URL**: https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app
+- **Production URL**: https://engineeringlogintelligence-7onbau5j3-jp3ttys-projects.vercel.app
 - **Demo Credentials**: admin/password123, analyst/password123, user/password123
 - **Status**: Production ready with full functionality
 
@@ -1302,7 +1302,7 @@ We've built a **complete enterprise-grade log intelligence platform** that inclu
 - **Production Configuration**: All 25+ environment variables configured
 - **CORS Headers**: Proper cross-origin resource sharing configuration
 - **Error Handling**: Graceful error handling and fallbacks implemented
-- **Production URL**: https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app
+- **Production URL**: https://engineeringlogintelligence-7onbau5j3-jp3ttys-projects.vercel.app
 
 #### ✅ Production Polish & Troubleshooting
 - **Authentication Bypass**: Fixed Vercel authentication protection issues

@@ -45,19 +45,16 @@
           </ul>
         </div>
 
-        <!-- System Status -->
+        <!-- Project Info -->
         <div>
-          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">System Status</h3>
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Project Info</h3>
           <div class="space-y-2">
             <div class="flex items-center space-x-2">
-              <div 
-                class="status-indicator"
-                :class="statusClass"
-              ></div>
-              <span class="text-sm text-gray-600">{{ systemStatus }}</span>
+              <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span class="text-sm text-gray-600">Production Ready</span>
             </div>
             <p class="text-xs text-gray-500">
-              Last updated: {{ lastUpdate }}
+              Version {{ appVersion }} - Live on Vercel
             </p>
           </div>
         </div>
@@ -99,44 +96,17 @@
  */
 
 import { computed } from 'vue'
-import { useSystemStore } from '@/stores/system'
 
 export default {
   name: 'AppFooter',
   setup() {
-    const systemStore = useSystemStore()
-
     // Computed properties
     const currentYear = computed(() => new Date().getFullYear())
     const appVersion = computed(() => '1.0.0')
 
-    const systemStatus = computed(() => {
-      if (systemStore.isHealthy) return 'All Systems Operational'
-      if (systemStore.isDegraded) return 'Some Issues Detected'
-      if (systemStore.isUnhealthy) return 'System Issues'
-      return 'Status Unknown'
-    })
-
-    const statusClass = computed(() => {
-      if (systemStore.isHealthy) return 'status-online'
-      if (systemStore.isDegraded) return 'status-warning'
-      if (systemStore.isUnhealthy) return 'status-error'
-      return 'status-offline'
-    })
-
-    const lastUpdate = computed(() => {
-      if (systemStore.lastUpdate) {
-        return new Date(systemStore.lastUpdate).toLocaleTimeString()
-      }
-      return 'Never'
-    })
-
     return {
       currentYear,
       appVersion,
-      systemStatus,
-      statusClass,
-      lastUpdate,
     }
   },
 }

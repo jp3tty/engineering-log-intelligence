@@ -34,7 +34,7 @@ Built a complete full-stack platform that automatically processes logs, identifi
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Data Sources  │    │   Processing    │    │   User Interface│
+│   Data Sources  │    │   Processing    │    │ User Interface  │
 │                 │    │   Pipeline      │    │                 │
 │ • SPLUNK        │───▶│ • Kafka Stream  │───▶│ • Vue.js 3      │
 │ • SAP Systems   │    │ • ML Models     │    │ • Real-time UI  │

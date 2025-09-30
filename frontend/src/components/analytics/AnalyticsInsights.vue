@@ -173,8 +173,8 @@ import {
   LightBulbIcon,
   ArrowPathIcon,
   ChartBarIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   ExclamationTriangleIcon,
   ExclamationCircleIcon,
   InformationCircleIcon,
@@ -204,8 +204,8 @@ export default {
     // Trend icon mapping
     const getTrendIcon = (type) => {
       const iconMap = {
-        'increasing': TrendingUpIcon,
-        'decreasing': TrendingDownIcon,
+        'increasing': ArrowTrendingUpIcon,
+        'decreasing': ArrowTrendingDownIcon,
         'stable': MinusIcon,
         'volatile': BoltIcon,
         'seasonal': ClockIcon,
@@ -263,7 +263,7 @@ export default {
         'error': ExclamationTriangleIcon,
         'performance': ChartBarIcon,
         'security': StarIcon,
-        'usage': TrendingUpIcon,
+        'usage': ArrowTrendingUpIcon,
         'seasonal': ClockIcon,
         'correlation': BoltIcon
       }

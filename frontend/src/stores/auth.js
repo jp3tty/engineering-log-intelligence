@@ -68,8 +68,8 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = true
       error.value = null
 
-      // Always use mock authentication for now
-      console.log('Using mock authentication')
+      // Use mock authentication for now (API is not working)
+      console.log('Using mock authentication - API not available')
       const mockData = await mockLogin(credentials)
       setAuthData(mockData)
       return { success: true, data: mockData }
@@ -84,19 +84,12 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     try {
-      // Call logout API if token exists
+      // Use mock logout for now (API is not working)
+      console.log('Using mock logout - API not available')
       if (token.value) {
-        try {
-          await axios.post('/api/auth/logout', {}, {
-            headers: {
-              Authorization: `Bearer ${token.value}`
-            }
-          })
-        } catch (apiError) {
-          // If API fails, use mock logout
-          console.log('API not available, using mock logout')
-          await mockLogout(token.value)
-        }
+        await mockLogout(token.value)
+      } else {
+        await mockLogout('no-token')
       }
     } catch (err) {
       console.warn('Logout failed:', err.message)

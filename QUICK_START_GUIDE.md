@@ -1,9 +1,15 @@
-# 🚀 Quick Start Guide - Day 21 Dashboard
+# 🚀 Quick Start Guide - Engineering Log Intelligence System
 
-## How to Test Your New Dashboard
+## 🌐 Production Access
 
-### Step 1: Start the Frontend
-The frontend should already be running on `http://localhost:3001/`
+### Option 1: Production URL (Recommended)
+**Main Application:** https://engineering-log-intelligence.vercel.app  
+*This stable URL automatically updates to the latest deployment*
+
+**Public Health Check:** https://engineering-log-intelligence.vercel.app/api/health_public
+
+### Option 2: Local Development
+The frontend should be running on `http://localhost:3001/`
 
 If it's not running, open a terminal and run:
 ```bash
@@ -12,7 +18,7 @@ npm run dev
 ```
 
 ### Step 2: Open Your Browser
-Go to: `http://localhost:3001/`
+Go to: `http://localhost:3001/` (local) or the production URL above
 
 ### Step 3: Login
 You should see a beautiful login page with demo credentials:
@@ -44,20 +50,38 @@ Once logged in, you'll see:
 
 ## 🔧 Troubleshooting
 
+### Production Access Issues
+- **Authentication Required**: The production URL may require Vercel authentication
+- **Solution**: Use the public health check endpoint: `/api/health_public`
+- **Alternative**: Access via Vercel dashboard with proper authentication
+
 ### If you see a blue-to-purple loading screen:
-1. **Wait a moment** - the app is initializing
+1. **Wait a moment** - the app is initializing (10-30 seconds)
 2. **Check the browser console** (F12) for any error messages
 3. **Refresh the page** if it gets stuck
+4. **Try the public health check** to verify API connectivity
 
 ### If login doesn't work:
 1. **Make sure you're using the correct credentials** (case-sensitive)
 2. **Check the browser console** for error messages
 3. **Try refreshing the page**
+4. **Verify API endpoints are responding**
 
 ### If charts don't appear:
 1. **Wait for the page to fully load**
 2. **Click the "Refresh" button** to load data
 3. **Check the browser console** for any errors
+4. **Charts will show mock data if API is unavailable**
+
+### Known Issues (Day 24 Test Results)
+- **Incident Response**: Some escalation rules not functioning properly (66.7% success rate)
+- **Incident Creation**: Validation errors in incident creation process
+- **Escalation Actions**: Limited escalation action execution
+
+### For More Help
+- **Check TROUBLESHOOTING_GUIDE.md** for comprehensive troubleshooting
+- **Review test results** in `day24_standalone_test_results.json`
+- **Check Vercel logs** for production issues
 
 ## 🎓 What You've Learned
 

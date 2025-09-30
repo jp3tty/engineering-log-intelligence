@@ -1,22 +1,81 @@
 <template>
-  <div class="chart-placeholder">
-    <div class="placeholder-content">
-      <h4>Line Chart</h4>
-      <p>Chart data: {{ data ? 'Loaded' : 'Loading...' }}</p>
-      <div class="mock-chart">
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-      </div>
+  <div class="line-chart-container">
+    <div class="chart-header" v-if="options?.plugins?.title?.text">
+      <h3 class="chart-title">{{ options.plugins.title.text }}</h3>
+    </div>
+    <div class="chart-content">
+      <svg :width="chartWidth" :height="chartHeight" class="line-chart-svg">
+        <!-- Grid lines -->
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#f3f4f6" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+        
+        <!-- Chart area -->
+        <g :transform="`translate(${padding.left}, ${padding.top})`">
+          <!-- Y-axis labels -->
+          <g class="y-axis">
+            <text
+              v-for="(label, index) in yAxisLabels"
+              :key="index"
+              :x="-10"
+              :y="yScale(label)"
+              text-anchor="end"
+              dominant-baseline="middle"
+              class="axis-label"
+            >
+              {{ label }}
+            </text>
+          </g>
+          
+          <!-- X-axis labels -->
+          <g class="x-axis">
+            <text
+              v-for="(label, index) in xAxisLabels"
+              :key="index"
+              :x="xScale(index)"
+              :y="chartAreaHeight + 20"
+              text-anchor="middle"
+              class="axis-label"
+            >
+              {{ label }}
+            </text>
+          </g>
+          
+          <!-- Data lines -->
+          <g v-for="(dataset, datasetIndex) in chartData" :key="datasetIndex">
+            <path
+              :d="createLinePath(dataset.data)"
+              :stroke="dataset.borderColor || '#3b82f6'"
+              :stroke-width="dataset.borderWidth || 2"
+              :fill="'none'"
+              class="data-line"
+            />
+            
+            <!-- Data points -->
+            <circle
+              v-for="(point, pointIndex) in dataset.data"
+              :key="pointIndex"
+              :cx="xScale(pointIndex)"
+              :cy="yScale(point)"
+              :r="4"
+              :fill="dataset.borderColor || '#3b82f6'"
+              :stroke="'#ffffff'"
+              :stroke-width="2"
+              class="data-point"
+            />
+          </g>
+        </g>
+      </svg>
     </div>
   </div>
 </template>
 
 <script>
+import { ref, computed, watch } from 'vue'
+
 export default {
   name: 'LineChart',
   props: {
@@ -27,58 +86,174 @@ export default {
     options: {
       type: Object,
       default: () => ({})
+    },
+    height: {
+      type: Number,
+      default: 300
+    }
+  },
+  setup(props) {
+    const chartWidth = ref(400)
+    const chartHeight = ref(300)
+    const padding = ref({ top: 20, right: 20, bottom: 40, left: 60 })
+
+    // Chart data processing
+    const chartData = computed(() => {
+      if (!props.data || !props.data.datasets) {
+        return []
+      }
+      return props.data.datasets.map(dataset => ({
+        ...dataset,
+        data: dataset.data || []
+      }))
+    })
+
+    const xAxisLabels = computed(() => {
+      return props.data?.labels || []
+    })
+
+    // Calculate Y-axis range and labels
+    const yAxisRange = computed(() => {
+      if (!chartData.value.length) return { min: 0, max: 100 }
+      
+      const allValues = chartData.value.flatMap(dataset => dataset.data)
+      const min = Math.min(...allValues)
+      const max = Math.max(...allValues)
+      
+      const padding = (max - min) * 0.1
+      return {
+        min: Math.max(0, min - padding),
+        max: max + padding
+      }
+    })
+
+    const yAxisLabels = computed(() => {
+      const { min, max } = yAxisRange.value
+      const step = (max - min) / 4
+      return Array.from({ length: 5 }, (_, i) => Math.round(min + step * i))
+    })
+
+    const chartAreaHeight = computed(() => chartHeight.value - padding.value.top - padding.value.bottom)
+    const chartAreaWidth = computed(() => chartWidth.value - padding.value.left - padding.value.right)
+
+    // Scaling functions
+    const xScale = (index) => {
+      if (xAxisLabels.value.length <= 1) return chartAreaWidth.value / 2
+      return (index / (xAxisLabels.value.length - 1)) * chartAreaWidth.value
+    }
+
+    const yScale = (value) => {
+      const { min, max } = yAxisRange.value
+      if (max === min) return chartAreaHeight.value / 2
+      return chartAreaHeight.value - ((value - min) / (max - min)) * chartAreaHeight.value
+    }
+
+    // Create line path
+    const createLinePath = (data) => {
+      if (!data || data.length === 0) return ''
+      
+      const points = data.map((value, index) => {
+        const x = xScale(index)
+        const y = yScale(value)
+        return `${x},${y}`
+      })
+      
+      return `M ${points.join(' L ')}`
+    }
+
+    // Watch for data changes
+    watch(() => props.data, () => {
+      // Recalculate when data changes
+    }, { deep: true })
+
+    return {
+      chartWidth,
+      chartHeight,
+      padding,
+      chartData,
+      xAxisLabels,
+      yAxisLabels,
+      chartAreaHeight,
+      chartAreaWidth,
+      xScale,
+      yScale,
+      createLinePath
     }
   }
 }
 </script>
 
 <style scoped>
-.chart-placeholder {
-  height: 300px;
+.line-chart-container {
   width: 100%;
-  border: 2px dashed #e5e7eb;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f9fafb;
+  height: 100%;
+  min-height: 300px;
 }
 
-.placeholder-content {
-  text-align: center;
-  color: #6b7280;
+.chart-header {
+  margin-bottom: 16px;
 }
 
-.placeholder-content h4 {
-  margin: 0 0 8px 0;
+.chart-title {
+  font-size: 16px;
+  font-weight: 600;
   color: #374151;
+  margin: 0;
 }
 
-.placeholder-content p {
-  margin: 0 0 16px 0;
-  font-size: 14px;
+.chart-content {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-.mock-chart {
-  display: flex;
-  align-items: end;
-  justify-content: center;
-  gap: 4px;
-  height: 100px;
+.line-chart-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.line {
-  width: 8px;
-  height: 60px;
-  background: linear-gradient(to top, #10b981, #34d399);
-  border-radius: 4px;
-  opacity: 0.8;
+.axis-label {
+  font-size: 12px;
+  fill: #6b7280;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
-.line:nth-child(2) { height: 45px; }
-.line:nth-child(3) { height: 70px; }
-.line:nth-child(4) { height: 30px; }
-.line:nth-child(5) { height: 55px; }
-.line:nth-child(6) { height: 40px; }
-.line:nth-child(7) { height: 65px; }
+.data-line {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-width 0.2s ease;
+}
+
+.data-line:hover {
+  stroke-width: 3;
+}
+
+.data-point {
+  transition: r 0.2s ease;
+  cursor: pointer;
+}
+
+.data-point:hover {
+  r: 6;
+}
+
+.y-axis text {
+  font-size: 11px;
+}
+
+.x-axis text {
+  font-size: 11px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .chart-title {
+    font-size: 14px;
+  }
+  
+  .axis-label {
+    font-size: 10px;
+  }
+}
 </style>

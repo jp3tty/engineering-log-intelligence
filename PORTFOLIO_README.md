@@ -2,9 +2,9 @@
 
 <div align="center">
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Available-brightgreen?style=for-the-badge)](https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Available-brightgreen?style=for-the-badge)](https://engineering-log-intelligence.vercel.app)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge)](https://github.com/jp3tty/engineering-log-intelligence)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)](https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)](https://engineering-log-intelligence.vercel.app)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 **An AI-powered log analysis platform that processes enterprise logs, identifies patterns using machine learning, and provides actionable insights through an intuitive web interface.**
@@ -84,7 +84,7 @@ Built a complete full-stack platform that automatically processes logs, identifi
 ## 🚀 **Live Demo**
 
 ### **Production Application**
-🌐 **[https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app](https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app)**
+🌐 **[https://engineering-log-intelligence.vercel.app](https://engineering-log-intelligence.vercel.app)**
 
 ### **Demo Credentials**
 ```
@@ -260,7 +260,7 @@ This project demonstrates proficiency in:
 ## 📞 **Contact & Links**
 
 - **GitHub Repository**: [https://github.com/jp3tty/engineering-log-intelligence](https://github.com/jp3tty/engineering-log-intelligence)
-- **Live Demo**: [https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app](https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app)
+- **Live Demo**: [https://engineering-log-intelligence.vercel.app](https://engineering-log-intelligence.vercel.app)
 - **Documentation**: See `/docs` folder for comprehensive guides
 
 ## 📄 **License**

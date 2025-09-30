@@ -8,7 +8,7 @@ We're going to set up a custom domain for our Engineering Log Intelligence Syste
 
 **Current URL (Vercel default):**
 ```
-https://engineeringlogintelligence-72exbwl7x-jp3ttys-projects.vercel.app
+https://engineering-log-intelligence.vercel.app
 ```
 
 **Future URL (with custom domain):**
