@@ -1,55 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "frontend/dist/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "api/health_public.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/health.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/logs.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/auth.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/monitoring.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/dashboard_analytics.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/alerting.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/incident_response.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/ml/analyze.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/ml/real_time.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "api/ml/ab_testing.py",
-      "use": "@vercel/python"
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -57,7 +7,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/frontend/dist/$1"
+      "destination": "/index.html"
     }
   ],
   "headers": [

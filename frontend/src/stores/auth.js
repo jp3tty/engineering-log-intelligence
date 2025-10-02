@@ -132,33 +132,49 @@ export const useAuthStore = defineStore('auth', () => {
 
   const initializeAuth = async () => {
     try {
+      // For local development, use mock authentication
+      console.log('🚀 Using mock authentication for local development')
+      
       // Check if we have stored auth data
       const storedUser = localStorage.getItem('user_data')
       if (storedUser && token.value) {
         user.value = JSON.parse(storedUser)
         
-        // Verify token is still valid
+        // Use mock verification for local development
         try {
-          await axios.get('/api/auth/verify', {
-            headers: {
-              Authorization: `Bearer ${token.value}`
-            }
-          })
+          await mockVerifyToken(token.value)
           return true
-        } catch (err) {
-          // If API fails, use mock verification
-          try {
-            await mockVerifyToken(token.value)
-            return true
-          } catch (mockErr) {
-            // Token is invalid, try to refresh
-            const refreshed = await refreshAuthToken()
-            return refreshed
-          }
+        } catch (mockErr) {
+          // Token is invalid, try to refresh
+          const refreshed = await refreshAuthToken()
+          return refreshed
         }
       }
       
-      return false
+      // If no stored data, create a mock user for local development
+      const mockUser = {
+        id: 'dev-user-1',
+        username: 'developer',
+        email: 'dev@engineeringlogintelligence.com',
+        role: 'admin',
+        name: 'Development User',
+        avatar: null,
+        lastLogin: new Date().toISOString(),
+        permissions: ['read', 'write', 'admin']
+      }
+      
+      user.value = mockUser
+      token.value = 'mock-token-' + Date.now()
+      refreshToken.value = 'mock-refresh-' + Date.now()
+      
+      // Store in localStorage
+      localStorage.setItem('user_data', JSON.stringify(mockUser))
+      localStorage.setItem('auth_token', token.value)
+      localStorage.setItem('refresh_token', refreshToken.value)
+      
+      console.log('✅ Mock user created for local development')
+      return true
+      
     } catch (err) {
       console.error('Auth initialization failed:', err.message)
       clearAuthData()

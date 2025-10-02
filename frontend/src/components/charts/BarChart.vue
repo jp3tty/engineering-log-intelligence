@@ -20,7 +20,7 @@
             <text
               v-for="(label, index) in yAxisLabels"
               :key="index"
-              :x="-10"
+              :x="-15"
               :y="yScale(label)"
               text-anchor="end"
               dominant-baseline="middle"
@@ -43,6 +43,35 @@
               {{ label }}
             </text>
           </g>
+          
+          <!-- Y-axis title background -->
+          <rect x="-75" y="80" width="30" height="140" fill="white" stroke="#e5e7eb" stroke-width="1" rx="4"/>
+          
+          <!-- Y-axis title -->
+          <text
+            x="20"
+            y="70"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            class="axis-title"
+            transform="rotate(-90, 20, 150)"
+          >
+            {{ yAxisTitle }}
+          </text>
+          
+          <!-- X-axis title background -->
+          <rect x="130" y="300" width="120" height="30" fill="white" stroke="#e5e7eb" stroke-width="1" rx="4"/>
+
+          <!-- X-axis title -->
+          <text
+            x="190"
+            y="318"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            class="axis-title"
+          >
+            {{ xAxisTitle }}
+          </text>
           
           <!-- Bars -->
           <g v-for="(dataset, datasetIndex) in chartData" :key="datasetIndex">
@@ -87,9 +116,9 @@ export default {
     }
   },
   setup(props) {
-    const chartWidth = ref(400)
-    const chartHeight = ref(300)
-    const padding = ref({ top: 20, right: 20, bottom: 40, left: 60 })
+    const chartWidth = ref(500)
+    const chartHeight = ref(350)
+    const padding = ref({ top: 20, right: 20, bottom: 60, left: 100 })
 
     // Chart data processing
     const chartData = computed(() => {
@@ -104,6 +133,15 @@ export default {
 
     const xAxisLabels = computed(() => {
       return props.data?.labels || []
+    })
+
+    // Axis titles from options
+    const xAxisTitle = computed(() => {
+      return props.options?.scales?.x?.title?.text || 'X Axis'
+    })
+
+    const yAxisTitle = computed(() => {
+      return props.options?.scales?.y?.title?.text || 'Y Axis'
     })
 
     // Calculate Y-axis range and labels
@@ -169,6 +207,8 @@ export default {
       chartData,
       xAxisLabels,
       yAxisLabels,
+      xAxisTitle,
+      yAxisTitle,
       chartAreaHeight,
       chartAreaWidth,
       barWidth,
@@ -203,6 +243,7 @@ export default {
   width: 100%;
   height: 100%;
   overflow: visible;
+  padding: 0 10px;
 }
 
 .bar-chart-svg {
@@ -213,8 +254,9 @@ export default {
 
 .axis-label {
   font-size: 12px;
-  fill: #6b7280;
+  fill: #374151;
   font-family: system-ui, -apple-system, sans-serif;
+  font-weight: 500;
 }
 
 .bar {
@@ -229,11 +271,28 @@ export default {
 }
 
 .y-axis text {
-  font-size: 11px;
+  font-size: 12px;
+  fill: #374151;
+  font-weight: 500;
 }
 
 .x-axis text {
   font-size: 11px;
+}
+
+.axis-title {
+  font-size: 12px;
+  font-weight: bold;
+  fill: #374151;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Specific styling for Y-axis title */
+.y-axis-title {
+  font-size: 12px;
+  font-weight: bold;
+  fill: #374151;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 /* Responsive adjustments */

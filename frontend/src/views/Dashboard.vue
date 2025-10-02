@@ -107,6 +107,7 @@
         <div class="card">
           <div class="card-header">
             <h3 class="text-lg font-semibold text-gray-900">Log Volume (Last 24 Hours)</h3>
+            <p class="text-sm text-gray-600 mt-1">Real-time log processing trends showing system activity and data ingestion patterns over the past 24 hours.</p>
           </div>
           <div class="card-body">
             <LineChart 
@@ -117,15 +118,16 @@
           </div>
         </div>
 
-        <!-- Error Distribution Pie Chart -->
+        <!-- Log Distribution Bar Chart -->
         <div class="card">
           <div class="card-header">
             <h3 class="text-lg font-semibold text-gray-900">Log Distribution</h3>
+            <p class="text-sm text-gray-600 mt-1">Breakdown of log levels (INFO, WARN, ERROR, DEBUG, FATAL) providing insights into system health and error patterns.</p>
           </div>
           <div class="card-body">
-            <PieChart 
+            <BarChart 
               :data="logDistributionData" 
-              :options="pieChartOptions"
+              :options="logDistributionBarOptions"
               :height="300"
             />
           </div>
@@ -138,6 +140,7 @@
         <div class="card">
           <div class="card-header">
             <h3 class="text-lg font-semibold text-gray-900">Response Time Trends</h3>
+            <p class="text-sm text-gray-600 mt-1">Performance metrics tracking API response times throughout the day to identify bottlenecks and optimization opportunities.</p>
           </div>
           <div class="card-body">
             <LineChart 
@@ -152,6 +155,7 @@
         <div class="card">
           <div class="card-header">
             <h3 class="text-lg font-semibold text-gray-900">Service Health Overview</h3>
+            <p class="text-sm text-gray-600 mt-1">Hierarchical view of system services with size indicating importance and color indicating health status for quick monitoring.</p>
           </div>
           <div class="card-body">
             <TreeMapChart 
@@ -269,16 +273,25 @@ export default {
     const logDistributionData = ref({
       labels: ['INFO', 'WARN', 'ERROR', 'DEBUG', 'FATAL'],
       datasets: [{
+        label: 'Log Count',
         data: [60, 25, 10, 4, 1],
         backgroundColor: [
-          'rgb(34, 197, 94)',  // Green for INFO
-          'rgb(245, 158, 11)', // Yellow for WARN
-          'rgb(239, 68, 68)',  // Red for ERROR
+          'rgba(34, 197, 94, 0.8)',   // Green for INFO
+          'rgba(245, 158, 11, 0.8)',  // Yellow for WARN
+          'rgba(239, 68, 68, 0.8)',   // Red for ERROR
+          'rgba(107, 114, 128, 0.8)', // Gray for DEBUG
+          'rgba(147, 51, 234, 0.8)'   // Purple for FATAL
+        ],
+        borderColor: [
+          'rgb(34, 197, 94)',   // Green for INFO
+          'rgb(245, 158, 11)',  // Yellow for WARN
+          'rgb(239, 68, 68)',   // Red for ERROR
           'rgb(107, 114, 128)', // Gray for DEBUG
-          'rgb(147, 51, 234)'  // Purple for FATAL
+          'rgb(147, 51, 234)'   // Purple for FATAL
         ],
         borderWidth: 2,
-        borderColor: '#ffffff'
+        borderRadius: 4,
+        borderSkipped: false
       }]
     })
 
@@ -294,80 +307,222 @@ export default {
       }]
     })
 
-    // Service health data for TreeMap
+    // Service health data for TreeMap with drill-down capability
     const serviceHealthData = ref([
       {
-        name: 'PostgreSQL Database',
+        name: 'Database Services',
         status: 'healthy',
         importance: 100,
         responseTime: 15,
         uptime: 99.9,
-        description: 'Primary database for structured data storage'
+        description: 'Core database infrastructure and data storage systems',
+        children: [
+          {
+            name: 'PostgreSQL Primary',
+            status: 'healthy',
+            importance: 90,
+            responseTime: 12,
+            uptime: 99.9,
+            description: 'Primary database for structured data storage',
+            children: [
+              {
+                name: 'Connection Pool',
+                status: 'healthy',
+                importance: 85,
+                responseTime: 5,
+                uptime: 99.8,
+                description: 'Database connection management'
+              },
+              {
+                name: 'Query Processor',
+                status: 'warning',
+                importance: 80,
+                responseTime: 25,
+                uptime: 98.5,
+                description: 'SQL query execution engine'
+              },
+              {
+                name: 'Storage Engine',
+                status: 'healthy',
+                importance: 75,
+                responseTime: 8,
+                uptime: 99.9,
+                description: 'Data persistence layer'
+              }
+            ]
+          },
+          {
+            name: 'PostgreSQL Replica',
+            status: 'healthy',
+            importance: 70,
+            responseTime: 18,
+            uptime: 99.7,
+            description: 'Read-only replica for load balancing',
+            children: [
+              {
+                name: 'Replication Process',
+                status: 'healthy',
+                importance: 65,
+                responseTime: 10,
+                uptime: 99.5,
+                description: 'Data synchronization from primary'
+              }
+            ]
+          },
+          {
+            name: 'Redis Cache',
+            status: 'healthy',
+            importance: 60,
+            responseTime: 2,
+            uptime: 99.8,
+            description: 'In-memory caching layer'
+          }
+        ]
       },
       {
-        name: 'Elasticsearch Cluster',
+        name: 'API Services',
         status: 'healthy',
         importance: 95,
         responseTime: 45,
         uptime: 99.8,
-        description: 'Search engine for log analysis and queries'
+        description: 'RESTful API endpoints and microservices',
+        children: [
+          {
+            name: 'Authentication API',
+            status: 'healthy',
+            importance: 90,
+            responseTime: 25,
+            uptime: 99.8,
+            description: 'JWT authentication and authorization',
+            children: [
+              {
+                name: 'Token Validator',
+                status: 'healthy',
+                importance: 85,
+                responseTime: 5,
+                uptime: 99.9,
+                description: 'JWT token validation service'
+              },
+              {
+                name: 'User Manager',
+                status: 'healthy',
+                importance: 80,
+                responseTime: 15,
+                uptime: 99.7,
+                description: 'User account management'
+              }
+            ]
+          },
+          {
+            name: 'Analytics API',
+            status: 'healthy',
+            importance: 85,
+            responseTime: 120,
+            uptime: 99.5,
+            description: 'Data analytics and reporting endpoints',
+            children: [
+              {
+                name: 'Query Engine',
+                status: 'healthy',
+                importance: 80,
+                responseTime: 100,
+                uptime: 99.4,
+                description: 'Analytics query processing'
+              },
+              {
+                name: 'Report Generator',
+                status: 'warning',
+                importance: 75,
+                responseTime: 200,
+                uptime: 98.8,
+                description: 'Automated report generation'
+              }
+            ]
+          },
+          {
+            name: 'Log Processing API',
+            status: 'degraded',
+            importance: 80,
+            responseTime: 150,
+            uptime: 98.5,
+            description: 'Log ingestion and processing endpoints'
+          }
+        ]
       },
       {
-        name: 'Kafka Streaming',
-        status: 'degraded',
-        importance: 90,
-        responseTime: 120,
-        uptime: 98.5,
-        description: 'Real-time message streaming platform'
-      },
-      {
-        name: 'Vercel Functions',
-        status: 'healthy',
-        importance: 85,
-        responseTime: 89,
-        uptime: 99.9,
-        description: 'Serverless API functions'
-      },
-      {
-        name: 'Vue.js Frontend',
-        status: 'healthy',
-        importance: 80,
-        responseTime: 65,
-        uptime: 99.7,
-        description: 'User interface and dashboard'
-      },
-      {
-        name: 'ML Models',
+        name: 'Frontend Services',
         status: 'healthy',
         importance: 75,
-        responseTime: 150,
-        uptime: 99.5,
-        description: 'Machine learning inference engine'
+        responseTime: 65,
+        uptime: 99.7,
+        description: 'User interface and client-side applications',
+        children: [
+          {
+            name: 'Web Application',
+            status: 'healthy',
+            importance: 70,
+            responseTime: 50,
+            uptime: 99.6,
+            description: 'Main Vue.js dashboard application'
+          },
+          {
+            name: 'Admin Dashboard',
+            status: 'healthy',
+            importance: 60,
+            responseTime: 45,
+            uptime: 99.5,
+            description: 'Administrative interface'
+          }
+        ]
       },
       {
-        name: 'Monitoring System',
+        name: 'Infrastructure Services',
         status: 'warning',
         importance: 70,
         responseTime: 200,
         uptime: 97.2,
-        description: 'System health monitoring and alerting'
-      },
-      {
-        name: 'Authentication',
-        status: 'healthy',
-        importance: 65,
-        responseTime: 25,
-        uptime: 99.8,
-        description: 'JWT authentication and authorization'
+        description: 'Core infrastructure and monitoring systems',
+        children: [
+          {
+            name: 'Elasticsearch Cluster',
+            status: 'healthy',
+            importance: 85,
+            responseTime: 45,
+            uptime: 99.8,
+            description: 'Search engine for log analysis and queries'
+          },
+          {
+            name: 'Kafka Streaming',
+            status: 'degraded',
+            importance: 80,
+            responseTime: 120,
+            uptime: 98.5,
+            description: 'Real-time message streaming platform'
+          },
+          {
+            name: 'Monitoring System',
+            status: 'warning',
+            importance: 75,
+            responseTime: 200,
+            uptime: 97.2,
+            description: 'System health monitoring and alerting'
+          }
+        ]
       }
     ])
 
     // Chart options - For beginners: These control how the charts look and behave
     const logVolumeOptions = ref({
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         title: {
           display: true,
-          text: 'Log Volume Over Time'
+          text: 'Log Volume Over Time',
+          font: {
+            size: 16,
+            weight: 'bold'
+          }
         }
       },
       scales: {
@@ -375,13 +530,29 @@ export default {
           beginAtZero: true,
           title: {
             display: true,
-            text: 'Number of Logs'
+            text: 'Number of Logs',
+            font: {
+              size: 14,
+              weight: 'bold'
+            },
+            color: '#374151'
+          },
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
           }
         },
         x: {
           title: {
             display: true,
-            text: 'Time (24h)'
+            text: 'Time (24h)',
+            font: {
+              size: 14,
+              weight: 'bold'
+            },
+            color: '#374151'
+          },
+          grid: {
+            display: false
           }
         }
       }
@@ -396,11 +567,80 @@ export default {
       }
     })
 
-    const responseTimeOptions = ref({
+    const logDistributionBarOptions = ref({
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         title: {
           display: true,
-          text: 'Response Time Trends'
+          text: 'Log Level Distribution (Last 24 Hours)',
+          font: {
+            size: 16,
+            weight: 'bold'
+          }
+        },
+        legend: {
+          display: true,
+          position: 'top'
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.dataset.label || ''
+              const value = context.parsed.y
+              const total = context.dataset.data.reduce((a, b) => a + b, 0)
+              const percentage = ((value / total) * 100).toFixed(1)
+              return `${label}: ${value} (${percentage}%)`
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Log Level',
+            font: {
+              size: 14,
+              weight: 'bold'
+            }
+          },
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Number of Logs',
+            font: {
+              size: 14,
+              weight: 'bold'
+            }
+          },
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          }
+        }
+      },
+      animation: {
+        duration: 1000,
+        easing: 'easeInOutQuart'
+      }
+    })
+
+    const responseTimeOptions = ref({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Response Time Trends',
+          font: {
+            size: 16,
+            weight: 'bold'
+          }
         }
       },
       scales: {
@@ -408,13 +648,29 @@ export default {
           beginAtZero: true,
           title: {
             display: true,
-            text: 'Response Time (ms)'
+            text: 'Response Time (ms)',
+            font: {
+              size: 14,
+              weight: 'bold'
+            },
+            color: '#374151'
+          },
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
           }
         },
         x: {
           title: {
             display: true,
-            text: 'Time (24h)'
+            text: 'Time (24h)',
+            font: {
+              size: 14,
+              weight: 'bold'
+            },
+            color: '#374151'
+          },
+          grid: {
+            display: false
           }
         }
       }
@@ -516,6 +772,7 @@ export default {
       // Chart options
       logVolumeOptions,
       pieChartOptions,
+      logDistributionBarOptions,
       responseTimeOptions,
       
       // Computed

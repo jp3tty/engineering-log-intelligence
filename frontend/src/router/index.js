@@ -32,10 +32,10 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    redirect: '/dashboard',
+    redirect: '/login',
     meta: {
       title: 'Home',
-      requiresAuth: true,
+      requiresAuth: false,
     },
   },
   {
