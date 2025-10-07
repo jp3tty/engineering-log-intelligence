@@ -4,17 +4,24 @@ An AI-powered log analysis platform that processes engineering logs from multipl
 
 ## 🌐 **Live Application**
 
-**Production URL**: https://engineeringlogintelligence-kslti215s-jp3ttys-projects.vercel.app  
-*Latest deployment with complete production enhancements*
+**Production URL**: https://engineeringlogintelligence-fjbthr6qg-jp3ttys-projects.vercel.app  
+*Latest deployment with fully functional API endpoints and production stability*
+
+**API Endpoints** (All Working ✅):
+- **Analytics API**: `/api/analytics` - AI-powered insights and analytics data
+- **Logs API**: `/api/logs` - Log processing and search functionality  
+- **Auth API**: `/api/auth` - Authentication and user management
+- **ML Analysis API**: `/api/ml/analyze` - Machine learning log analysis
+- **Health Check API**: `/api/health_public` - System health monitoring
 
 **Demo Credentials:**
 - **Admin**: `admin` / `password123`
 - **Analyst**: `analyst` / `password123`
 - **User**: `user` / `password123`
 
-**Status**: ✅ **Production Ready** - Complete enterprise-grade platform with enhanced UI, analytics, and log analysis
+**Status**: ✅ **Fully Functional** - Complete enterprise-grade platform with working API endpoints and production stability
 
-**Latest Achievements** (October 1, 2025): 100% completion with production polish and comprehensive analytics
+**Latest Achievements** (October 5, 2025): API structure fixes, environment variable configuration, and 100% endpoint functionality
 
 ## Features
 

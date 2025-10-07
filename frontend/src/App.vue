@@ -103,10 +103,10 @@ export default {
       // Track page views (in production, you might send this to analytics)
       console.log(`📄 Navigating from ${from?.path || 'unknown'} to ${to.path}`)
       
-      // Update page title
+      // Update page title with portfolio label
       document.title = to.meta?.title 
-        ? `${to.meta.title} - Engineering Log Intelligence`
-        : 'Engineering Log Intelligence'
+        ? `${to.meta.title} - Engineering Log Intelligence | Portfolio Project`
+        : 'Engineering Log Intelligence | Portfolio Project'
     }
     
     // Handle global errors

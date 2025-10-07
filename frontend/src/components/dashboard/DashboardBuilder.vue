@@ -65,6 +65,7 @@
           @update-widget="updateWidget"
           @remove-widget="removeWidget"
           @reorder-widgets="reorderWidgets"
+          @load-template="loadTemplate"
         />
       </div>
 
@@ -140,8 +141,16 @@ export default {
     const updateWidget = (widgetId, updates) => {
       const index = dashboard.widgets.findIndex(w => w.id === widgetId)
       if (index !== -1) {
+        // Update existing widget
         Object.assign(dashboard.widgets[index], updates)
         dashboard.widgets[index].lastUpdated = new Date()
+      } else {
+        // Add new widget if it doesn't exist
+        dashboard.widgets.push({
+          ...updates,
+          id: widgetId,
+          lastUpdated: new Date()
+        })
       }
     }
 
@@ -159,8 +168,10 @@ export default {
       dashboard.widgets = newOrder
     }
 
-    const loadTemplate = () => {
-      if (!selectedTemplate.value) return
+    const loadTemplate = (templateName) => {
+      // If called with a parameter, use it; otherwise use selectedTemplate.value
+      const templateToLoad = templateName || selectedTemplate.value
+      if (!templateToLoad) return
       
       const templates = {
         'system-overview': {
@@ -200,8 +211,12 @@ export default {
         }
       }
       
-      const template = templates[selectedTemplate.value]
+      const template = templates[templateToLoad]
       if (template) {
+        // Update selectedTemplate if called with parameter
+        if (templateName) {
+          selectedTemplate.value = templateName
+        }
         dashboard.widgets = template.widgets.map((widget, index) => ({
           id: `widget-${Date.now()}-${index}`,
           type: widget.type,

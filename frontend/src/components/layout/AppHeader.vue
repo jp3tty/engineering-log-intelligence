@@ -4,6 +4,10 @@
       <div class="flex items-center justify-between h-16">
         <!-- Logo and Brand -->
         <div class="flex items-center space-x-4">
+          <!-- Portfolio Badge -->
+          <span class="px-2 py-1 text-xs font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded shadow-sm animate-pulse">
+            Portfolio Project
+          </span>
           <router-link to="/dashboard" class="flex items-center space-x-2">
             <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
