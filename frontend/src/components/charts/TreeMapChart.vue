@@ -1,17 +1,9 @@
 <template>
   <div class="treemap-chart">
-    <!-- Chart Header -->
-    <div class="treemap-header">
-      <div class="chart-title-container">
-        <span class="level-title">Service Health Overview</span>
-      </div>
-    </div>
-
     <!-- Main Chart Area -->
     <div class="treemap-container">
       <div ref="chartContainer" class="chart-area">
       </div>
-      <div ref="legendContainer" class="legend-area"></div>
     </div>
 
     <!-- Service Details Panel -->
@@ -102,7 +94,6 @@ const props = defineProps({
 })
 // Reactive references for template
 const chartContainer = ref(null)
-const legendContainer = ref(null)
 const selectedService = ref(null)
 let resizeObserver = null
 
@@ -458,59 +449,8 @@ const createTreeMap = () => {
   })
 
   chartContainer.value.appendChild(svg)
-  
-  // Create separate legend
-  createLegend()
 }
 
-// Create legend
-const createLegend = () => {
-  if (!legendContainer.value) return
-  
-  // Clear existing legend
-  legendContainer.value.innerHTML = ''
-  
-  const legend = document.createElement('div')
-  legend.className = 'legend'
-  
-  const title = document.createElement('h4')
-  title.className = 'legend-title'
-  title.textContent = 'Service Status'
-  title.style.fontWeight = 'bold'
-  title.style.textDecoration = 'underline'
-  legend.appendChild(title)
-  
-  const statuses = [
-    { status: 'healthy', label: 'Healthy' },
-    { status: 'warning', label: 'Warning' },
-    { status: 'degraded', label: 'Degraded' },
-    { status: 'unhealthy', label: 'Unhealthy' }
-  ]
-
-  statuses.forEach((item) => {
-    const legendItem = document.createElement('div')
-    legendItem.className = 'legend-item'
-    
-    const bullet = document.createElement('span')
-    bullet.className = 'legend-bullet'
-    const color = getStatusColor(item.status)
-    bullet.style.color = color
-    bullet.textContent = '•'
-    
-    // Debug: Log the color being applied
-    console.log(`Legend item: ${item.status} -> Color: ${color}`)
-    
-    const label = document.createElement('span')
-    label.className = 'legend-label'
-    label.textContent = item.label
-    
-    legendItem.appendChild(bullet)
-    legendItem.appendChild(label)
-    legend.appendChild(legendItem)
-  })
-
-  legendContainer.value.appendChild(legend)
-}
 
 // Handle resize
 const handleResize = () => {
@@ -553,59 +493,15 @@ onUnmounted(() => {
   position: relative;
 }
 
-/* Navigation Header */
-.treemap-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px 16px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 16px;
-  border-radius: 8px 8px 0 0;
-}
-
-.chart-title-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-
-
-
-.level-title {
-  font-weight: 700;
-  color: #1f2937;
-  font-size: 13px;
-}
-
-.back-to-overview {
-  background: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 4px 8px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-
-.back-to-overview:hover {
-  background: #dc2626;
-}
 
 .treemap-container {
-  display: flex;
   width: 100%;
-  height: calc(100% - 60px);
-  gap: 20px;
+  height: 100%;
 }
 
 .chart-area {
-  flex: 1;
-  min-width: 0; /* Allow chart to shrink */
+  width: 100%;
+  height: 100%;
   position: relative;
 }
 
@@ -635,13 +531,6 @@ onUnmounted(() => {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
-.legend-area {
-  flex: 0 0 200px; /* Fixed width for legend */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: 20px 0;
-}
 
 .treemap-chart svg {
   display: block;
@@ -649,41 +538,6 @@ onUnmounted(() => {
   height: 100%;
 }
 
-/* Legend styles */
-.legend {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  border: 1px solid #e5e7eb;
-}
-
-.legend-title {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  font-weight: bold;
-  text-decoration: underline;
-  color: #374151;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-  gap: 4px;
-}
-
-.legend-bullet {
-  font-size: 18px;
-  font-weight: bold;
-  margin-right: 8px;
-  flex-shrink: 0;
-}
-
-.legend-label {
-  font-size: 12px;
-  color: #6b7280;
-  font-weight: 500;
-}
 
 /* Drill-down Info Panel */
 .service-details-panel {

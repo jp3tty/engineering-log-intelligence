@@ -82,7 +82,7 @@ export default {
     }
   },
   emits: ['update-widget'],
-  setup(props) {
+  setup(props, { emit }) {
     const loading = ref(false)
     const error = ref(null)
     const refreshInterval = ref(null)
@@ -153,20 +153,45 @@ export default {
       error.value = null
       
       try {
-        // Simulate API call - replace with actual API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Simulate API call with shorter timeout
+        await new Promise(resolve => setTimeout(resolve, 300))
         
         // Mock data - replace with actual data fetching
         const mockValue = Math.floor(Math.random() * 100)
         const mockTrend = ['up', 'down', 'neutral'][Math.floor(Math.random() * 3)]
         
-        // Update widget config
-        props.widget.config.value = mockValue
-        props.widget.config.trend = mockTrend
+        // Update widget config and emit changes
+        const updatedConfig = {
+          ...props.widget.config,
+          value: mockValue,
+          trend: mockTrend
+        }
+        
+        // Emit update to parent (with error handling)
+        try {
+          emit('update-widget', props.widget.id, { config: updatedConfig })
+        } catch (emitError) {
+          console.warn('Failed to emit metric update:', emitError)
+        }
         
       } catch (err) {
         error.value = 'Failed to fetch data'
         console.error('Error fetching metric data:', err)
+        
+        // Provide fallback data
+        const fallbackValue = Math.floor(Math.random() * 50) + 25
+        const fallbackTrend = 'neutral'
+        const updatedConfig = {
+          ...props.widget.config,
+          value: fallbackValue,
+          trend: fallbackTrend
+        }
+        
+        try {
+          emit('update-widget', props.widget.id, { config: updatedConfig })
+        } catch (emitError) {
+          console.warn('Failed to emit fallback metric update:', emitError)
+        }
       } finally {
         loading.value = false
       }
@@ -175,7 +200,7 @@ export default {
     const startAutoRefresh = () => {
       if (props.previewMode) return
       
-      const interval = widget.config.refreshInterval || 30
+      const interval = props.widget.config.refreshInterval || 30
       refreshInterval.value = setInterval(fetchData, interval * 1000)
     }
 

@@ -4,9 +4,29 @@
     <div class="bg-white shadow-sm border-b border-gray-200">
       <div class="container-custom py-6">
         <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p class="text-gray-600 mt-1">Overview of system health and log analysis</p>
+          <div class="flex-1">
+            <h1 class="text-2xl font-bold text-gray-900">Engineering Log Intelligence Dashboard</h1>
+            <p class="text-gray-600 mt-1">Real-time monitoring and analysis of enterprise log data from multiple sources</p>
+            <div class="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span><strong>Data Sources:</strong> SPLUNK, SAP, Application Logs</span>
+              </div>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span><strong>Time Range:</strong> Last 24 Hours</span>
+              </div>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span><strong>Processing:</strong> Real-time Analytics & AI Insights</span>
+              </div>
+            </div>
           </div>
           <div class="flex items-center space-x-4">
             <button
@@ -113,29 +133,11 @@
             <LineChart 
               :data="logVolumeData" 
               :options="logVolumeOptions"
-              :height="300"
+              :height="375"
             />
           </div>
         </div>
 
-        <!-- Log Distribution Bar Chart -->
-        <div class="card">
-          <div class="card-header">
-            <h3 class="text-lg font-semibold text-gray-900">Log Distribution</h3>
-            <p class="text-sm text-gray-600 mt-1">Breakdown of log levels (INFO, WARN, ERROR, DEBUG, FATAL) providing insights into system health and error patterns.</p>
-          </div>
-          <div class="card-body">
-            <BarChart 
-              :data="logDistributionData" 
-              :options="logDistributionBarOptions"
-              :height="300"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Additional Charts Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <!-- Response Time Chart -->
         <div class="card">
           <div class="card-header">
@@ -146,8 +148,79 @@
             <LineChart 
               :data="responseTimeData" 
               :options="responseTimeOptions"
-              :height="300"
+              :height="375"
             />
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Log Distribution Bar Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold text-gray-900">Log Distribution (Last 24 Hours)</h3>
+            <p class="text-sm text-gray-600 mt-1">Breakdown of log levels across all data sources (SPLUNK, SAP, Application logs) over the past 24 hours, providing insights into system health and error patterns.</p>
+          </div>
+          <div class="card-body" style="overflow: visible; position: relative; z-index: 1;">
+            <div class="flex flex-col gap-6">
+              <!-- Chart Container -->
+              <div class="w-full" style="overflow: visible; position: relative;">
+                <div style="height: 375px; overflow: visible; position: relative;">
+                  <BarChart 
+                    :data="logDistributionData" 
+                    :options="logDistributionBarOptions"
+                    :height="375"
+                  />
+                </div>
+              </div>
+              
+              <!-- Log Level Legend -->
+              <div class="w-full">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                  <div class="space-y-3">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-4 h-4 rounded-full bg-green-500 flex-shrink-0"></div>
+                      <div>
+                        <p class="text-xs text-gray-600">Normal operations, successful transactions</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="w-4 h-4 rounded-full bg-yellow-500 flex-shrink-0"></div>
+                      <div>
+                        <p class="text-xs text-gray-600">Performance issues, unusual patterns</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="w-4 h-4 rounded-full bg-red-500 flex-shrink-0"></div>
+                      <div>
+                        <p class="text-xs text-gray-600">Application errors, failed transactions</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="w-4 h-4 rounded-full bg-gray-500 flex-shrink-0"></div>
+                      <div>
+                        <p class="text-xs text-gray-600">Detailed diagnostic information</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="w-4 h-4 rounded-full bg-purple-500 flex-shrink-0"></div>
+                      <div>
+                        <p class="text-xs text-gray-600">Critical system failures, security breaches</p>
+                      </div>
+                    </div>
+                    <div class="pt-3 border-t border-gray-200">
+                      <div class="flex items-center space-x-3">
+                        <div class="w-4 h-4 rounded-full bg-blue-500 flex-shrink-0"></div>
+                        <div>
+                          <p class="text-xs text-gray-600">SPLUNK + SAP + Application logs</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -158,10 +231,56 @@
             <p class="text-sm text-gray-600 mt-1">Hierarchical view of system services with size indicating importance and color indicating health status for quick monitoring.</p>
           </div>
           <div class="card-body">
-            <TreeMapChart 
-              :data="serviceHealthData" 
-              :height="300"
-            />
+            <div class="flex flex-col gap-6">
+              <!-- TreeMap Container -->
+              <div class="w-full">
+                <TreeMapChart 
+                  :data="serviceHealthData" 
+                  :height="300"
+                  :options="{ plugins: { legend: { display: false } } }"
+                />
+              </div>
+              
+              <!-- Service Health Legend -->
+              <div class="w-full">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                  <div class="space-y-3">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-4 h-4 rounded-full bg-green-500 flex-shrink-0"></div>
+                      <div>
+                        <p class="text-xs text-gray-600">Healthy services, optimal performance</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="w-4 h-4 rounded-full bg-yellow-500 flex-shrink-0"></div>
+                      <div>
+                        <p class="text-xs text-gray-600">Warning state, performance degradation</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="w-4 h-4 rounded-full bg-red-500 flex-shrink-0"></div>
+                      <div>
+                        <p class="text-xs text-gray-600">Critical issues, service failures</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                      <div class="w-4 h-4 rounded-full bg-gray-500 flex-shrink-0"></div>
+                      <div>
+                        <p class="text-xs text-gray-600">Unknown status, monitoring unavailable</p>
+                      </div>
+                    </div>
+                    <div class="pt-3 border-t border-gray-200">
+                      <div class="flex items-center space-x-3">
+                        <div class="w-4 h-4 rounded-full bg-blue-500 flex-shrink-0"></div>
+                        <div>
+                          <p class="text-xs text-gray-600">Service size indicates importance/load</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -273,8 +392,8 @@ export default {
     const logDistributionData = ref({
       labels: ['INFO', 'WARN', 'ERROR', 'DEBUG', 'FATAL'],
       datasets: [{
-        label: 'Log Count',
-        data: [60, 25, 10, 4, 1],
+        label: 'Log Count (Last 24h)',
+        data: [15420, 3280, 1240, 890, 45],
         backgroundColor: [
           'rgba(34, 197, 94, 0.8)',   // Green for INFO
           'rgba(245, 158, 11, 0.8)',  // Yellow for WARN
@@ -572,25 +691,44 @@ export default {
       maintainAspectRatio: false,
       plugins: {
         title: {
-          display: true,
-          text: 'Log Level Distribution (Last 24 Hours)',
-          font: {
-            size: 16,
-            weight: 'bold'
-          }
+          display: false
         },
         legend: {
-          display: true,
-          position: 'top'
+          display: false
         },
         tooltip: {
+          enabled: true,
+          mode: 'index',
+          intersect: false,
+          position: 'nearest',
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          borderColor: 'rgba(255, 255, 255, 0.5)',
+          borderWidth: 2,
+          padding: 16,
+          displayColors: true,
+          cornerRadius: 8,
+          titleFont: {
+            size: 14,
+            weight: 'bold'
+          },
+          bodyFont: {
+            size: 13
+          },
           callbacks: {
+            title: function(context) {
+              return 'Log Level: ' + context[0].label
+            },
             label: function(context) {
-              const label = context.dataset.label || ''
               const value = context.parsed.y
               const total = context.dataset.data.reduce((a, b) => a + b, 0)
               const percentage = ((value / total) * 100).toFixed(1)
-              return `${label}: ${value} (${percentage}%)`
+              return [
+                `Count: ${value.toLocaleString()} logs`,
+                `Percentage: ${percentage}% of total`,
+                `Total 24h: ${total.toLocaleString()} logs`
+              ]
             }
           }
         }
@@ -601,32 +739,67 @@ export default {
             display: true,
             text: 'Log Level',
             font: {
-              size: 14,
+              size: 12,
               weight: 'bold'
             }
           },
           grid: {
             display: false
+          },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 0,
+            font: {
+              size: 10
+            },
+            padding: 10
           }
         },
         y: {
           beginAtZero: true,
+          min: 0,
+          max: 16000,
           title: {
             display: true,
-            text: 'Number of Logs',
+            text: 'Log Count (24h)',
             font: {
-              size: 14,
+              size: 12,
               weight: 'bold'
             }
           },
           grid: {
             color: 'rgba(0, 0, 0, 0.1)'
+          },
+          ticks: {
+            font: {
+              size: 11
+            },
+            stepSize: 2000,
+            callback: function(value) {
+              if (value >= 1000) {
+                return (value / 1000).toFixed(0) + 'k'
+              }
+              return value
+            }
           }
         }
       },
       animation: {
         duration: 1000,
         easing: 'easeInOutQuart'
+      },
+      layout: {
+        padding: {
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: 20
+        }
+      },
+      elements: {
+        bar: {
+          borderWidth: 1
+        }
       }
     })
 

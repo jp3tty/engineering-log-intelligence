@@ -126,7 +126,7 @@ export default {
     }
   },
   emits: ['update-widget'],
-  setup(props) {
+  setup(props, { emit }) {
     const logs = ref([])
     const loading = ref(false)
     const error = ref(null)
@@ -218,15 +218,30 @@ export default {
       error.value = null
       
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 600))
+        // Simulate API call with shorter timeout
+        await new Promise(resolve => setTimeout(resolve, 300))
         
         // Generate mock logs
-        logs.value = generateMockLogs()
+        const newLogs = generateMockLogs()
+        logs.value = newLogs
+        
+        // Emit update to parent (with error handling)
+        try {
+          emit('update-widget', props.widget.id, { 
+            data: newLogs,
+            lastUpdated: new Date()
+          })
+        } catch (emitError) {
+          console.warn('Failed to emit log update:', emitError)
+        }
         
       } catch (err) {
         error.value = 'Failed to fetch logs'
         console.error('Error fetching logs:', err)
+        
+        // Provide fallback data
+        const fallbackLogs = generateMockLogs()
+        logs.value = fallbackLogs
       } finally {
         loading.value = false
       }

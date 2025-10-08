@@ -126,7 +126,7 @@ export default {
     }
   },
   emits: ['update-widget'],
-  setup(props) {
+  setup(props, { emit }) {
     const alerts = ref([])
     const loading = ref(false)
     const error = ref(null)
@@ -226,15 +226,30 @@ export default {
       error.value = null
       
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800))
+        // Simulate API call with shorter timeout
+        await new Promise(resolve => setTimeout(resolve, 300))
         
         // Generate mock alerts
-        alerts.value = generateMockAlerts()
+        const newAlerts = generateMockAlerts()
+        alerts.value = newAlerts
+        
+        // Emit update to parent (with error handling)
+        try {
+          emit('update-widget', props.widget.id, { 
+            data: newAlerts,
+            lastUpdated: new Date()
+          })
+        } catch (emitError) {
+          console.warn('Failed to emit alert update:', emitError)
+        }
         
       } catch (err) {
         error.value = 'Failed to fetch alerts'
         console.error('Error fetching alerts:', err)
+        
+        // Provide fallback data
+        const fallbackAlerts = generateMockAlerts()
+        alerts.value = fallbackAlerts
       } finally {
         loading.value = false
       }
@@ -314,6 +329,7 @@ export default {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

@@ -200,7 +200,7 @@ export default {
       default: false
     }
   },
-  emits: ['update-widget', 'remove-widget', 'reorder-widgets', 'load-template'],
+    emits: ['update-widget', 'remove-widget', 'reorder-widgets', 'load-template', 'select-widget'],
   setup(props, { emit }) {
     const canvasRef = ref(null)
     const selectedWidgetId = ref(null)
@@ -261,6 +261,8 @@ export default {
 
     const selectWidget = (widget) => {
       selectedWidgetId.value = widget.id
+      // Emit to parent to open Widget Editor
+      emit('select-widget', widget)
     }
 
     const editWidget = (widget) => {
