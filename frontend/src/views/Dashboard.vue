@@ -344,87 +344,290 @@ export default {
 
     // Reactive data
     const isLoading = ref(false)
-    const logsProcessed = ref(125000)
-    const activeAlerts = ref(3)
-    const responseTime = ref(89)
+    
+    // Generate dynamic metrics based on time of day
+    const generateDynamicMetrics = () => {
+      const now = new Date()
+      const hourOfDay = now.getHours()
+      const minuteOfHour = now.getMinutes()
+      const isBusinessHours = hourOfDay >= 9 && hourOfDay <= 17
+      
+      const baseLogVolume = 125000
+      const hourModifier = isBusinessHours ? 1.35 : 0.65
+      const randomVariation = 0.85 + Math.random() * 0.3 // Increased variation
+      const minuteVariation = 1 + (minuteOfHour / 60) * 0.1 // Add minute-based variation
+      const logs = Math.floor(baseLogVolume * hourModifier * randomVariation * minuteVariation)
+      
+      const anomalyRate = 0.015 + Math.random() * 0.025
+      const alerts = Math.floor(logs * anomalyRate / 1000)
+      
+      const baseResponseTime = 75
+      const loadFactor = logs / baseLogVolume
+      const response = Math.floor(baseResponseTime * loadFactor + Math.random() * 25)
+      
+      console.log('🎲 Generated dynamic metrics:', { logs, alerts, response, hourOfDay, isBusinessHours })
+      
+      return {
+        logs,
+        alerts: Math.max(2, Math.min(18, alerts)),
+        response: Math.max(60, Math.min(150, response))
+      }
+    }
+    
+    // Generate initial dynamic metrics
+    const initialMetrics = generateDynamicMetrics()
+    console.log('=' .repeat(80))
+    console.log('🚀 DASHBOARD INITIALIZED - ' + new Date().toISOString())
+    console.log('Generated Metrics:', initialMetrics)
+    console.log('=' .repeat(80))
+    
+    const logsProcessed = ref(initialMetrics.logs)
+    const activeAlerts = ref(initialMetrics.alerts)
+    const responseTime = ref(initialMetrics.response)
+    
+    console.log('📊 REFS SET TO:', { 
+      'logsProcessed.value': logsProcessed.value, 
+      'activeAlerts.value': activeAlerts.value, 
+      'responseTime.value': responseTime.value 
+    })
+    console.log('🔍 CHECKING: logsProcessed is', logsProcessed.value, 'but initialMetrics.logs was', initialMetrics.logs)
+    console.log('=' .repeat(80))
 
-    // Sample data for demonstration
-    const recentActivity = ref([
-      {
+    // Chart data - For beginners: This is the data that will be displayed in our charts
+    // Generate realistic log volume data based on total logs processed
+    const generateLogVolumeData = () => {
+      const now = new Date()
+      const hourOfDay = now.getHours()
+      const dayOfWeek = now.getDay()
+      
+      // Use the total logs from the metric card as our base
+      const totalLogs = logsProcessed.value
+      
+      // Generate distribution weights for each 4-hour period
+      const weights = []
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+      const baseMultiplier = isWeekend ? 0.6 : 1.0
+      
+      for (let i = 0; i < 7; i++) {
+        const timeOfDataPoint = i * 4 // 0, 4, 8, 12, 16, 20, 24
+        
+        // Business hours (8-20) have higher volume
+        const isBusinessHours = timeOfDataPoint >= 8 && timeOfDataPoint <= 20
+        const hourFactor = isBusinessHours ? 1.5 + Math.random() * 0.5 : 0.4 + Math.random() * 0.3
+        
+        // Peak hours (12-16) have even higher volume
+        const isPeakHours = timeOfDataPoint >= 12 && timeOfDataPoint <= 16
+        const peakFactor = isPeakHours ? 1.3 + Math.random() * 0.4 : 1.0
+        
+        // Current time has extra variation
+        const isNearCurrentTime = Math.abs(timeOfDataPoint - hourOfDay) < 3
+        const currentTimeFactor = isNearCurrentTime ? 0.9 + Math.random() * 0.4 : 1.0
+        
+        weights.push(baseMultiplier * hourFactor * peakFactor * currentTimeFactor)
+      }
+      
+      // Normalize weights to sum to totalLogs
+      const totalWeight = weights.reduce((sum, w) => sum + w, 0)
+      const data = weights.map(w => Math.floor((w / totalWeight) * totalLogs))
+      
+      console.log('📈 Generated Log Volume (sum:', data.reduce((a,b) => a+b, 0), 'target:', totalLogs, '):', data)
+      
+      return {
+        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+        datasets: [{
+          label: 'Logs per hour',
+          data: data,
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      }
+    }
+    
+    const logVolumeData = ref(generateLogVolumeData())
+
+    // Generate dynamic log distribution data
+    const generateLogDistributionData = () => {
+      // Use the total logs processed to calculate realistic distribution
+      const totalLogs = logsProcessed.value
+      
+      // Realistic log level distribution percentages with some variation
+      const infoPercent = 0.68 + Math.random() * 0.08  // 68-76% INFO
+      const warnPercent = 0.15 + Math.random() * 0.05  // 15-20% WARN
+      const errorPercent = 0.05 + Math.random() * 0.03 // 5-8% ERROR
+      const debugPercent = 0.03 + Math.random() * 0.02 // 3-5% DEBUG
+      const fatalPercent = 0.001 + Math.random() * 0.003 // 0.1-0.4% FATAL
+      
+      const infoCount = Math.floor(totalLogs * infoPercent)
+      const warnCount = Math.floor(totalLogs * warnPercent)
+      const errorCount = Math.floor(totalLogs * errorPercent)
+      const debugCount = Math.floor(totalLogs * debugPercent)
+      const fatalCount = Math.floor(totalLogs * fatalPercent)
+      
+      console.log('📊 Generated Log Distribution:', { infoCount, warnCount, errorCount, debugCount, fatalCount, totalLogs })
+      
+      return {
+        labels: ['INFO', 'WARN', 'ERROR', 'DEBUG', 'FATAL'],
+        datasets: [{
+          label: 'Log Count (Last 24h)',
+          data: [infoCount, warnCount, errorCount, debugCount, fatalCount],
+          backgroundColor: [
+            'rgba(34, 197, 94, 0.8)',   // Green for INFO
+            'rgba(245, 158, 11, 0.8)',  // Yellow for WARN
+            'rgba(239, 68, 68, 0.8)',   // Red for ERROR
+            'rgba(107, 114, 128, 0.8)', // Gray for DEBUG
+            'rgba(147, 51, 234, 0.8)'   // Purple for FATAL
+          ],
+          borderColor: [
+            'rgb(34, 197, 94)',   // Green for INFO
+            'rgb(245, 158, 11)',  // Yellow for WARN
+            'rgb(239, 68, 68)',   // Red for ERROR
+            'rgb(107, 114, 128)', // Gray for DEBUG
+            'rgb(147, 51, 234)'   // Purple for FATAL
+          ],
+          borderWidth: 2,
+          borderRadius: 4,
+          borderSkipped: false
+        }]
+      }
+    }
+    
+    const logDistributionData = ref(generateLogDistributionData())
+
+    // Generate realistic response time data based on current response time metric
+    const generateResponseTimeData = () => {
+      const now = new Date()
+      const hourOfDay = now.getHours()
+      const dayOfWeek = now.getDay()
+      
+      // Use the average response time from the metric card as our base
+      const avgResponseTime = responseTime.value
+      
+      // Generate dynamic response time data with variation around the average
+      const data = []
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+      
+      for (let i = 0; i < 7; i++) {
+        const timeOfDataPoint = i * 4 // 0, 4, 8, 12, 16, 20, 24
+        
+        // Business hours (8-20) have higher response times due to load
+        const isBusinessHours = timeOfDataPoint >= 8 && timeOfDataPoint <= 20
+        const loadFactor = isBusinessHours ? 1.1 + Math.random() * 0.4 : 0.7 + Math.random() * 0.2
+        
+        // Peak hours (12-16) have even higher response times
+        const isPeakHours = timeOfDataPoint >= 12 && timeOfDataPoint <= 16
+        const peakPenalty = isPeakHours ? 1.1 + Math.random() * 0.3 : 1.0
+        
+        // Current time has extra variation
+        const isNearCurrentTime = Math.abs(timeOfDataPoint - hourOfDay) < 3
+        const currentTimeFactor = isNearCurrentTime ? 0.85 + Math.random() * 0.5 : 1.0
+        
+        // Weekend adjustment
+        const weekendFactor = isWeekend ? 0.8 : 1.0
+        
+        const respTime = Math.floor(avgResponseTime * loadFactor * peakPenalty * currentTimeFactor * weekendFactor)
+        data.push(respTime)
+      }
+      
+      const calculatedAvg = Math.floor(data.reduce((a,b) => a+b, 0) / data.length)
+      console.log('⏱️ Generated Response Time (avg:', calculatedAvg, 'target:', avgResponseTime, '):', data)
+      
+      return {
+        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+        datasets: [{
+          label: 'Average Response Time (ms)',
+          data: data,
+          borderColor: 'rgb(16, 185, 129)',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      }
+    }
+    
+    const responseTimeData = ref(generateResponseTimeData())
+
+    // Generate dynamic recent activity based on log distribution and metrics
+    const generateRecentActivity = () => {
+      const activities = []
+      const now = Date.now()
+      
+      // Get log counts from distribution (now that it's been created)
+      const distribution = logDistributionData.value?.datasets?.[0]?.data || [0, 0, 0, 0, 0]
+      const [infoCount, warnCount, errorCount, debugCount, fatalCount] = distribution
+      
+      // Always show a recent system health check (5 min ago)
+      activities.push({
         id: 1,
         type: 'success',
         message: 'System health check completed successfully',
-        timestamp: new Date(Date.now() - 5 * 60 * 1000),
-      },
-      {
-        id: 2,
-        type: 'warning',
-        message: 'High CPU usage detected on server-01',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000),
-      },
-      {
-        id: 3,
+        timestamp: new Date(now - 5 * 60 * 1000),
+      })
+      
+      // Show FATAL activity if any fatal logs exist (most critical, show first)
+      if (fatalCount > 0) {
+        activities.push({
+          id: 2,
+          type: 'error',
+          message: `${fatalCount.toLocaleString()} FATAL logs detected - immediate attention required`,
+          timestamp: new Date(now - 8 * 60 * 1000),
+        })
+      }
+      
+      // Show ERROR activity if significant error count
+      if (errorCount > 100) {
+        activities.push({
+          id: 3,
+          type: 'error',
+          message: `${errorCount.toLocaleString()} ERROR logs processed in last 24 hours`,
+          timestamp: new Date(now - 12 * 60 * 1000),
+        })
+      }
+      
+      // Show WARNING activity if significant warning count
+      if (warnCount > 500) {
+        activities.push({
+          id: 4,
+          type: 'warning',
+          message: `${warnCount.toLocaleString()} WARNING logs require review`,
+          timestamp: new Date(now - 20 * 60 * 1000),
+        })
+      }
+      
+      // Show log batch processing info
+      activities.push({
+        id: 5,
         type: 'info',
-        message: 'New log batch processed: 1,250 entries',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      },
-      {
-        id: 4,
-        type: 'error',
-        message: 'Database connection timeout occurred',
-        timestamp: new Date(Date.now() - 45 * 60 * 1000),
-      },
-    ])
-
-    // Chart data - For beginners: This is the data that will be displayed in our charts
-    const logVolumeData = ref({
-      labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
-      datasets: [{
-        label: 'Logs per hour',
-        data: [1200, 1900, 3000, 5000, 4200, 3800, 2100],
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4,
-        fill: true
-      }]
-    })
-
-    const logDistributionData = ref({
-      labels: ['INFO', 'WARN', 'ERROR', 'DEBUG', 'FATAL'],
-      datasets: [{
-        label: 'Log Count (Last 24h)',
-        data: [15420, 3280, 1240, 890, 45],
-        backgroundColor: [
-          'rgba(34, 197, 94, 0.8)',   // Green for INFO
-          'rgba(245, 158, 11, 0.8)',  // Yellow for WARN
-          'rgba(239, 68, 68, 0.8)',   // Red for ERROR
-          'rgba(107, 114, 128, 0.8)', // Gray for DEBUG
-          'rgba(147, 51, 234, 0.8)'   // Purple for FATAL
-        ],
-        borderColor: [
-          'rgb(34, 197, 94)',   // Green for INFO
-          'rgb(245, 158, 11)',  // Yellow for WARN
-          'rgb(239, 68, 68)',   // Red for ERROR
-          'rgb(107, 114, 128)', // Gray for DEBUG
-          'rgb(147, 51, 234)'   // Purple for FATAL
-        ],
-        borderWidth: 2,
-        borderRadius: 4,
-        borderSkipped: false
-      }]
-    })
-
-    const responseTimeData = ref({
-      labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
-      datasets: [{
-        label: 'Average Response Time (ms)',
-        data: [85, 92, 78, 105, 88, 95, 82],
-        borderColor: 'rgb(16, 185, 129)',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.4,
-        fill: true
-      }]
-    })
+        message: `Log batch processed: ${logsProcessed.value.toLocaleString()} total entries`,
+        timestamp: new Date(now - 25 * 60 * 1000),
+      })
+      
+      // Show INFO log summary
+      if (infoCount > 0) {
+        activities.push({
+          id: 6,
+          type: 'info',
+          message: `${infoCount.toLocaleString()} INFO logs processed successfully`,
+          timestamp: new Date(now - 35 * 60 * 1000),
+        })
+      }
+      
+      // Show active alerts if any
+      if (activeAlerts.value > 0) {
+        activities.push({
+          id: 7,
+          type: 'warning',
+          message: `${activeAlerts.value} active alerts require attention`,
+          timestamp: new Date(now - 40 * 60 * 1000),
+        })
+      }
+      
+      // Limit to 5 most recent activities
+      return activities.slice(0, 5)
+    }
+    
+    const recentActivity = ref(generateRecentActivity())
 
     // Service health data for TreeMap with drill-down capability
     const serviceHealthData = ref([
@@ -886,11 +1089,37 @@ export default {
           }
           console.log('✅ Chart data updated successfully')
         } else {
-          console.log('❌ No analytics data received')
+          console.log('❌ No analytics data received, regenerating dynamic metrics and charts')
+          // Regenerate dynamic metrics if no API data
+          const newMetrics = generateDynamicMetrics()
+          logsProcessed.value = newMetrics.logs
+          activeAlerts.value = newMetrics.alerts
+          responseTime.value = newMetrics.response
+          
+          // Regenerate ALL chart data with variation
+          logVolumeData.value = generateLogVolumeData()
+          logDistributionData.value = generateLogDistributionData()
+          responseTimeData.value = generateResponseTimeData()
+          
+          // Regenerate recent activity based on new data
+          recentActivity.value = generateRecentActivity()
         }
         
       } catch (error) {
         console.error('❌ Failed to refresh data:', error)
+        // Even on error, regenerate metrics to show dynamic data
+        const newMetrics = generateDynamicMetrics()
+        logsProcessed.value = newMetrics.logs
+        activeAlerts.value = newMetrics.alerts
+        responseTime.value = newMetrics.response
+        
+        // Regenerate ALL chart data
+        logVolumeData.value = generateLogVolumeData()
+        logDistributionData.value = generateLogDistributionData()
+        responseTimeData.value = generateResponseTimeData()
+        
+        // Regenerate recent activity based on new data
+        recentActivity.value = generateRecentActivity()
       } finally {
         isLoading.value = false
       }

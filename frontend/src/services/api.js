@@ -19,16 +19,40 @@ const api = {
       const action = config.params?.action
       
       if (action === 'overview') {
+        // Generate dynamic overview data
+        const now = new Date()
+        const hourOfDay = now.getHours()
+        const minuteOfHour = now.getMinutes()
+        const isBusinessHours = hourOfDay >= 9 && hourOfDay <= 17
+        
+        const baseLogVolume = 125000
+        const hourModifier = isBusinessHours ? 1.35 : 0.65
+        const randomVariation = 0.85 + Math.random() * 0.3
+        const minuteVariation = 1 + (minuteOfHour / 60) * 0.1
+        const total_logs = Math.floor(baseLogVolume * hourModifier * randomVariation * minuteVariation)
+        
+        const anomalyRate = 0.015 + Math.random() * 0.025
+        const anomalies_detected = Math.floor(total_logs * anomalyRate)
+        
+        const baseResponseTime = 75
+        const loadFactor = total_logs / baseLogVolume
+        const avg_response_time = Math.max(60, Math.min(150, Math.floor(baseResponseTime * loadFactor + Math.random() * 25)))
+        
+        const healthBase = 98 - (anomalies_detected / total_logs) * 100
+        const system_health = Math.max(85, Math.min(99, healthBase))
+        
+        console.log('📊 Mock API Generated Overview:', { total_logs, anomalies_detected, avg_response_time, system_health, hourOfDay, isBusinessHours })
+        
         return {
           data: {
-            total_logs: 125000,
-            anomalies_detected: 23,
-            avg_response_time: 89,
-            system_health: 94.5,
-            logs_trend: 12.5,
-            anomalies_trend: -8.2,
-            response_trend: -5.1,
-            health_trend: 2.3
+            total_logs: total_logs,
+            anomalies_detected: anomalies_detected,
+            avg_response_time: avg_response_time,
+            system_health: parseFloat(system_health.toFixed(1)),
+            logs_trend: -2 + Math.random() * 20,
+            anomalies_trend: -15 + Math.random() * 20,
+            response_trend: -10 + Math.random() * 15,
+            health_trend: -5 + Math.random() * 8
           }
         }
       }

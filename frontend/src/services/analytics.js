@@ -58,14 +58,70 @@ export const fetchDashboardAnalytics = async () => {
  * It's useful for development and testing.
  */
 const getMockAnalyticsData = () => {
-  console.log('Using mock analytics data')
+  console.log('Using mock analytics data with dynamic metrics')
+  
+  // Generate dynamic metrics based on time
+  const now = new Date()
+  const hourOfDay = now.getHours()
+  const minuteOfHour = now.getMinutes()
+  const isBusinessHours = hourOfDay >= 9 && hourOfDay <= 17
+  
+  const baseLogVolume = 125000
+  const hourModifier = isBusinessHours ? 1.35 : 0.65
+  const randomVariation = 0.85 + Math.random() * 0.3
+  const minuteVariation = 1 + (minuteOfHour / 60) * 0.1
+  const logsProcessed = Math.floor(baseLogVolume * hourModifier * randomVariation * minuteVariation)
+  
+  const anomalyRate = 0.015 + Math.random() * 0.025
+  const activeAlerts = Math.max(2, Math.min(18, Math.floor(logsProcessed * anomalyRate / 1000)))
+  
+  const baseResponseTime = 75
+  const loadFactor = logsProcessed / baseLogVolume
+  const responseTime = Math.max(60, Math.min(150, Math.floor(baseResponseTime * loadFactor + Math.random() * 25)))
+  
+  console.log('📊 Mock Analytics Generated:', { logsProcessed, activeAlerts, responseTime, hourOfDay, isBusinessHours })
+  
+  // Calculate dynamic log distribution based on total logs
+  const infoPercent = 0.68 + Math.random() * 0.08  // 68-76% INFO
+  const warnPercent = 0.15 + Math.random() * 0.05  // 15-20% WARN
+  const errorPercent = 0.05 + Math.random() * 0.03 // 5-8% ERROR
+  const debugPercent = 0.03 + Math.random() * 0.02 // 3-5% DEBUG
+  const fatalPercent = 0.001 + Math.random() * 0.003 // 0.1-0.4% FATAL
+  
+  const infoCount = Math.floor(logsProcessed * infoPercent)
+  const warnCount = Math.floor(logsProcessed * warnPercent)
+  const errorCount = Math.floor(logsProcessed * errorPercent)
+  const debugCount = Math.floor(logsProcessed * debugPercent)
+  const fatalCount = Math.floor(logsProcessed * fatalPercent)
+  
+  // Generate dynamic log volume data based on total logs
+  const dayOfWeek = now.getDay()
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+  const baseMultiplier = isWeekend ? 0.6 : 1.0
+  
+  // Generate distribution weights
+  const weights = []
+  for (let i = 0; i < 7; i++) {
+    const timeOfDataPoint = i * 4
+    const isBusinessHours = timeOfDataPoint >= 8 && timeOfDataPoint <= 20
+    const hourFactor = isBusinessHours ? 1.5 + Math.random() * 0.5 : 0.4 + Math.random() * 0.3
+    const isPeakHours = timeOfDataPoint >= 12 && timeOfDataPoint <= 16
+    const peakFactor = isPeakHours ? 1.3 + Math.random() * 0.4 : 1.0
+    const isNearCurrentTime = Math.abs(timeOfDataPoint - hourOfDay) < 3
+    const currentTimeFactor = isNearCurrentTime ? 0.9 + Math.random() * 0.4 : 1.0
+    weights.push(baseMultiplier * hourFactor * peakFactor * currentTimeFactor)
+  }
+  
+  // Normalize weights to sum to logsProcessed
+  const totalWeight = weights.reduce((sum, w) => sum + w, 0)
+  const logVolumeData = weights.map(w => Math.floor((w / totalWeight) * logsProcessed))
   
   return {
     logVolume: {
       labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
       datasets: [{
         label: 'Logs per hour',
-        data: [1200, 1900, 3000, 5000, 4200, 3800, 2100],
+        data: logVolumeData,
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         tension: 0.4,
@@ -75,8 +131,16 @@ const getMockAnalyticsData = () => {
     logDistribution: {
       labels: ['INFO', 'WARN', 'ERROR', 'DEBUG', 'FATAL'],
       datasets: [{
-        data: [60, 25, 10, 4, 1],
+        label: 'Log Count (Last 24h)',
+        data: [infoCount, warnCount, errorCount, debugCount, fatalCount],
         backgroundColor: [
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(245, 158, 11, 0.8)',
+          'rgba(239, 68, 68, 0.8)',
+          'rgba(107, 114, 128, 0.8)',
+          'rgba(147, 51, 234, 0.8)'
+        ],
+        borderColor: [
           'rgb(34, 197, 94)',
           'rgb(245, 158, 11)',
           'rgb(239, 68, 68)',
@@ -84,14 +148,33 @@ const getMockAnalyticsData = () => {
           'rgb(147, 51, 234)'
         ],
         borderWidth: 2,
-        borderColor: '#ffffff'
+        borderRadius: 4,
+        borderSkipped: false
       }]
     },
     responseTime: {
       labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
       datasets: [{
         label: 'Average Response Time (ms)',
-        data: [85, 92, 78, 105, 88, 95, 82],
+        data: (() => {
+          // Generate dynamic response time data based on average response time
+          const responseTimeData = []
+          
+          for (let i = 0; i < 7; i++) {
+            const timeOfDataPoint = i * 4
+            const isBusinessHours = timeOfDataPoint >= 8 && timeOfDataPoint <= 20
+            const loadFactor = isBusinessHours ? 1.1 + Math.random() * 0.4 : 0.7 + Math.random() * 0.2
+            const isPeakHours = timeOfDataPoint >= 12 && timeOfDataPoint <= 16
+            const peakPenalty = isPeakHours ? 1.1 + Math.random() * 0.3 : 1.0
+            const isNearCurrentTime = Math.abs(timeOfDataPoint - hourOfDay) < 3
+            const currentTimeFactor = isNearCurrentTime ? 0.85 + Math.random() * 0.5 : 1.0
+            const weekendFactor = isWeekend ? 0.8 : 1.0
+            const respTime = Math.floor(responseTime * loadFactor * peakPenalty * currentTimeFactor * weekendFactor)
+            responseTimeData.push(respTime)
+          }
+          
+          return responseTimeData
+        })(),
         borderColor: 'rgb(16, 185, 129)',
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
         tension: 0.4,
@@ -121,9 +204,9 @@ const getMockAnalyticsData = () => {
       }]
     },
     systemMetrics: {
-      logsProcessed: 125000,
-      activeAlerts: 3,
-      responseTime: 89,
+      logsProcessed: logsProcessed,
+      activeAlerts: activeAlerts,
+      responseTime: responseTime,
       systemHealth: 'Healthy',
       uptime: '99.9%',
       cpuUsage: 45,
