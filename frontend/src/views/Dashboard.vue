@@ -232,13 +232,10 @@
           </div>
           <div class="card-body">
             <div class="flex flex-col gap-6">
-              <!-- TreeMap Container -->
-              <div class="w-full">
-                <TreeMapChart 
-                  :data="serviceHealthData" 
-                  :height="300"
-                  :options="{ plugins: { legend: { display: false } } }"
-                />
+              <!-- TreeMap Container - Temporarily Disabled -->
+              <div class="w-full text-center py-8 text-gray-500">
+                <p>Service Health TreeMap visualization coming soon</p>
+                <!-- TreeMapChart removed temporarily -->
               </div>
               
               <!-- Service Health Legend -->
@@ -328,7 +325,7 @@
 
 import { ref, computed, onMounted } from 'vue'
 import { useSystemStore } from '@/stores/system'
-import { LineChart, BarChart, PieChart, TreeMapChart } from '@/components/charts'
+import { LineChart, BarChart, PieChart } from '@/components/charts'
 import { fetchDashboardAnalytics } from '@/services/analytics'
 
 export default {
@@ -336,8 +333,7 @@ export default {
   components: {
     LineChart,
     BarChart,
-    PieChart,
-    TreeMapChart
+    PieChart
   },
   setup() {
     const systemStore = useSystemStore()
