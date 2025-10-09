@@ -104,3 +104,4 @@ external-services/*.pem
 dmypy.json
 railway_aws.txt
 *.txt
+.env*.local

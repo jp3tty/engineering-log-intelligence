@@ -18,7 +18,7 @@ import axios from 'axios'
 // For beginners: This creates an axios instance with default settings
 // It's like having a pre-configured HTTP client
 const analyticsAPI = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: '/api',  // Use Vercel's built-in API routing
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
