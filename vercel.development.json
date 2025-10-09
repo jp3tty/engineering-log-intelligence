@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "name": "engineering-log-intelligence-dev",
+  "builds": [
+    {
+      "src": "api/**/*.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    }
+  ],
+  "env": {
+    "PYTHONPATH": ".",
+    "ENVIRONMENT": "development",
+    "DEBUG": "true",
+    "LOG_LEVEL": "DEBUG"
+  },
+  "functions": {
+    "api/**/*.py": {
+      "runtime": "python3.9"
+    }
+  },
+  "regions": ["iad1"],
+  "devCommand": "vercel dev --listen 3000"
+}
