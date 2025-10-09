@@ -4,6 +4,8 @@
 
 The Engineering Log Intelligence System provides a comprehensive set of Vercel Functions for log management, user authentication, and system administration. All functions are designed for serverless deployment on Vercel with proper error handling, rate limiting, and security.
 
+**Recent Update (October 3, 2025):** Analytics endpoints have been consolidated into a single `/api/analytics` endpoint to optimize Vercel function usage and improve maintainability.
+
 ## Base URL
 
 ```
@@ -617,6 +619,242 @@ Check system health.
     },
     "version": "1.1.0"
   }
+}
+```
+
+### Analytics (Consolidated)
+
+#### GET /api/analytics
+Get analytics overview and service information.
+
+**Query Parameters:**
+- `type` (optional): `insights`, `performance`, `reports`, `dashboard` (default: overview)
+- `action` (optional): Action to perform based on type
+
+**Response (Overview):**
+```json
+{
+  "service": "Analytics API - Consolidated",
+  "version": "2.0.0",
+  "available_types": ["insights", "performance", "reports", "dashboard"],
+  "endpoints": {
+    "insights": "GET /api/analytics?type=insights&action=overview",
+    "performance": "GET /api/analytics?type=performance&action=metrics",
+    "reports": "GET /api/analytics?type=reports",
+    "dashboard": "GET /api/analytics?type=dashboard"
+  },
+  "timestamp": "2025-10-03T10:30:00Z"
+}
+```
+
+#### GET /api/analytics?type=insights
+Get AI-powered insights and analytics data.
+
+**Query Parameters:**
+- `action`: `overview`, `insights`
+
+**Response (Insights Overview):**
+```json
+{
+  "total_logs": 125000,
+  "anomalies_detected": 23,
+  "avg_response_time": 95,
+  "system_health": 94.5,
+  "logs_trend": 12.3,
+  "anomalies_trend": -8.2,
+  "response_trend": -5.1,
+  "health_trend": 3.2,
+  "timestamp": "2025-10-03T10:30:00Z"
+}
+```
+
+**Response (AI Insights):**
+```json
+{
+  "insights": [
+    {
+      "id": 1,
+      "title": "Performance Optimization Opportunity",
+      "description": "Database queries are taking 15% longer than usual.",
+      "severity": "medium",
+      "category": "performance",
+      "confidence": 0.87,
+      "recommendations": [
+        "Review slow query logs",
+        "Consider adding database indexes"
+      ],
+      "timestamp": "2025-10-03T10:30:00Z"
+    }
+  ],
+  "total_insights": 3,
+  "generated_at": "2025-10-03T10:30:00Z"
+}
+```
+
+#### GET /api/analytics?type=performance
+Get performance analytics and forecasting data.
+
+**Query Parameters:**
+- `action`: `metrics`, `forecasts`
+- `time_range`: `1h`, `6h`, `24h`, `7d`, `30d` (default: `7d`)
+
+**Response (Performance Metrics):**
+```json
+{
+  "time_range": "7d",
+  "time_series": ["2025-10-03T10:00:00Z", "..."],
+  "cpu_usage": {
+    "data": [45.2, 48.1, 52.3],
+    "avg": 48.5,
+    "max": 78.2,
+    "min": 23.1,
+    "trend": 2.3
+  },
+  "memory_usage": {
+    "data": [65.1, 67.8, 69.2],
+    "avg": 67.4,
+    "max": 85.1,
+    "min": 45.3,
+    "trend": 1.8
+  },
+  "response_times": {
+    "data": [95.2, 98.1, 102.3],
+    "avg": 98.5,
+    "max": 185.2,
+    "min": 45.1,
+    "trend": -3.2
+  },
+  "throughput": {
+    "data": [850, 920, 780],
+    "avg": 850,
+    "max": 1200,
+    "min": 450,
+    "trend": 12.5
+  },
+  "alerts": [
+    {
+      "type": "warning",
+      "message": "CPU usage exceeded 80% for 15 minutes",
+      "timestamp": "2025-10-03T08:30:00Z",
+      "severity": "medium"
+    }
+  ],
+  "generated_at": "2025-10-03T10:30:00Z"
+}
+```
+
+#### GET /api/analytics?type=reports
+Get report templates and generated reports.
+
+**Response:**
+```json
+{
+  "templates": [
+    {
+      "id": "system_overview",
+      "name": "System Overview Report",
+      "description": "Comprehensive system health and performance overview",
+      "category": "system",
+      "frequency": ["daily", "weekly", "monthly"],
+      "sections": [
+        "System Health Metrics",
+        "Performance Trends",
+        "Error Analysis"
+      ]
+    }
+  ],
+  "generated_reports": [
+    {
+      "id": "uuid",
+      "template_id": "system_overview",
+      "name": "System Overview Report - Oct 1, 2025",
+      "status": "completed",
+      "generated_at": "2025-10-01T08:30:00Z",
+      "file_size": "2.3 MB",
+      "format": "PDF",
+      "download_url": "/api/reports/download/uuid"
+    }
+  ],
+  "total_templates": 4,
+  "total_reports": 3,
+  "generated_at": "2025-10-03T10:30:00Z"
+}
+```
+
+#### POST /api/analytics?type=reports
+Generate or schedule reports.
+
+**Request Body (Generate Report):**
+```json
+{
+  "action": "generate",
+  "template_id": "system_overview",
+  "options": {
+    "format": "PDF",
+    "include_charts": true
+  }
+}
+```
+
+**Request Body (Schedule Report):**
+```json
+{
+  "action": "schedule",
+  "template_id": "security_audit",
+  "schedule": {
+    "frequency": "weekly",
+    "options": {
+      "format": "Excel",
+      "recipients": ["admin@company.com"]
+    }
+  }
+}
+```
+
+#### GET /api/analytics?type=dashboard
+Get dashboard analytics data for visualization.
+
+**Response:**
+```json
+{
+  "logVolume": {
+    "labels": ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"],
+    "datasets": [{
+      "label": "Logs per hour",
+      "data": [1200, 1900, 3000, 5000, 4200, 3800, 2100],
+      "borderColor": "rgb(59, 130, 246)",
+      "backgroundColor": "rgba(59, 130, 246, 0.1)",
+      "tension": 0.4,
+      "fill": true
+    }]
+  },
+  "logDistribution": {
+    "labels": ["INFO", "WARN", "ERROR", "DEBUG", "FATAL"],
+    "datasets": [{
+      "data": [60, 25, 10, 4, 1],
+      "backgroundColor": [
+        "rgb(34, 197, 94)",
+        "rgb(245, 158, 11)",
+        "rgb(239, 68, 68)",
+        "rgb(107, 114, 128)",
+        "rgb(147, 51, 234)"
+      ],
+      "borderWidth": 2,
+      "borderColor": "#ffffff"
+    }]
+  },
+  "responseTime": {
+    "labels": ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"],
+    "datasets": [{
+      "label": "Average Response Time (ms)",
+      "data": [85, 92, 78, 105, 88, 95, 82],
+      "borderColor": "rgb(16, 185, 129)",
+      "backgroundColor": "rgba(16, 185, 129, 0.1)",
+      "tension": 0.4,
+      "fill": true
+    }]
+  },
+  "timestamp": "2025-10-03T10:30:00Z"
 }
 ```
 

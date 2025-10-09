@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="section-header">
       <h2 class="section-title">
-        <ChartLineIcon class="w-6 h-6 text-purple-500" />
+        <ChartBarIcon class="w-6 h-6 text-purple-500" />
         Performance Analytics
       </h2>
       <button
@@ -223,7 +223,7 @@
 
     <!-- Empty State -->
     <div v-if="!metrics && !loading" class="empty-state">
-      <ChartLineIcon class="w-12 h-12 text-gray-400 mx-auto mb-4" />
+      <ChartBarIcon class="w-12 h-12 text-gray-400 mx-auto mb-4" />
       <h3 class="empty-title">No Performance Data Available</h3>
       <p class="empty-description">
         Performance metrics will appear here once data is collected.
@@ -238,10 +238,9 @@
 <script>
 import { ref, onMounted, nextTick } from 'vue'
 import {
-  ChartLineIcon,
+  ChartBarIcon,
   ArrowPathIcon,
   ClockIcon,
-  ChartBarIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   ArrowUpIcon,

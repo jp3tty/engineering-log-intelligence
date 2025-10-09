@@ -65,6 +65,8 @@
           @update-widget="updateWidget"
           @remove-widget="removeWidget"
           @reorder-widgets="reorderWidgets"
+          @load-template="loadTemplate"
+          @select-widget="selectWidget"
         />
       </div>
 
@@ -140,9 +142,21 @@ export default {
     const updateWidget = (widgetId, updates) => {
       const index = dashboard.widgets.findIndex(w => w.id === widgetId)
       if (index !== -1) {
+        // Update existing widget
         Object.assign(dashboard.widgets[index], updates)
         dashboard.widgets[index].lastUpdated = new Date()
+      } else {
+        // Add new widget if it doesn't exist
+        dashboard.widgets.push({
+          ...updates,
+          id: widgetId,
+          lastUpdated: new Date()
+        })
       }
+    }
+
+    const selectWidget = (widget) => {
+      selectedWidget.value = widget
     }
 
     const removeWidget = (widgetId) => {
@@ -159,8 +173,10 @@ export default {
       dashboard.widgets = newOrder
     }
 
-    const loadTemplate = () => {
-      if (!selectedTemplate.value) return
+    const loadTemplate = (templateName) => {
+      // If called with a parameter, use it; otherwise use selectedTemplate.value
+      const templateToLoad = templateName || selectedTemplate.value
+      if (!templateToLoad) return
       
       const templates = {
         'system-overview': {
@@ -200,18 +216,40 @@ export default {
         }
       }
       
-      const template = templates[selectedTemplate.value]
+      const template = templates[templateToLoad]
       if (template) {
-        dashboard.widgets = template.widgets.map((widget, index) => ({
-          id: `widget-${Date.now()}-${index}`,
-          type: widget.type,
-          title: widget.title,
-          position: { x: 0, y: 0 },
-          size: widget.size,
-          config: getDefaultWidgetConfig(widget.type),
-          data: null,
-          lastUpdated: new Date()
-        }))
+        // Update selectedTemplate if called with parameter
+        if (templateName) {
+          selectedTemplate.value = templateName
+        }
+        // Calculate positions to avoid overlap
+        let currentX = 0
+        let currentY = 0
+        const maxWidth = 12 // Grid width
+        const cellSize = 20 // Grid cell size
+        
+        dashboard.widgets = template.widgets.map((widget, index) => {
+          // Calculate position based on widget size and previous widgets
+          const position = { x: currentX, y: currentY }
+          
+          // Move to next position
+          currentX += widget.size.width
+          if (currentX >= maxWidth) {
+            currentX = 0
+            currentY += Math.max(...template.widgets.slice(0, index + 1).map(w => w.size.height))
+          }
+          
+          return {
+            id: `widget-${Date.now()}-${index}`,
+            type: widget.type,
+            title: widget.title,
+            position: position,
+            size: widget.size,
+            config: getDefaultWidgetConfig(widget.type),
+            data: null,
+            lastUpdated: new Date()
+          }
+        })
       }
     }
 
@@ -277,6 +315,7 @@ export default {
       dashboard,
       addWidget,
       updateWidget,
+      selectWidget,
       removeWidget,
       reorderWidgets,
       loadTemplate,

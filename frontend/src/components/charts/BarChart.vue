@@ -20,7 +20,7 @@
             <text
               v-for="(label, index) in yAxisLabels"
               :key="index"
-              :x="-10"
+              :x="-15"
               :y="yScale(label)"
               text-anchor="end"
               dominant-baseline="middle"
@@ -44,6 +44,35 @@
             </text>
           </g>
           
+          <!-- Y-axis title background -->
+          <rect x="-75" y="80" width="30" height="140" fill="white" stroke="#e5e7eb" stroke-width="1" rx="4"/>
+          
+          <!-- Y-axis title -->
+          <text
+            x="20"
+            y="70"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            class="axis-title"
+            transform="rotate(-90, 20, 150)"
+          >
+            {{ yAxisTitle }}
+          </text>
+          
+          <!-- X-axis title background -->
+          <rect x="130" y="300" width="120" height="30" fill="white" stroke="#e5e7eb" stroke-width="1" rx="4"/>
+
+          <!-- X-axis title -->
+          <text
+            x="190"
+            y="318"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            class="axis-title"
+          >
+            {{ xAxisTitle }}
+          </text>
+          
           <!-- Bars -->
           <g v-for="(dataset, datasetIndex) in chartData" :key="datasetIndex">
             <rect
@@ -57,16 +86,33 @@
               :stroke="'#ffffff'"
               :stroke-width="1"
               class="bar"
-              @mouseenter="highlightBar(index)"
-              @mouseleave="unhighlightBar(index)"
+              @mouseenter="showTooltip($event, index, value, dataset)"
+              @mouseleave="hideTooltip"
+              @mousemove="updateTooltipPosition($event)"
             />
           </g>
         </g>
       </svg>
+      
+      <!-- Tooltip -->
+      <div 
+        v-if="tooltip.visible" 
+        class="chart-tooltip"
+        :style="{
+          left: tooltip.x + 'px',
+          top: tooltip.y + 'px'
+        }"
+      >
+        <div class="tooltip-title">{{ tooltip.title }}</div>
+        <div class="tooltip-content">
+          <div v-for="(line, idx) in tooltip.lines" :key="idx" class="tooltip-line">
+            {{ line }}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
-
 <script>
 import { ref, computed, watch } from 'vue'
 
@@ -87,9 +133,18 @@ export default {
     }
   },
   setup(props) {
-    const chartWidth = ref(400)
-    const chartHeight = ref(300)
-    const padding = ref({ top: 20, right: 20, bottom: 40, left: 60 })
+    const chartWidth = ref(500)
+    const chartHeight = ref(350)
+    const padding = ref({ top: 20, right: 20, bottom: 60, left: 100 })
+    
+    // Tooltip state
+    const tooltip = ref({
+      visible: false,
+      x: 0,
+      y: 0,
+      title: '',
+      lines: []
+    })
 
     // Chart data processing
     const chartData = computed(() => {
@@ -104,6 +159,15 @@ export default {
 
     const xAxisLabels = computed(() => {
       return props.data?.labels || []
+    })
+
+    // Axis titles from options
+    const xAxisTitle = computed(() => {
+      return props.options?.scales?.x?.title?.text || 'X Axis'
+    })
+
+    const yAxisTitle = computed(() => {
+      return props.options?.scales?.y?.title?.text || 'Y Axis'
     })
 
     // Calculate Y-axis range and labels
@@ -148,13 +212,34 @@ export default {
       return chartAreaHeight.value - ((value - min) / (max - min)) * chartAreaHeight.value
     }
 
-    // Highlight functions
-    const highlightBar = (index) => {
-      // Could add highlighting logic here
+    // Tooltip functions
+    const showTooltip = (event, index, value, dataset) => {
+      const label = xAxisLabels.value[index]
+      const total = dataset.data.reduce((a, b) => a + b, 0)
+      const percentage = ((value / total) * 100).toFixed(1)
+      
+      tooltip.value = {
+        visible: true,
+        x: event.clientX + 15,
+        y: event.clientY - 60,
+        title: `Log Level: ${label}`,
+        lines: [
+          `Count: ${value.toLocaleString()} logs`,
+          `Percentage: ${percentage}% of total`,
+          `Total 24h: ${total.toLocaleString()} logs`
+        ]
+      }
     }
-
-    const unhighlightBar = (index) => {
-      // Could add unhighlighting logic here
+    
+    const hideTooltip = () => {
+      tooltip.value.visible = false
+    }
+    
+    const updateTooltipPosition = (event) => {
+      if (tooltip.value.visible) {
+        tooltip.value.x = event.clientX + 15
+        tooltip.value.y = event.clientY - 60
+      }
     }
 
     // Watch for data changes
@@ -166,16 +251,20 @@ export default {
       chartWidth,
       chartHeight,
       padding,
+      tooltip,
       chartData,
       xAxisLabels,
       yAxisLabels,
+      xAxisTitle,
+      yAxisTitle,
       chartAreaHeight,
       chartAreaWidth,
       barWidth,
       xScale,
       yScale,
-      highlightBar,
-      unhighlightBar
+      showTooltip,
+      hideTooltip,
+      updateTooltipPosition
     }
   }
 }
@@ -203,6 +292,7 @@ export default {
   width: 100%;
   height: 100%;
   overflow: visible;
+  padding: 0 10px;
 }
 
 .bar-chart-svg {
@@ -213,8 +303,9 @@ export default {
 
 .axis-label {
   font-size: 12px;
-  fill: #6b7280;
+  fill: #374151;
   font-family: system-ui, -apple-system, sans-serif;
+  font-weight: 500;
 }
 
 .bar {
@@ -229,11 +320,62 @@ export default {
 }
 
 .y-axis text {
-  font-size: 11px;
+  font-size: 12px;
+  fill: #374151;
+  font-weight: 500;
 }
 
 .x-axis text {
   font-size: 11px;
+}
+
+.axis-title {
+  font-size: 12px;
+  font-weight: bold;
+  fill: #374151;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Specific styling for Y-axis title */
+.y-axis-title {
+  font-size: 12px;
+  font-weight: bold;
+  fill: #374151;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Tooltip styling */
+.chart-tooltip {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-family: system-ui, -apple-system, sans-serif;
+  min-width: 200px;
+}
+
+.tooltip-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tooltip-line {
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 /* Responsive adjustments */
@@ -244,6 +386,20 @@ export default {
   
   .axis-label {
     font-size: 10px;
+  }
+  
+  .chart-tooltip {
+    font-size: 12px;
+    padding: 10px 12px;
+    min-width: 180px;
+  }
+  
+  .tooltip-title {
+    font-size: 13px;
+  }
+  
+  .tooltip-line {
+    font-size: 12px;
   }
 }
 </style>

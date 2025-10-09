@@ -2,129 +2,130 @@
 Authentication endpoint for Vercel Functions.
 """
 
+from http.server import BaseHTTPRequestHandler
 import json
 import os
 from datetime import datetime, timedelta
 import hashlib
 import secrets
 
-
-def handler(request):
-    """
-    Authentication handler for Vercel Functions.
-    """
-    
-    # Set CORS headers
-    headers = {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    }
-    
-    # Handle preflight requests
-    if request.method == 'OPTIONS':
-        return {
-            "statusCode": 200,
-            "headers": headers,
-            "body": json.dumps({"message": "CORS preflight successful"})
-        }
-    
-    try:
-        if request.method == 'POST':
-            # Handle login request
-            if hasattr(request, 'body'):
-                body = request.body
-            else:
-                body = request.get('body', '{}')
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        """Handle GET requests for auth API"""
+        try:
+            # Set CORS headers
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+            self.end_headers()
             
-            if isinstance(body, str):
-                data = json.loads(body)
-            else:
-                data = body
+            # Get environment info
+            environment = os.getenv('ENVIRONMENT', 'development')
+            app_name = os.getenv('APP_NAME', 'Engineering Log Intelligence')
             
-            username = data.get('username', '').strip()
-            password = data.get('password', '').strip()
-            
-            # Demo credentials for testing
-            demo_users = {
-                'admin': {
-                    'password': 'password123',
-                    'role': 'admin',
-                    'permissions': ['read_logs', 'view_dashboard', 'create_alerts', 'analyze_logs', 'export_data', 'manage_users', 'manage_system', 'configure_alerts']
+            # Generate auth status data
+            auth_data = {
+                "success": True,
+                "data": {
+                    "authentication": {
+                        "status": "active",
+                        "method": "JWT",
+                        "expires_in": 1800
+                    },
+                    "user_info": {
+                        "username": "demo_user",
+                        "role": "analyst",
+                        "permissions": ["read_logs", "view_dashboard", "create_reports"]
+                    },
+                    "session": {
+                        "created_at": datetime.utcnow().isoformat(),
+                        "last_activity": datetime.utcnow().isoformat(),
+                        "ip_address": "127.0.0.1"
+                    }
                 },
-                'analyst': {
-                    'password': 'password123',
-                    'role': 'analyst',
-                    'permissions': ['read_logs', 'view_dashboard', 'create_alerts', 'analyze_logs', 'export_data']
-                },
-                'user': {
-                    'password': 'password123',
-                    'role': 'user',
-                    'permissions': ['read_logs', 'view_dashboard', 'create_alerts']
-                }
-            }
-            
-            # Check credentials
-            if username in demo_users and demo_users[username]['password'] == password:
-                # Generate tokens (simplified for demo)
-                access_token = f"demo_access_token_{username}_{int(datetime.utcnow().timestamp())}"
-                refresh_token = f"demo_refresh_token_{username}_{int(datetime.utcnow().timestamp())}"
-                
-                user_data = {
-                    'id': 1,
-                    'username': username,
-                    'email': f'{username}@example.com',
-                    'role': demo_users[username]['role'],
-                    'permissions': demo_users[username]['permissions'],
-                    'first_name': username.title(),
-                    'last_name': 'User'
-                }
-                
-                return {
-                    "statusCode": 200,
-                    "headers": headers,
-                    "body": json.dumps({
-                        "user": user_data,
-                        "tokens": {
-                            "access_token": access_token,
-                            "refresh_token": refresh_token,
-                            "expires_in": 1800
-                        },
-                        "timestamp": datetime.utcnow().isoformat()
-                    })
-                }
-            else:
-                return {
-                    "statusCode": 401,
-                    "headers": headers,
-                    "body": json.dumps({
-                        "error": "Invalid credentials",
-                        "message": "Username or password is incorrect"
-                    })
-                }
-        
-        else:
-            # Handle GET request - return endpoint info
-            return {
-                "statusCode": 200,
-                "headers": headers,
-                "body": json.dumps({
-                    "message": "Authentication endpoint",
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "status": "success",
-                    "environment": os.getenv("ENVIRONMENT", "development"),
-                    "available_methods": ["POST", "GET", "OPTIONS"]
-                })
-            }
-    
-    except Exception as e:
-        return {
-            "statusCode": 500,
-            "headers": headers,
-            "body": json.dumps({
-                "error": "Internal server error",
-                "message": str(e),
+                "environment": environment,
+                "app_name": app_name,
                 "timestamp": datetime.utcnow().isoformat()
-            })
-        }
+            }
+            
+            # Send response
+            self.wfile.write(json.dumps(auth_data, indent=2).encode())
+            
+        except Exception as e:
+            # Error response
+            error_data = {
+                "success": False,
+                "error": "AUTH_ERROR",
+                "message": f"Authentication API error: {str(e)}",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps(error_data, indent=2).encode())
+    
+    def do_POST(self):
+        """Handle POST requests for auth API (login)"""
+        try:
+            # Set CORS headers
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+            self.end_headers()
+            
+            # Get environment info
+            environment = os.getenv('ENVIRONMENT', 'development')
+            app_name = os.getenv('APP_NAME', 'Engineering Log Intelligence')
+            
+            # Generate mock login response
+            login_data = {
+                "success": True,
+                "data": {
+                    "access_token": f"mock_jwt_token_{secrets.token_hex(16)}",
+                    "refresh_token": f"mock_refresh_token_{secrets.token_hex(16)}",
+                    "token_type": "bearer",
+                    "expires_in": 1800,
+                    "user": {
+                        "id": 1,
+                        "username": "demo_user",
+                        "email": "demo@example.com",
+                        "role": "analyst",
+                        "permissions": ["read_logs", "view_dashboard", "create_reports"]
+                    }
+                },
+                "environment": environment,
+                "app_name": app_name,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+            # Send response
+            self.wfile.write(json.dumps(login_data, indent=2).encode())
+            
+        except Exception as e:
+            # Error response
+            error_data = {
+                "success": False,
+                "error": "AUTH_ERROR",
+                "message": f"Authentication API error: {str(e)}",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps(error_data, indent=2).encode())
+    
+    def do_OPTIONS(self):
+        """Handle OPTIONS requests for CORS"""
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.end_headers()

@@ -1,28 +1,49 @@
-/**
- * Minimal Main.js for Testing
- * ===========================
- * 
- * This is a minimal version of main.js to test if Vue.js
- * is working without the router and complex setup.
- * 
- * Author: Engineering Log Intelligence Team
- * Date: September 22, 2025
- */
+// Minimal main.js to test Vue.js loading
+import { createApp, ref, onMounted } from 'vue'
+import { createPinia } from 'pinia'
 
-import { createApp } from 'vue'
-import App from './App.vue'
+console.log('🚀 Minimal main.js loading...')
 
-// Create Vue application
-const app = createApp(App)
+// Create a simple app first
+const app = createApp({
+  template: `
+    <div style="padding: 20px; background: white; color: black; min-height: 100vh;">
+      <h1>Minimal Vue.js Test</h1>
+      <p>If you can see this, basic Vue.js is working!</p>
+      <p>Current time: {{ currentTime }}</p>
+      <button @click="updateTime">Update Time</button>
+    </div>
+  `,
+  setup() {
+    const currentTime = ref('')
+    
+    const updateTime = () => {
+      currentTime.value = new Date().toLocaleTimeString()
+    }
+    
+    onMounted(() => {
+      updateTime()
+      setInterval(updateTime, 1000)
+      console.log('✅ Minimal Vue.js app mounted!')
+      
+      // Hide loading screen
+      const loadingScreen = document.getElementById('loading-screen')
+      if (loadingScreen) {
+        loadingScreen.style.display = 'none'
+      }
+    })
+    
+    return {
+      currentTime,
+      updateTime
+    }
+  }
+})
 
-// Global error handler
-app.config.errorHandler = (err, vm, info) => {
-  console.error('Vue Error:', err)
-  console.error('Component:', vm)
-  console.error('Info:', info)
-}
+// Add Pinia
+const pinia = createPinia()
+app.use(pinia)
 
-// Mount the application
+console.log('🚀 Mounting minimal app...')
 app.mount('#app')
-
-console.log('🚀 Minimal Vue.js app initialized!')
+console.log('✅ Minimal app mounted!')

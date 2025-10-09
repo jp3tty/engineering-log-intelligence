@@ -82,7 +82,7 @@ export default {
     }
   },
   emits: ['update-widget'],
-  setup(props) {
+  setup(props, { emit }) {
     const chartCanvas = ref(null)
     const chartInstance = ref(null)
     const loading = ref(false)
@@ -227,18 +227,32 @@ export default {
       error.value = null
 
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Simulate API call with shorter timeout
+        await new Promise(resolve => setTimeout(resolve, 200))
         
         // Update chart with new data
         createChart()
         
-        // Update widget timestamp
-        props.widget.lastUpdated = new Date()
+        // Emit update to parent with new timestamp (with error handling)
+        try {
+          emit('update-widget', props.widget.id, { 
+            lastUpdated: new Date(),
+            data: generateMockData()
+          })
+        } catch (emitError) {
+          console.warn('Failed to emit chart update:', emitError)
+        }
         
       } catch (err) {
         error.value = 'Failed to refresh chart data'
         console.error('Error refreshing chart:', err)
+        
+        // Provide fallback chart data
+        try {
+          createChart()
+        } catch (chartError) {
+          console.warn('Failed to create fallback chart:', chartError)
+        }
       } finally {
         loading.value = false
       }

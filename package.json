@@ -2,12 +2,12 @@
   "name": "engineering-log-intelligence",
   "version": "1.0.0",
   "description": "AI-powered log analysis platform",
-  "main": "index.js",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'No build step required'",
-    "start": "echo 'No start script required'"
+    "build": "cd frontend && npm install && npm run build",
+    "dev": "cd frontend && npm run dev",
+    "start": "cd frontend && npm run preview"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
 }

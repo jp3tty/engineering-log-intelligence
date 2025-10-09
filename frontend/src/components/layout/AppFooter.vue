@@ -63,8 +63,13 @@
       <!-- Bottom Section -->
       <div class="mt-8 pt-8 border-t border-gray-200">
         <div class="flex flex-col md:flex-row justify-between items-center">
-          <div class="text-sm text-gray-500">
-            © {{ currentYear }} Engineering Log Intelligence. All rights reserved.
+          <div class="flex items-center space-x-4">
+            <div class="text-sm text-gray-500">
+              © {{ currentYear }} Engineering Log Intelligence. All rights reserved.
+            </div>
+            <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
+              Portfolio Project
+            </span>
           </div>
           <div class="flex items-center space-x-6 mt-4 md:mt-0">
             <span class="text-sm text-gray-500">

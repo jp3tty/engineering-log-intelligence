@@ -76,7 +76,7 @@
           class="widget-container absolute"
           :style="getWidgetStyle(widget)"
           @click="selectWidget(widget)"
-          @mousedown="startResize"
+          @mousedown="startDrag(widget, $event)"
           @contextmenu.prevent="showWidgetMenu(widget, $event)"
         >
           <div
@@ -200,7 +200,7 @@ export default {
       default: false
     }
   },
-  emits: ['update-widget', 'remove-widget', 'reorder-widgets'],
+    emits: ['update-widget', 'remove-widget', 'reorder-widgets', 'load-template', 'select-widget'],
   setup(props, { emit }) {
     const canvasRef = ref(null)
     const selectedWidgetId = ref(null)
@@ -215,7 +215,9 @@ export default {
     })
 
     const isResizing = ref(false)
+    const isDragging = ref(false)
     const resizeData = ref(null)
+    const dragData = ref(null)
 
     // Computed properties
     const gridStyle = computed(() => ({
@@ -248,14 +250,19 @@ export default {
         'line-chart': 'ChartWidget',
         'bar-chart': 'ChartWidget',
         'pie-chart': 'ChartWidget',
+        'chart': 'ChartWidget',  // Added for template widgets
         'alert-list': 'AlertWidget',
-        'log-viewer': 'LogWidget'
+        'alert': 'AlertWidget',  // Added for template widgets
+        'log-viewer': 'LogWidget',
+        'log': 'LogWidget'       // Added for template widgets
       }
       return components[type] || 'MetricWidget'
     }
 
     const selectWidget = (widget) => {
       selectedWidgetId.value = widget.id
+      // Emit to parent to open Widget Editor
+      emit('select-widget', widget)
     }
 
     const editWidget = (widget) => {
@@ -376,13 +383,105 @@ export default {
     }
 
     const loadTemplate = (templateName) => {
-      // This would load a predefined template
-      console.log('Loading template:', templateName)
+      // Emit to parent to load the template
+      emit('load-template', templateName)
     }
 
     const startResize = (widget, direction) => {
       isResizing.value = true
       resizeData.value = { widget, direction }
+      
+      const handleMouseMove = (e) => {
+        if (!isResizing.value) return
+        
+        const rect = canvasRef.value.getBoundingClientRect()
+        const x = Math.floor((e.clientX - rect.left) / gridSize.value)
+        const y = Math.floor((e.clientY - rect.top) / gridSize.value)
+        
+        const newSize = { ...widget.size }
+        const newPosition = { ...widget.position }
+        
+        switch (direction) {
+          case 'se': // Southeast
+            newSize.width = Math.max(1, x - widget.position.x)
+            newSize.height = Math.max(1, y - widget.position.y)
+            break
+          case 'sw': // Southwest
+            newSize.width = Math.max(1, widget.position.x + widget.size.width - x)
+            newSize.height = Math.max(1, y - widget.position.y)
+            newPosition.x = Math.min(x, widget.position.x + widget.size.width - 1)
+            break
+          case 'ne': // Northeast
+            newSize.width = Math.max(1, x - widget.position.x)
+            newSize.height = Math.max(1, widget.position.y + widget.size.height - y)
+            newPosition.y = Math.min(y, widget.position.y + widget.size.height - 1)
+            break
+          case 'nw': // Northwest
+            newSize.width = Math.max(1, widget.position.x + widget.size.width - x)
+            newSize.height = Math.max(1, widget.position.y + widget.size.height - y)
+            newPosition.x = Math.min(x, widget.position.x + widget.size.width - 1)
+            newPosition.y = Math.min(y, widget.position.y + widget.size.height - 1)
+            break
+        }
+        
+        emit('update-widget', widget.id, {
+          size: newSize,
+          position: newPosition
+        })
+      }
+      
+      const handleMouseUp = () => {
+        isResizing.value = false
+        resizeData.value = null
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+      
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    }
+
+    const startDrag = (widget, event) => {
+      // Don't start drag if clicking on resize handles or buttons
+      if (event.target.closest('.resize-handle') || event.target.closest('button')) {
+        return
+      }
+      
+      isDragging.value = true
+      dragData.value = {
+        widget,
+        startX: event.clientX,
+        startY: event.clientY,
+        startPosition: { ...widget.position }
+      }
+      
+      const handleMouseMove = (e) => {
+        if (!isDragging.value) return
+        
+        const rect = canvasRef.value.getBoundingClientRect()
+        const deltaX = e.clientX - dragData.value.startX
+        const deltaY = e.clientY - dragData.value.startY
+        
+        const gridDeltaX = Math.floor(deltaX / gridSize.value)
+        const gridDeltaY = Math.floor(deltaY / gridSize.value)
+        
+        const newPosition = {
+          x: Math.max(0, dragData.value.startPosition.x + gridDeltaX),
+          y: Math.max(0, dragData.value.startPosition.y + gridDeltaY)
+        }
+        
+        emit('update-widget', widget.id, { position: newPosition })
+      }
+      
+      const handleMouseUp = () => {
+        isDragging.value = false
+        dragData.value = null
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+      
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
     }
 
     const updateWidget = (widgetId, updates) => {
@@ -413,6 +512,8 @@ export default {
       showGrid,
       gridSize,
       contextMenu,
+      isDragging,
+      dragData,
       gridStyle,
       contextMenuStyle,
       getWidgetStyle,
@@ -431,6 +532,7 @@ export default {
       addSampleWidgets,
       loadTemplate,
       startResize,
+      startDrag,
       updateWidget
     }
   }
