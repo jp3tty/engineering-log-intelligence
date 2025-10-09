@@ -56,7 +56,7 @@ class handler(BaseHTTPRequestHandler):
         """Generate and send the analytics data response"""
         try:
             # Try to connect to database
-            db_conn = get_database_connection()
+            db_conn, db_error = get_database_connection()
             use_real_data = db_conn is not None
             
             # Generate time labels for the last 24 hours
@@ -265,30 +265,25 @@ def generate_system_metrics() -> Dict[str, Any]:
 # DATABASE CONNECTION AND QUERY FUNCTIONS
 # ============================================================================
 
-def get_database_connection() -> Optional[any]:
+def get_database_connection() -> tuple:
     """
     Establish connection to PostgreSQL database.
-    Returns None if connection fails or database is unavailable.
+    Returns (connection, error_message) tuple.
     """
     if not DATABASE_AVAILABLE:
-        print("❌ psycopg2 not available")
-        return None
+        return None, "psycopg2 not available"
     
     try:
         database_url = os.environ.get('DATABASE_URL')
         if not database_url:
-            print("❌ DATABASE_URL environment variable not set")
-            return None
+            return None, "DATABASE_URL environment variable not set"
         
-        print(f"✅ Attempting to connect to database...")
         conn = psycopg2.connect(database_url)
-        print(f"✅ Database connection successful!")
-        return conn
+        conn.autocommit = True  # Prevent transaction abort issues
+        return conn, None
     except Exception as e:
-        print(f"❌ Database connection failed: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
+        error_msg = f"Connection failed: {str(e)}"
+        return None, error_msg
 
 def fetch_log_volume_from_db(conn, time_labels: List[str]) -> Dict[str, Any]:
     """
@@ -302,7 +297,7 @@ def fetch_log_volume_from_db(conn, time_labels: List[str]) -> Dict[str, Any]:
             SELECT 
                 DATE_TRUNC('hour', timestamp) as hour,
                 COUNT(*) as log_count
-            FROM logs
+            FROM log_entries
             WHERE timestamp > NOW() - INTERVAL '24 hours'
             GROUP BY hour
             ORDER BY hour
@@ -349,7 +344,7 @@ def fetch_log_distribution_from_db(conn) -> Dict[str, Any]:
             SELECT 
                 level,
                 COUNT(*) as count
-            FROM logs
+            FROM log_entries
             WHERE timestamp > NOW() - INTERVAL '24 hours'
             GROUP BY level
         """)
@@ -406,7 +401,7 @@ def fetch_response_time_from_db(conn, time_labels: List[str]) -> Dict[str, Any]:
             SELECT 
                 DATE_TRUNC('hour', timestamp) as hour,
                 AVG(response_time_ms) as avg_response_time
-            FROM logs
+            FROM log_entries
             WHERE timestamp > NOW() - INTERVAL '24 hours'
                 AND response_time_ms IS NOT NULL
             GROUP BY hour
@@ -451,7 +446,7 @@ def fetch_error_types_from_db(conn) -> Dict[str, Any]:
             SELECT 
                 error_type,
                 COUNT(*) as count
-            FROM logs
+            FROM log_entries
             WHERE timestamp > NOW() - INTERVAL '24 hours'
                 AND level IN ('ERROR', 'FATAL')
                 AND error_type IS NOT NULL
@@ -507,16 +502,15 @@ def fetch_system_metrics_from_db(conn) -> Dict[str, Any]:
     try:
         cursor = conn.cursor()
         
-        # Query total logs processed
+        # Query total logs processed (all time)
         cursor.execute("""
-            SELECT COUNT(*) FROM logs 
-            WHERE timestamp > NOW() - INTERVAL '24 hours'
+            SELECT COUNT(*) FROM log_entries
         """)
         logs_processed = cursor.fetchone()[0]
         
         # Query active alerts
         cursor.execute("""
-            SELECT COUNT(*) FROM logs 
+            SELECT COUNT(*) FROM log_entries 
             WHERE timestamp > NOW() - INTERVAL '1 hour'
                 AND level IN ('ERROR', 'FATAL')
         """)
@@ -524,7 +518,7 @@ def fetch_system_metrics_from_db(conn) -> Dict[str, Any]:
         
         # Query average response time
         cursor.execute("""
-            SELECT AVG(response_time_ms) FROM logs 
+            SELECT AVG(response_time_ms) FROM log_entries 
             WHERE timestamp > NOW() - INTERVAL '1 hour'
                 AND response_time_ms IS NOT NULL
         """)
@@ -534,15 +528,21 @@ def fetch_system_metrics_from_db(conn) -> Dict[str, Any]:
         cursor.close()
         
         return {
-            'logsProcessed': logs_processed if logs_processed > 0 else random.randint(120000, 130000),
-            'activeAlerts': min(active_alerts, 20),
+            'logsProcessed': logs_processed,
+            'activeAlerts': active_alerts,
             'responseTime': response_time,
             'systemHealth': 'Healthy' if active_alerts < 10 else 'Warning',
             'uptime': '99.9%',
-            'cpuUsage': random.randint(20, 80),
-            'memoryUsage': random.randint(30, 70),
-            'diskUsage': random.randint(40, 90)
+            'cpuUsage': 45,
+            'memoryUsage': 52,
+            'diskUsage': 63
         }
     except Exception as e:
-        print(f"Error fetching system metrics: {e}")
-        return generate_system_metrics()
+        error_msg = f"Error fetching system metrics: {str(e)}"
+        print(error_msg)
+        import traceback
+        traceback.print_exc()
+        # Return error in metrics for debugging
+        fallback = generate_system_metrics()
+        fallback['_db_error'] = error_msg
+        return fallback

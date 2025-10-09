@@ -19,7 +19,7 @@ import axios from 'axios'
 // It's like having a pre-configured HTTP client
 const analyticsAPI = axios.create({
   baseURL: '/api',  // Use Vercel's built-in API routing
-  timeout: 10000,
+  timeout: 15000,  // Increased timeout for database queries
   headers: {
     'Content-Type': 'application/json'
   }
@@ -38,7 +38,10 @@ export const fetchDashboardAnalytics = async () => {
     console.log('Fetching dashboard analytics...')
     
     // For beginners: This makes an HTTP GET request to our API
-    const response = await analyticsAPI.get('/api/dashboard_analytics')
+    // Add cache-busting timestamp to ensure fresh data
+    const response = await analyticsAPI.get('/dashboard_analytics', {
+      params: { _t: Date.now() }
+    })
     
     console.log('Analytics data received:', response.data)
     return response.data
