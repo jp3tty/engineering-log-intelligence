@@ -271,17 +271,23 @@ def get_database_connection() -> Optional[any]:
     Returns None if connection fails or database is unavailable.
     """
     if not DATABASE_AVAILABLE:
+        print("❌ psycopg2 not available")
         return None
     
     try:
         database_url = os.environ.get('DATABASE_URL')
         if not database_url:
+            print("❌ DATABASE_URL environment variable not set")
             return None
         
+        print(f"✅ Attempting to connect to database...")
         conn = psycopg2.connect(database_url)
+        print(f"✅ Database connection successful!")
         return conn
     except Exception as e:
-        print(f"Database connection failed: {e}")
+        print(f"❌ Database connection failed: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def fetch_log_volume_from_db(conn, time_labels: List[str]) -> Dict[str, Any]:
