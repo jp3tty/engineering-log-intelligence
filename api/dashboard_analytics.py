@@ -90,7 +90,13 @@ class handler(BaseHTTPRequestHandler):
                 'errorTypes': error_types_data,
                 'systemMetrics': system_metrics,
                 'timestamp': now.isoformat(),
-                'dataSource': 'database' if use_real_data else 'simulated'
+                'dataSource': 'database' if use_real_data else 'simulated',
+                'debug': {
+                    'DATABASE_AVAILABLE': DATABASE_AVAILABLE,
+                    'DATABASE_URL_SET': bool(os.environ.get('DATABASE_URL')),
+                    'db_connection_successful': use_real_data,
+                    'db_error': db_error if not use_real_data else None
+                }
             }
             
             # Send successful response
