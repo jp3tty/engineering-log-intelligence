@@ -232,10 +232,9 @@
           </div>
           <div class="card-body">
             <div class="flex flex-col gap-6">
-              <!-- TreeMap Container - Temporarily Disabled -->
-              <div class="w-full text-center py-8 text-gray-500">
-                <p>Service Health TreeMap visualization coming soon</p>
-                <!-- TreeMapChart removed temporarily -->
+              <!-- TreeMap Container -->
+              <div class="w-full">
+                <TreeMapChart :data="flatServiceHealthData" :height="400" />
               </div>
               
               <!-- Service Health Legend -->
@@ -325,7 +324,7 @@
 
 import { ref, computed, onMounted } from 'vue'
 import { useSystemStore } from '@/stores/system'
-import { LineChart, BarChart, PieChart } from '@/components/charts'
+import { LineChart, BarChart, PieChart, TreeMapChart } from '@/components/charts'
 import { fetchDashboardAnalytics } from '@/services/analytics'
 
 export default {
@@ -333,7 +332,8 @@ export default {
   components: {
     LineChart,
     BarChart,
-    PieChart
+    PieChart,
+    TreeMapChart
   },
   setup() {
     const systemStore = useSystemStore()
@@ -1147,6 +1147,50 @@ export default {
       }
     }
 
+    // Computed property to flatten service health data for TreeMap
+    const flatServiceHealthData = computed(() => {
+      if (!serviceHealthData.value || serviceHealthData.value.length === 0) {
+        return []
+      }
+      
+      // Extract top-level services and their first-level children
+      const flattened = []
+      
+      serviceHealthData.value.forEach(service => {
+        if (service.children && service.children.length > 0) {
+          // Add the main children as separate services
+          service.children.forEach(child => {
+            flattened.push({
+              name: child.name,
+              status: child.status,
+              importance: child.importance || 20,
+              responseTime: child.responseTime || 0,
+              uptime: child.uptime || 99.0
+            })
+          })
+        } else {
+          // Add the service itself if it has no children
+          flattened.push({
+            name: service.name,
+            status: service.status,
+            importance: service.importance || 20,
+            responseTime: service.responseTime || 0,
+            uptime: service.uptime || 99.0
+          })
+        }
+      })
+      
+      // Normalize importance values to ensure they sum to 100
+      const totalImportance = flattened.reduce((sum, s) => sum + s.importance, 0)
+      if (totalImportance > 0) {
+        flattened.forEach(s => {
+          s.importance = (s.importance / totalImportance) * 100
+        })
+      }
+      
+      return flattened
+    })
+    
     // Lifecycle
     onMounted(() => {
       console.log('🎯 Dashboard mounted, refreshing data...')
@@ -1166,6 +1210,7 @@ export default {
       logDistributionData,
       responseTimeData,
       serviceHealthData,
+      flatServiceHealthData,
       
       // Chart options
       logVolumeOptions,
