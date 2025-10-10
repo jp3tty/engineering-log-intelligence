@@ -53,7 +53,7 @@
     <div v-if="!loading" class="dashboard-content">
       <!-- Key Metrics Overview -->
       <div class="metrics-overview">
-        <h2 class="section-title">Key Metrics</h2>
+        <h2 class="section-title">Key Metrics (Last 24 Hours)</h2>
         <div class="metrics-grid">
           <MetricCard
             v-for="metric in keyMetrics"

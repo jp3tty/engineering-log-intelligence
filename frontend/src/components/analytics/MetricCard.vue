@@ -148,8 +148,13 @@ export default {
 
     // Helper functions
     const formatDuration = (seconds) => {
+      // Handle very small durations (under 1 second) - show in milliseconds
+      if (seconds < 1) return `${(seconds * 1000).toFixed(0)}ms`
+      // Under 60 seconds - show in seconds
       if (seconds < 60) return `${seconds.toFixed(2)}s`
+      // Under 1 hour - show in minutes
       if (seconds < 3600) return `${(seconds / 60).toFixed(1)}m`
+      // 1 hour or more - show in hours
       return `${(seconds / 3600).toFixed(1)}h`
     }
 

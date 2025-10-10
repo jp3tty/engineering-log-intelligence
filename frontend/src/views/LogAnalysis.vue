@@ -259,7 +259,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center">
                 <span class="text-sm text-gray-700">
-                  Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, searchResults.length) }} of {{ searchResults.length }} results
+                  Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, totalResults) }} of {{ totalResults }} results
                 </span>
               </div>
               <div class="flex items-center space-x-2">
@@ -388,7 +388,7 @@ export default {
     // Reactive state
     const isLoading = ref(false)
     const searchQuery = ref('')
-    const timeRange = ref('24h')
+    const timeRange = ref('30d')
     const logLevel = ref('')
     const sourceSystem = ref('')
     const aiAnalysisType = ref('')
@@ -400,58 +400,14 @@ export default {
     // Search results and AI insights
     const searchResults = ref([])
     const aiInsights = ref([])
-
-    // Sample log data (in real app, this would come from API)
-    const sampleLogs = ref([
-      {
-        id: 1,
-        timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-        level: 'ERROR',
-        source: 'APPLICATION',
-        message: 'Database connection failed: Connection timeout after 30 seconds',
-        aiAnalysis: null
-      },
-      {
-        id: 2,
-        timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-        level: 'WARN',
-        source: 'SPLUNK',
-        message: 'High CPU usage detected on server-01: 95% utilization',
-        aiAnalysis: { category: 'Performance', anomaly: true }
-      },
-      {
-        id: 3,
-        timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-        level: 'INFO',
-        source: 'SAP',
-        message: 'User authentication successful for user: admin@company.com',
-        aiAnalysis: null
-      },
-      {
-        id: 4,
-        timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-        level: 'DEBUG',
-        source: 'APPLICATION',
-        message: 'Processing batch job: 1,250 records processed successfully',
-        aiAnalysis: null
-      },
-      {
-        id: 5,
-        timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-        level: 'FATAL',
-        source: 'SYSTEM',
-        message: 'Out of memory error: Unable to allocate 512MB for process',
-        aiAnalysis: { category: 'Critical Error', anomaly: true, severity: 'high' }
-      }
-    ])
+    const totalResults = ref(0)
 
     // Computed properties
-    const totalPages = computed(() => Math.ceil(searchResults.value.length / pageSize.value))
+    const totalPages = computed(() => Math.ceil(totalResults.value / pageSize.value))
     
     const paginatedResults = computed(() => {
-      const start = (currentPage.value - 1) * pageSize.value
-      const end = start + pageSize.value
-      return searchResults.value.slice(start, end)
+      // API returns paginated results, so just return them as-is
+      return searchResults.value
     })
 
     // Methods
@@ -462,63 +418,75 @@ export default {
     const performSearch = async () => {
       isLoading.value = true
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        
-        // Filter sample logs based on search criteria
-        let filteredLogs = sampleLogs.value.filter(log => {
-          // Text search
-          if (searchQuery.value && !log.message.toLowerCase().includes(searchQuery.value.toLowerCase())) {
-            return false
-          }
-          
-          // Level filter
-          if (logLevel.value && log.level !== logLevel.value) {
-            return false
-          }
-          
-          // Source filter
-          if (sourceSystem.value && log.source !== sourceSystem.value) {
-            return false
-          }
-          
-          return true
+        // Build query parameters
+        const params = new URLSearchParams({
+          page: currentPage.value.toString(),
+          pageSize: pageSize.value.toString(),
+          timeRange: timeRange.value
         })
-
-        // Sort results
-        filteredLogs.sort((a, b) => {
-          switch (sortBy.value) {
-            case 'timestamp':
-              return new Date(b.timestamp) - new Date(a.timestamp)
-            case 'level':
-              const levelOrder = { 'FATAL': 0, 'ERROR': 1, 'WARN': 2, 'INFO': 3, 'DEBUG': 4 }
-              return levelOrder[a.level] - levelOrder[b.level]
-            case 'source':
-              return a.source.localeCompare(b.source)
-            default:
-              return 0
-          }
-        })
-
-        searchResults.value = filteredLogs
         
-        // Generate AI insights if analysis type is selected
-        if (aiAnalysisType.value) {
-          generateAIInsights(filteredLogs)
+        if (searchQuery.value) {
+          params.append('search', searchQuery.value)
+        }
+        if (logLevel.value) {
+          params.append('level', logLevel.value)
+        }
+        if (sourceSystem.value) {
+          params.append('source', sourceSystem.value)
         }
         
-        notificationStore.addNotification({
-          type: 'success',
-          title: 'Search Complete',
-          message: `Found ${filteredLogs.length} logs matching your criteria`
-        })
+        // Fetch logs from API
+        console.log(`🔍 Fetching logs with params: ${params.toString()}`)
+        const response = await fetch(`/api/logs?${params.toString()}`)
+        
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error(`❌ API error response: ${errorText}`)
+          throw new Error(`API error: ${response.status} - ${errorText}`)
+        }
+        
+        const responseText = await response.text()
+        console.log(`📥 Raw response (first 500 chars):`, responseText.substring(0, 500))
+        
+        let data
+        try {
+          data = JSON.parse(responseText)
+        } catch (parseError) {
+          console.error(`❌ JSON parse error:`, parseError)
+          throw new Error(`Failed to parse response: ${parseError.message}`)
+        }
+        
+        console.log(`📊 Parsed data:`, data)
+        
+        if (data.success) {
+          searchResults.value = data.data.logs
+          totalResults.value = data.data.pagination.total_count
+          
+          // Log data source for debugging
+          console.log(`✅ Logs loaded from: ${data.dataSource}`)
+          console.log(`📈 Total logs: ${totalResults.value}`)
+          console.log(`📝 First log:`, searchResults.value[0])
+          
+          // Generate AI insights if analysis type is selected
+          if (aiAnalysisType.value) {
+            generateAIInsights(searchResults.value)
+          }
+          
+          notificationStore.addNotification({
+            type: 'success',
+            title: 'Search Complete',
+            message: `Found ${totalResults.value} logs matching your criteria (source: ${data.dataSource})`
+          })
+        } else {
+          throw new Error(data.message || 'Failed to fetch logs')
+        }
         
       } catch (error) {
         console.error('Search error:', error)
         notificationStore.addNotification({
           type: 'error',
           title: 'Search Failed',
-          message: 'Unable to search logs. Please try again.'
+          message: `Unable to search logs: ${error.message}`
         })
       } finally {
         isLoading.value = false
@@ -570,30 +538,63 @@ export default {
 
     const analyzeLog = async (log) => {
       try {
-        // Call ML analysis API
-        const response = await fetch('/api/ml/analyze', {
+        console.log('🤖 Analyzing log:', log)
+        
+        const requestBody = {
+          action: 'analyze',
+          log_data: [{
+            id: log.id,
+            message: log.message,
+            level: log.level,
+            source: log.source,
+            timestamp: log.timestamp
+          }]
+        }
+        console.log('🤖 Request body:', JSON.stringify(requestBody, null, 2))
+        
+        // Call ML analysis API with correct structure
+        const response = await fetch('/api/ml', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            operation: 'analyze',
-            log_entry: log.message
-          })
+          body: JSON.stringify(requestBody)
         })
         
-        const result = await response.json()
+        console.log('🤖 Response status:', response.status, response.statusText)
         
-        if (result.analysis) {
-          log.aiAnalysis = result.analysis
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('🤖 Error response:', errorText)
+          throw new Error(`API error: ${response.status} - ${errorText}`)
+        }
+        
+        const responseText = await response.text()
+        console.log('🤖 Raw response:', responseText)
+        
+        const result = JSON.parse(responseText)
+        console.log('🤖 Parsed result:', result)
+        
+        if (result.success && result.results && result.results.length > 0) {
+          const analysis = result.results[0]
+          log.aiAnalysis = {
+            category: analysis.classification,
+            confidence: analysis.confidence,
+            anomaly: analysis.is_anomaly,
+            severity: analysis.severity,
+            anomalyScore: analysis.anomaly_score
+          }
+          
           notificationStore.addNotification({
             type: 'success',
-            title: 'Analysis Complete',
-            message: 'AI analysis completed for this log entry'
+            title: 'AI Analysis Complete',
+            message: `Classified as "${analysis.classification}" with ${Math.round(analysis.confidence * 100)}% confidence`
           })
+        } else {
+          throw new Error('No analysis results returned')
         }
       } catch (error) {
-        console.error('Analysis error:', error)
+        console.error('❌ Analysis error:', error)
         // Fallback to mock analysis
         log.aiAnalysis = {
           category: 'System Error',
@@ -680,10 +681,20 @@ export default {
         performSearch()
       }
     })
-
-    // Initialize with sample data
-    onMounted(() => {
-      searchResults.value = sampleLogs.value
+    
+    // Watch for page changes to fetch new page of results
+    watch(currentPage, () => {
+      if (searchResults.value.length > 0 || totalResults.value > 0) {
+        performSearch()
+      }
+    })
+    
+    // Watch for page size changes
+    watch(pageSize, () => {
+      currentPage.value = 1  // Reset to page 1 when page size changes
+      if (searchResults.value.length > 0 || totalResults.value > 0) {
+        performSearch()
+      }
     })
 
     return {
@@ -700,6 +711,7 @@ export default {
       selectedLog,
       searchResults,
       aiInsights,
+      totalResults,
       
       // Computed
       totalPages,

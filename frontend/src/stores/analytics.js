@@ -87,10 +87,14 @@ export const useAnalyticsStore = defineStore('analytics', () => {
         
         // Transform dashboard analytics data to overview format
         const dashboardData = response.data
+        // Convert response time from milliseconds to seconds for proper display
+        const responseTimeMs = dashboardData.systemMetrics?.responseTime || 0
+        const responseTimeSec = responseTimeMs / 1000
+        
         overview.value = {
           total_logs: dashboardData.systemMetrics?.logsProcessed || 0,
           anomalies_detected: dashboardData.systemMetrics?.activeAlerts || 0,
-          avg_response_time: dashboardData.systemMetrics?.responseTime || 0,
+          avg_response_time: responseTimeSec,
           system_health: parseFloat(dashboardData.systemMetrics?.uptime || '0'),
           logs_trend: 5.2,
           anomalies_trend: -12.3,
@@ -163,23 +167,169 @@ export const useAnalyticsStore = defineStore('analytics', () => {
           params: { _t: Date.now(), ...filters }
         })
         
-        // Transform dashboard data to insights format (mock insights for now)
+        // Transform dashboard data to comprehensive insights format
         const dashboardData = response.data
-        insights.value = {
-          trend_analysis: [
-            {
-              id: 1,
-              title: 'Log Volume Analysis',
-              description: `Currently processing ${dashboardData.systemMetrics?.logsProcessed || 0} logs with ${dashboardData.systemMetrics?.activeAlerts || 0} active alerts.`,
-              type: 'info',
-              confidence: 0.95,
-              impact: 'medium'
-            }
-          ],
-          recommendations: [],
-          anomalies: []
+        const metrics = dashboardData.systemMetrics || {}
+        const now = new Date()
+        
+        // Build Trend Analysis
+        const trendAnalysis = []
+        
+        // Log volume trend
+        const logsProcessed = metrics.logsProcessed || 0
+        trendAnalysis.push({
+          id: 'trend_1',
+          title: 'Log Processing Volume',
+          description: `Currently processing ${logsProcessed.toLocaleString()} total logs with ${metrics.activeAlerts || 0} active alerts. System is ${metrics.systemHealth === 'Healthy' ? 'operating normally' : 'experiencing issues'}.`,
+          type: 'stable',
+          confidence: 0.95,
+          impact: 'medium'
+        })
+        
+        // Response time trend
+        const responseTime = metrics.responseTime || 0
+        const responseTrend = responseTime < 100 ? 'stable' : responseTime < 200 ? 'increasing' : 'volatile'
+        trendAnalysis.push({
+          id: 'trend_2',
+          title: 'Response Time Performance',
+          description: `Average response time is ${responseTime}ms. ${responseTime < 100 ? 'Performance is optimal.' : responseTime < 200 ? 'Slight performance degradation detected.' : 'Performance requires attention.'}`,
+          type: responseTrend,
+          confidence: 0.88,
+          impact: responseTime > 150 ? 'high' : 'low'
+        })
+        
+        // System health trend
+        const uptime = parseFloat(metrics.uptime) || 99.9
+        trendAnalysis.push({
+          id: 'trend_3',
+          title: 'System Uptime & Reliability',
+          description: `System uptime at ${uptime}%. ${uptime > 99.5 ? 'Excellent reliability maintained.' : 'Reliability below target threshold.'}`,
+          type: uptime > 99.5 ? 'stable' : 'decreasing',
+          confidence: 0.92,
+          impact: uptime < 99 ? 'high' : 'low'
+        })
+        
+        // Build Anomaly Detection
+        const anomalies = []
+        const activeAlerts = metrics.activeAlerts || 0
+        
+        if (activeAlerts > 0) {
+          anomalies.push({
+            id: 'anomaly_1',
+            title: 'Active Error Alerts Detected',
+            description: `${activeAlerts} active alerts detected in the last hour. These are ERROR or FATAL level logs requiring attention.`,
+            severity: activeAlerts > 5 ? 'high' : activeAlerts > 2 ? 'medium' : 'low',
+            confidence: 0.95,
+            detected_at: now.toISOString(),
+            affected_systems: ['Log Processing', 'Error Handling']
+          })
         }
-        console.log('✅ Analytics Insights loaded from database')
+        
+        if (responseTime > 150) {
+          anomalies.push({
+            id: 'anomaly_2',
+            title: 'Elevated Response Time',
+            description: `Response time of ${responseTime}ms exceeds the 150ms threshold. This may indicate database load or network latency issues.`,
+            severity: responseTime > 250 ? 'high' : 'medium',
+            confidence: 0.87,
+            detected_at: now.toISOString(),
+            affected_systems: ['Database', 'API Gateway']
+          })
+        }
+        
+        // Build Pattern Recognition
+        const patterns = []
+        
+        // Log volume pattern
+        patterns.push({
+          id: 'pattern_1',
+          title: 'Steady State Log Pattern',
+          description: `Log entries are being processed at a consistent rate. Total volume: ${logsProcessed.toLocaleString()} logs.`,
+          type: 'usage',
+          frequency: logsProcessed,
+          tags: ['log-processing', 'system-health', 'monitoring']
+        })
+        
+        // Response time pattern
+        if (responseTime > 100) {
+          patterns.push({
+            id: 'pattern_2',
+            title: 'Response Time Variance',
+            description: `Response times averaging ${responseTime}ms suggest moderate system load. Pattern indicates normal operational variance.`,
+            type: 'performance',
+            frequency: Math.floor(responseTime / 10),
+            tags: ['performance', 'response-time', 'optimization']
+          })
+        }
+        
+        // Error pattern
+        if (activeAlerts > 0) {
+          patterns.push({
+            id: 'pattern_3',
+            title: 'Error Log Clustering',
+            description: `${activeAlerts} error-level logs detected, indicating potential issues requiring investigation.`,
+            type: 'error',
+            frequency: activeAlerts,
+            tags: ['errors', 'alerts', 'troubleshooting']
+          })
+        }
+        
+        // Build Recommendations
+        const recommendations = []
+        
+        if (activeAlerts > 3) {
+          recommendations.push({
+            id: 'rec_1',
+            title: 'Investigate High Error Rate',
+            description: `With ${activeAlerts} active alerts, immediate investigation is recommended. Review recent deployments, check system resources, and examine error logs for patterns.`,
+            priority: activeAlerts > 5 ? 'high' : 'medium',
+            expected_impact: 'Reduce error rate by 60-80%',
+            actions: ['Review error logs', 'Check system resources', 'Analyze recent changes']
+          })
+        }
+        
+        if (responseTime > 150) {
+          recommendations.push({
+            id: 'rec_2',
+            title: 'Optimize Response Time',
+            description: `Response time of ${responseTime}ms exceeds optimal threshold. Consider database query optimization, adding caching layers, or scaling resources.`,
+            priority: responseTime > 250 ? 'high' : 'medium',
+            expected_impact: 'Improve response time by 30-50%',
+            actions: ['Optimize database queries', 'Implement caching', 'Review connection pooling']
+          })
+        }
+        
+        if (logsProcessed > 50000) {
+          recommendations.push({
+            id: 'rec_3',
+            title: 'Consider Log Archival Strategy',
+            description: `With ${logsProcessed.toLocaleString()} logs processed, implementing a log archival and retention policy will improve query performance and reduce storage costs.`,
+            priority: logsProcessed > 100000 ? 'medium' : 'low',
+            expected_impact: 'Reduce query time by 20-40%',
+            actions: ['Define retention policy', 'Implement archival process', 'Set up automated cleanup']
+          })
+        }
+        
+        // Always include a general recommendation
+        if (recommendations.length === 0) {
+          recommendations.push({
+            id: 'rec_4',
+            title: 'Maintain Current Monitoring Practices',
+            description: 'System is operating within normal parameters. Continue regular monitoring and maintain current operational practices.',
+            priority: 'low',
+            expected_impact: 'Sustained system reliability',
+            actions: ['Continue monitoring', 'Regular health checks', 'Document baseline metrics']
+          })
+        }
+        
+        insights.value = {
+          trend_analysis: trendAnalysis,
+          anomalies: anomalies,
+          patterns: patterns,
+          recommendations: recommendations
+        }
+        
+        console.log('✅ Analytics Insights generated from database metrics:', insights.value)
         return insights.value
       } catch (apiError) {
         console.log('Analytics insights API not available, using realistic dynamic insights')

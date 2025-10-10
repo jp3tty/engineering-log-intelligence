@@ -69,12 +69,18 @@ class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         """Handle POST requests for ML API"""
         try:
+            print("🤖 ML API POST request received")
+            
             # Read request body
             content_length = int(self.headers.get('Content-Length', 0))
             body = self.rfile.read(content_length).decode('utf-8')
+            print(f"🤖 Request body: {body}")
+            
             data = json.loads(body) if body else {}
+            print(f"🤖 Parsed data: {data}")
             
             action = data.get('action', 'analyze')
+            print(f"🤖 Action: {action}")
             
             # Set CORS headers
             self.send_response(200)
