@@ -181,7 +181,7 @@ def populate_database(count=10000):
         
         # Connect to database
         print("\nConnecting to database...")
-        conn = psycopg2.connect(database_url)
+        conn = psycopg2.connect(database_url, sslmode='require')
         print("✅ Connected successfully")
         print()
         
@@ -226,5 +226,6 @@ def populate_database(count=10000):
 if __name__ == "__main__":
     import sys
     count = int(sys.argv[1]) if len(sys.argv) > 1 else 10000
-    populate_database(count)
+    success = populate_database(count)
+    sys.exit(0 if success else 1)
 

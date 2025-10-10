@@ -38,7 +38,19 @@ jobs:
           # Use manual input if provided, otherwise use default 1000
           LOG_COUNT=${{ github.event.inputs.log_count || '1000' }}
           echo "🚀 Generating $LOG_COUNT log entries..."
+          echo "📊 Verifying DATABASE_URL is set..."
+          if [ -z "$DATABASE_URL" ]; then
+            echo "❌ ERROR: DATABASE_URL is not set!"
+            exit 1
+          fi
+          echo "✅ DATABASE_URL is configured"
           python populate_database.py $LOG_COUNT
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "❌ Script failed with exit code: $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
+          echo "✅ Script completed successfully"
       
       - name: Report success
         if: success()
