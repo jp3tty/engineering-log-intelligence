@@ -38,7 +38,7 @@ jobs:
           # Use manual input if provided, otherwise use default 1000
           LOG_COUNT=${{ github.event.inputs.log_count || '1000' }}
           echo "🚀 Generating $LOG_COUNT log entries..."
-          python engineering_log_intelligence/populate_database.py $LOG_COUNT
+          python populate_database.py $LOG_COUNT
       
       - name: Report success
         if: success()
