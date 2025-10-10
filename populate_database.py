@@ -11,8 +11,9 @@ from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import execute_batch
 
-# Load environment variables
-load_dotenv('.env.local')
+# Load environment variables (if .env.local exists locally, otherwise use environment)
+load_dotenv('.env.local')  # Loads from file if it exists
+load_dotenv()  # Also try default .env file
 
 def generate_log_entries(count=10000):
     """Generate sample log entries"""

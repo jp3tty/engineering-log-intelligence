@@ -205,6 +205,30 @@ vercel --prod
 vercel
 ```
 
+### Automated Log Generation
+
+The system includes automated daily log generation via GitHub Actions:
+
+```bash
+# The workflow runs automatically every day at 2 AM UTC
+# Generates 1000 new log entries daily
+
+# Manual generation (for testing)
+python populate_database.py 1000
+```
+
+**Setup Instructions:**
+1. Add `DATABASE_URL` to GitHub Secrets (Settings → Secrets → Actions)
+2. See `.github/workflows/DAILY_LOG_GENERATION_SETUP.md` for details
+3. Test workflow: Actions tab → Daily Log Generation → Run workflow
+
+**Features:**
+- ✅ Automated daily execution (2 AM UTC)
+- ✅ Manual trigger option via GitHub UI
+- ✅ Configurable log count per run
+- ✅ Free (uses GitHub Actions free tier)
+- ✅ Generates realistic multi-source logs (SPLUNK, SAP, Application)
+
 ## Documentation
 
 - [Project Status](PROJECT_STATUS.md) - Current project status and achievements
