@@ -26,6 +26,7 @@ import Login from '@/views/Login.vue'
 import NotFound from '@/views/NotFound.vue'
 import DashboardBuilder from '@/components/dashboard/DashboardBuilder.vue'
 import AnalyticsDashboard from '@/components/analytics/AnalyticsDashboard.vue'
+import MLDashboard from '@/components/MLDashboard.vue'
 
 // Define routes
 const routes = [
@@ -70,6 +71,17 @@ const routes = [
       requiresAuth: true,
       icon: 'chart-bar',
       roles: ['analyst', 'admin'],
+    },
+  },
+  {
+    path: '/ml-analytics',
+    name: 'MLDashboard',
+    component: MLDashboard,
+    meta: {
+      title: 'ML Analytics',
+      description: 'Machine Learning predictions and anomaly detection',
+      requiresAuth: true,
+      icon: 'beaker',
     },
   },
   {
