@@ -205,6 +205,12 @@ export default {
         requiresRole: ['analyst', 'admin'],
       },
       {
+        name: 'MLDashboard',
+        path: '/ml-analytics',
+        title: 'ML Analytics',
+        icon: 'BeakerIcon',
+      },
+      {
         name: 'DashboardBuilder',
         path: '/dashboard-builder',
         title: 'Dashboard Builder',
