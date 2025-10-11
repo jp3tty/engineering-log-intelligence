@@ -224,10 +224,24 @@ export default {
       console.log('Store overview:', analyticsStore.overview)
       console.log('Store metrics length:', storeMetrics?.length)
       
-      // If we have store metrics with data, use them
+      // If we have store metrics with data, use them BUT override anomaly count with ML data
       if (storeMetrics && storeMetrics.length > 0) {
-        console.log('✅ Using store metrics:', storeMetrics)
-        return storeMetrics
+        console.log('✅ Using store metrics with ML override')
+        
+        // Clone the metrics and update the anomalies_detected metric with real ML data
+        const updatedMetrics = storeMetrics.map(metric => {
+          if (metric.id === 'anomalies_detected' && anomalyCount.value > 0) {
+            return {
+              ...metric,
+              value: anomalyCount.value,
+              description: '🤖 Live ML Data'
+            }
+          }
+          return metric
+        })
+        
+        console.log('Updated metrics with ML data:', updatedMetrics)
+        return updatedMetrics
       }
       
       // Otherwise generate fallback
