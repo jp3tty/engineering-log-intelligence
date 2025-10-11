@@ -234,6 +234,7 @@ python populate_database.py 1000
 - [Project Status](PROJECT_STATUS.md) - Current project status and achievements
 - [Technical Architecture](docs/TECHNICAL_ARCHITECTURE.md)
 - [ML Enablement Guide](docs/ML_ENABLEMENT_GUIDE.md) - **NEW**: Step-by-step guide to enable ML features
+- [Data Overview for ML](docs/DATA_OVERVIEW_FOR_ML.md) - **NEW**: Understanding your log data for ML training
 - [Environment Setup](docs/ENVIRONMENT_SETUP.md)
 - [Vercel Development Setup](docs/VERCEL_DEVELOPMENT_SETUP.md)
 - [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
