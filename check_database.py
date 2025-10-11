@@ -48,25 +48,27 @@ def check_database():
         
         print("✅ Database connection successful!")
         
-        # Check if logs table exists
+        # Check if log_entries table exists
         cursor.execute("""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables 
-                WHERE table_name = 'logs'
+                WHERE table_name = 'log_entries'
             )
         """)
         table_exists = cursor.fetchone()['exists']
         
         if not table_exists:
-            print("❌ 'logs' table does not exist")
+            print("❌ 'log_entries' table does not exist")
             print("\nTo create the table, run:")
             print("psql $DATABASE_URL < external-services/postgresql/schema.sql")
+            print("\nOr run the setup script:")
+            print("python setup_schema.py")
             return False
         
-        print("✅ 'logs' table exists")
+        print("✅ 'log_entries' table exists")
         
         # Check row count
-        cursor.execute("SELECT COUNT(*) as count FROM logs")
+        cursor.execute("SELECT COUNT(*) as count FROM log_entries")
         total_logs = cursor.fetchone()['count']
         
         print(f"📊 Total logs in database: {total_logs:,}")
@@ -80,7 +82,7 @@ def check_database():
         # Get log distribution
         cursor.execute("""
             SELECT level, COUNT(*) as count 
-            FROM logs 
+            FROM log_entries 
             GROUP BY level 
             ORDER BY count DESC
         """)
@@ -93,7 +95,7 @@ def check_database():
         # Get recent logs
         cursor.execute("""
             SELECT COUNT(*) as count 
-            FROM logs 
+            FROM log_entries 
             WHERE timestamp > NOW() - INTERVAL '24 hours'
         """)
         recent_logs = cursor.fetchone()['count']
@@ -109,7 +111,7 @@ def check_database():
             SELECT 
                 MIN(timestamp) as oldest,
                 MAX(timestamp) as newest
-            FROM logs
+            FROM log_entries
         """)
         date_range = cursor.fetchone()
         

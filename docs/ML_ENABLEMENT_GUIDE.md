@@ -18,6 +18,12 @@ Before enabling ML features, ensure you have:
 - ✅ Sufficient log data for model training (minimum 1,000 logs recommended)
 - ✅ Environment variables configured in Vercel
 
+**Current Status (October 11, 2025):**
+- ✅ Database: Connected with `log_entries` table
+- ✅ Data: 12,010 logs available (exceeds minimum requirement)
+- ✅ Schema: Includes all necessary fields for ML training
+- ✅ Ready: All prerequisites met for ML enablement
+
 ## 🏗️ ML Architecture Status
 
 ### Current ML Components
@@ -45,7 +51,7 @@ The following ML components are already implemented:
 
 ## 🚀 Enablement Steps
 
-### Step 1: Verify Training Data
+### Step 1: Verify Training Data ✅
 
 First, verify you have sufficient log data for training:
 
@@ -60,34 +66,92 @@ python check_database.py
 - Minimum 1,000 logs (basic training)
 - Recommended 10,000+ logs (production-ready models)
 
+**Current Status (October 11, 2025):**
+- ✅ Database connected: PostgreSQL on Railway
+- ✅ Schema created: `log_entries` table exists
+- ✅ Data available: **12,010 logs** ready for training
+- ✅ Recent data: 604 logs in last 24 hours
+
+**You already have sufficient data to proceed with ML training!**
+
 ### Step 2: Train ML Models
 
-Train the ML models using your production log data:
+Train the ML models using your production log data from the `log_entries` table:
 
 ```bash
-# Activate virtual environment
+# Activate virtual environment (if not already active)
 source venv/bin/activate
 
-# Run model training script
-python -c "
+# Install required ML libraries
+pip install scikit-learn numpy pandas
+
+# Create a training script
+cat > train_models.py << 'EOF'
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from datetime import datetime
+
+# Get database connection
+database_url = os.environ.get('DATABASE_URL')
+if not database_url:
+    print("❌ DATABASE_URL not set")
+    exit(1)
+
+print("🔄 Connecting to database...")
+conn = psycopg2.connect(database_url)
+cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+# Fetch training data from log_entries table
+print("📊 Fetching training data from log_entries table...")
+cursor.execute("""
+    SELECT 
+        log_id, timestamp, level, message, source_type,
+        host, service, category, tags, raw_log,
+        is_anomaly, anomaly_type, http_status, response_time_ms
+    FROM log_entries 
+    ORDER BY timestamp DESC 
+    LIMIT 10000
+""")
+
+training_data = cursor.fetchall()
+print(f"✅ Loaded {len(training_data)} log entries for training")
+
+# Convert to list of dicts for ML service
+training_logs = []
+for row in training_data:
+    log_dict = dict(row)
+    # Convert any special types to standard Python types
+    if log_dict.get('timestamp'):
+        log_dict['timestamp'] = log_dict['timestamp'].isoformat()
+    training_logs.append(log_dict)
+
+cursor.close()
+conn.close()
+
+# Now train the models
+print("\n🤖 Starting ML model training...")
 from external_services.ml.ml_service import MLService
-from src.api.database import get_logs_for_training
 
 # Initialize ML service
 ml_service = MLService(model_storage_path='models/')
 
-# Get training data from database
-training_data = get_logs_for_training(limit=10000)
-
 # Train all models
-results = ml_service.train_all_models(training_data)
+results = ml_service.train_all_models(training_logs)
 
-print('Training Results:')
-print(f'Classification Model Accuracy: {results[\"models\"][\"log_classifier\"][\"accuracy\"]}')
-print(f'Anomaly Detection Model Accuracy: {results[\"models\"][\"anomaly_detector\"][\"accuracy\"]}')
-print('Models saved successfully!')
-"
+print('\n✅ Training Complete!')
+print('='*60)
+print(f'Classification Model Accuracy: {results["models"]["log_classifier"]["accuracy"]:.2%}')
+print(f'Anomaly Detection Model Accuracy: {results["models"]["anomaly_detector"]["accuracy"]:.2%}')
+print(f'Models saved to: models/')
+print('='*60)
+EOF
+
+# Run the training script
+python train_models.py
 ```
+
+**Note:** The training script fetches data from the `log_entries` table (not `logs`).
 
 ### Step 3: Update API to Use Real Models
 
@@ -360,5 +424,6 @@ If you encounter issues during ML enablement:
 
 **Last Updated:** October 11, 2025  
 **Status:** Ready for Implementation  
+**Database Status:** ✅ Connected with 12,010 logs in `log_entries` table  
 **Estimated Time:** 2-3 hours for full enablement
 
