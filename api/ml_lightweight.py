@@ -19,6 +19,20 @@ from http.server import BaseHTTPRequestHandler
 import json
 import os
 from datetime import datetime, timedelta
+from decimal import Decimal
+
+def convert_to_json_serializable(obj):
+    """Convert non-JSON-serializable types to serializable ones"""
+    if isinstance(obj, dict):
+        return {k: convert_to_json_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_to_json_serializable(item) for item in obj]
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    elif isinstance(obj, datetime):
+        return obj.isoformat()
+    else:
+        return obj
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -220,9 +234,12 @@ class handler(BaseHTTPRequestHandler):
             cursor.close()
             conn.close()
             
+            # Convert to JSON-serializable format
+            serializable_results = [convert_to_json_serializable(dict(r)) for r in results]
+            
             return {
                 "success": True,
-                "results": [dict(r) for r in results],
+                "results": serializable_results,
                 "total": len(results),
                 "source": "pre-computed_predictions",
                 "timestamp": datetime.now().isoformat()
@@ -273,14 +290,17 @@ class handler(BaseHTTPRequestHandler):
             cursor.close()
             conn.close()
             
+            # Convert to JSON-serializable format
+            serializable_stats = convert_to_json_serializable({
+                "severity_distribution": [dict(s) for s in severity_stats],
+                "total_predictions": anomaly_stats['total'],
+                "anomalies_detected": anomaly_stats['anomalies'],
+                "anomaly_rate": anomaly_stats['anomalies'] / max(anomaly_stats['total'], 1)
+            })
+            
             return {
                 "success": True,
-                "statistics": {
-                    "severity_distribution": [dict(s) for s in severity_stats],
-                    "total_predictions": anomaly_stats['total'],
-                    "anomalies_detected": anomaly_stats['anomalies'],
-                    "anomaly_rate": anomaly_stats['anomalies'] / max(anomaly_stats['total'], 1)
-                },
+                "statistics": serializable_stats,
                 "period": "last_24_hours",
                 "timestamp": datetime.now().isoformat()
             }
