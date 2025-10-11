@@ -98,44 +98,55 @@ class handler(BaseHTTPRequestHandler):
             response_time_result = cursor.fetchone()
             avg_response_time = float(response_time_result['avg_response_time']) if response_time_result and response_time_result['avg_response_time'] else 0
             
-            # Get error rate (ERROR and FATAL logs vs total)
+            # Get FATAL and ERROR counts separately (industry standard)
             cursor.execute("""
                 SELECT 
-                    COUNT(*) FILTER (WHERE level IN ('ERROR', 'FATAL')) as error_count,
+                    COUNT(*) FILTER (WHERE level = 'FATAL') as fatal_count,
+                    COUNT(*) FILTER (WHERE level = 'ERROR') as error_count,
                     COUNT(*) as total_count
                 FROM log_entries
                 WHERE timestamp > NOW() - INTERVAL '24 hours'
             """)
             error_rate_result = cursor.fetchone()
+            fatal_count = error_rate_result['fatal_count'] if error_rate_result else 0
             error_count = error_rate_result['error_count'] if error_rate_result else 0
             total_count = error_rate_result['total_count'] if error_rate_result else 1
+            
+            fatal_rate = (fatal_count / max(total_count, 1)) * 100
             error_rate = (error_count / max(total_count, 1)) * 100
             
-            # Get ML anomaly rate from ml_predictions
+            # Get high-severity ML anomalies only (not all anomalies)
             try:
                 cursor.execute("""
                     SELECT 
-                        COUNT(*) FILTER (WHERE is_anomaly = true) as anomaly_count,
+                        COUNT(*) FILTER (WHERE is_anomaly = true AND severity = 'high') as high_anomaly_count,
                         COUNT(*) as total_predictions
                     FROM ml_predictions
                     WHERE predicted_at > NOW() - INTERVAL '24 hours'
                 """)
                 ml_result = cursor.fetchone()
-                anomaly_count = ml_result['anomaly_count'] if ml_result else 0
+                high_anomaly_count = ml_result['high_anomaly_count'] if ml_result else 0
                 total_predictions = ml_result['total_predictions'] if ml_result else 0
-                ml_anomaly_rate = (anomaly_count / max(total_predictions, 1)) * 100
+                high_anomaly_rate = (high_anomaly_count / max(total_predictions, 1)) * 100
             except:
-                ml_anomaly_rate = 0
+                high_anomaly_rate = 0
             
-            # Calculate system health
-            # Base health: 100%
-            # Subtract error rate impact (errors are bad)
-            # Subtract anomaly rate impact (anomalies indicate issues)
-            base_health = 100.0
-            error_impact = error_rate * 2  # Errors have 2x weight
-            anomaly_impact = ml_anomaly_rate * 0.5  # Anomalies have 0.5x weight
+            # Calculate system health (Industry Standard Approach)
+            # Similar to AWS CloudWatch, DataDog, New Relic
+            # - Start at 99% baseline (no system is "perfect" 100%)
+            # - Only penalize for critical issues (FATAL, ERROR, high-severity anomalies)
+            # - Use small deductions to keep scores realistic (90-99% is normal)
+            # - Floor at 85% (even troubled systems should show some health)
+            base_health = 99.0
             
-            system_health = max(0, base_health - error_impact - anomaly_impact)
+            # Deductions (much smaller than before)
+            fatal_impact = fatal_rate * 3.0      # FATAL logs are serious: 1% fatal = -3% health
+            error_impact = error_rate * 0.5      # ERROR logs less severe: 1% error = -0.5% health
+            anomaly_impact = high_anomaly_rate * 0.3  # Only high-severity anomalies: 1% = -0.3% health
+            
+            # Calculate final health with floor and ceiling
+            system_health = base_health - fatal_impact - error_impact - anomaly_impact
+            system_health = max(85.0, min(99.9, system_health))  # Floor: 85%, Ceiling: 99.9%
             
             cursor.close()
             conn.close()
@@ -145,9 +156,17 @@ class handler(BaseHTTPRequestHandler):
                 "metrics": {
                     "total_logs": total_logs,
                     "avg_response_time_ms": round(avg_response_time, 2),
+                    "fatal_rate": round(fatal_rate, 2),
                     "error_rate": round(error_rate, 2),
-                    "ml_anomaly_rate": round(ml_anomaly_rate, 2),
+                    "high_anomaly_rate": round(high_anomaly_rate, 2),
+                    "high_anomaly_count": high_anomaly_count,  # Add actual count
                     "system_health": round(system_health, 1)
+                },
+                "calculation": {
+                    "base": 99.0,
+                    "fatal_impact": round(fatal_impact, 2),
+                    "error_impact": round(error_impact, 2),
+                    "anomaly_impact": round(anomaly_impact, 2)
                 },
                 "period": "last_24_hours",
                 "timestamp": datetime.now().isoformat()

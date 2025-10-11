@@ -360,7 +360,7 @@ export default {
           console.log('✅ Real metrics loaded:', data.metrics)
           return {
             logs: data.metrics.total_logs || 0,
-            alerts: data.metrics.high_anomaly_rate ? Math.round(data.metrics.total_logs * data.metrics.high_anomaly_rate / 100) : 0,
+            alerts: data.metrics.high_anomaly_count || 0,  // Use actual count, not calculated from rate
             response: Math.round(data.metrics.avg_response_time_ms || 0)
           }
         }
