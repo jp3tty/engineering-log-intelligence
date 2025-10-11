@@ -23,11 +23,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.11'
       
       - name: Install dependencies
         run: |
-          pip install scikit-learn==1.7.2 numpy==2.3.3 psycopg2-binary==2.9.9 python-dotenv==1.0.0
+          pip install scikit-learn numpy pandas psycopg2-binary python-dotenv
       
       - name: Run ML analysis
         env:
