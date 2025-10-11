@@ -232,6 +232,14 @@ export default {
         
         // Clone the metrics and update with real database data
         const updatedMetrics = storeMetrics.map(metric => {
+          // Override total logs with real count
+          if (metric.id === 'total_logs' && realMetrics.value?.metrics?.total_logs) {
+            return {
+              ...metric,
+              value: realMetrics.value.metrics.total_logs,
+              description: '📊 Real Database Count'
+            }
+          }
           // Override anomalies with ML data
           if (metric.id === 'anomalies_detected' && anomalyCount.value > 0) {
             return {
@@ -270,12 +278,16 @@ export default {
       const minuteOfHour = now.getMinutes()
       const isBusinessHours = hourOfDay >= 9 && hourOfDay <= 17
       
-      // Generate dynamic values based on time of day (match Dashboard calculation)
-      const baseLogVolume = 125000
-      const hourModifier = isBusinessHours ? 1.35 : 0.65
-      const randomVariation = 0.85 + Math.random() * 0.3
-      const minuteVariation = 1 + (minuteOfHour / 60) * 0.1
-      const total_logs = Math.floor(baseLogVolume * hourModifier * randomVariation * minuteVariation)
+      // Use real log count from database if available, otherwise generate
+      const total_logs = realMetrics.value?.metrics?.total_logs
+        ? realMetrics.value.metrics.total_logs
+        : (() => {
+            const baseLogVolume = 125000
+            const hourModifier = isBusinessHours ? 1.35 : 0.65
+            const randomVariation = 0.85 + Math.random() * 0.3
+            const minuteVariation = 1 + (minuteOfHour / 60) * 0.1
+            return Math.floor(baseLogVolume * hourModifier * randomVariation * minuteVariation)
+          })()
       
       // Use real data if available, otherwise fallback
       const currentAnomalyCount = anomalyCount.value
@@ -309,7 +321,8 @@ export default {
           value: total_logs,
           format: 'number',
           trend: -2 + Math.random() * 20,
-          color: 'blue'
+          color: 'blue',
+          description: realMetrics.value?.metrics?.total_logs ? '📊 Real Database Count' : null
         },
         {
           id: 'anomalies_detected',
