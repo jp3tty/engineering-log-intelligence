@@ -102,16 +102,43 @@ export function useMLData() {
   })
 
   /**
+   * Get high severity count from stats
+   */
+  const highSeverityCount = computed(() => {
+    // Try to get from stats first
+    if (mlStats.value?.statistics?.severity_distribution) {
+      const highSeverity = mlStats.value.statistics.severity_distribution.find(
+        s => s.severity === 'high'
+      )
+      if (highSeverity) return highSeverity.count
+    }
+    // Fall back to counting predictions
+    return highSeverityPredictions.value.length
+  })
+
+  /**
    * Get anomaly count
+   * Prioritizes mlStats (from /stats endpoint) over counting mlPredictions
    */
   const anomalyCount = computed(() => {
+    // If we have stats data, use it (more efficient)
+    if (mlStats.value?.statistics?.anomalies_detected != null) {
+      return mlStats.value.statistics.anomalies_detected
+    }
+    // Otherwise fall back to counting predictions
     return mlAnomalies.value.length
   })
 
   /**
    * Get anomaly rate
+   * Prioritizes mlStats over calculating from predictions
    */
   const anomalyRate = computed(() => {
+    // If we have stats data, use it
+    if (mlStats.value?.statistics?.anomaly_rate != null) {
+      return mlStats.value.statistics.anomaly_rate * 100 // Convert to percentage
+    }
+    // Otherwise calculate from predictions
     if (mlPredictions.value.length === 0) return 0
     return (mlAnomalies.value.length / mlPredictions.value.length) * 100
   })
@@ -167,6 +194,7 @@ export function useMLData() {
     // Computed
     mlAnomalies,
     highSeverityPredictions,
+    highSeverityCount,
     anomalyCount,
     anomalyRate,
     mlSystemHealth,

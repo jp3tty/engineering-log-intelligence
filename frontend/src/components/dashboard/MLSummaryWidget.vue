@@ -61,17 +61,13 @@ const {
   loading,
   isMLActive,
   anomalyCount,
-  highSeverityPredictions,
+  highSeverityCount,
   anomalyRate,
   fetchMLStats
 } = useMLData()
 
 onMounted(() => {
   fetchMLStats()
-})
-
-const highSeverityCount = computed(() => {
-  return highSeverityPredictions.value.length
 })
 
 const formatLastUpdate = computed(() => {
