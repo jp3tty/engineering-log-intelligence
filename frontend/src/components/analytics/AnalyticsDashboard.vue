@@ -174,8 +174,10 @@ export default {
     // ML Data composable
     const {
       mlStats,
+      realMetrics,
       anomalyCount,
-      fetchMLStats
+      fetchMLStats,
+      fetchRealMetrics
     } = useMLData()
 
     // Reactive state
@@ -228,13 +230,30 @@ export default {
       if (storeMetrics && storeMetrics.length > 0) {
         console.log('✅ Using store metrics with ML override')
         
-        // Clone the metrics and update the anomalies_detected metric with real ML data
+        // Clone the metrics and update with real database data
         const updatedMetrics = storeMetrics.map(metric => {
+          // Override anomalies with ML data
           if (metric.id === 'anomalies_detected' && anomalyCount.value > 0) {
             return {
               ...metric,
               value: anomalyCount.value,
               description: '🤖 Live ML Data'
+            }
+          }
+          // Override avg response time with real data
+          if (metric.id === 'avg_response_time' && realMetrics.value?.metrics?.avg_response_time_ms) {
+            return {
+              ...metric,
+              value: realMetrics.value.metrics.avg_response_time_ms,
+              description: '📊 Real Database Data'
+            }
+          }
+          // Override system health with calculated value
+          if (metric.id === 'system_health' && realMetrics.value?.metrics?.system_health) {
+            return {
+              ...metric,
+              value: realMetrics.value.metrics.system_health,
+              description: '📊 Calculated from Error Rates'
             }
           }
           return metric
@@ -258,12 +277,19 @@ export default {
       const minuteVariation = 1 + (minuteOfHour / 60) * 0.1
       const total_logs = Math.floor(baseLogVolume * hourModifier * randomVariation * minuteVariation)
       
-      // Use real ML anomaly count if available, otherwise fallback
-      // IMPORTANT: Read anomalyCount.value here so Vue tracks it as a dependency
+      // Use real data if available, otherwise fallback
       const currentAnomalyCount = anomalyCount.value
       const mlAnomalies = currentAnomalyCount > 0 ? currentAnomalyCount : Math.floor(total_logs * (0.015 + Math.random() * 0.025))
-      const responseTime = Math.floor(75 + Math.random() * 35)
-      const systemHealth = parseFloat((94 + Math.random() * 5).toFixed(1))
+      
+      // Use real response time from database if available
+      const responseTime = realMetrics.value?.metrics?.avg_response_time_ms 
+        ? realMetrics.value.metrics.avg_response_time_ms 
+        : Math.floor(75 + Math.random() * 35)
+      
+      // Use calculated system health if available
+      const systemHealth = realMetrics.value?.metrics?.system_health
+        ? realMetrics.value.metrics.system_health
+        : parseFloat((94 + Math.random() * 5).toFixed(1))
       
       console.log('📊 Analytics Metrics Generated:', { 
         total_logs, 
@@ -294,22 +320,24 @@ export default {
           color: 'red',
           description: currentAnomalyCount > 0 ? '🤖 Live ML Data' : null
         },
-        {
-          id: 'avg_response_time',
-          title: 'Avg Response Time',
-          value: responseTime,
-          format: 'duration',
-          trend: -10 + Math.random() * 15,
-          color: 'green'
-        },
-        {
-          id: 'system_health',
-          title: 'System Health',
-          value: systemHealth,
-          format: 'percentage',
-          trend: -5 + Math.random() * 8,
-          color: 'emerald'
-        }
+          {
+            id: 'avg_response_time',
+            title: 'Avg Response Time',
+            value: responseTime,
+            format: 'duration',
+            trend: -10 + Math.random() * 15,
+            color: 'green',
+            description: realMetrics.value?.metrics?.avg_response_time_ms ? '📊 Real Database Data' : null
+          },
+          {
+            id: 'system_health',
+            title: 'System Health',
+            value: systemHealth,
+            format: 'percentage',
+            trend: -5 + Math.random() * 8,
+            color: 'emerald',
+            description: realMetrics.value?.metrics?.system_health ? '📊 Calculated from Error Rates' : null
+          }
       ]
     })
 
@@ -439,10 +467,14 @@ export default {
     // Load data on component mount
     onMounted(async () => {
       console.log('AnalyticsDashboard mounted, loading data...')
-      // Load ML data
-      await fetchMLStats()
+      // Load ML data and real metrics
+      await Promise.all([
+        fetchMLStats(),
+        fetchRealMetrics()
+      ])
       console.log('ML Stats loaded:', mlStats.value)
       console.log('ML Anomaly Count:', anomalyCount.value)
+      console.log('Real Metrics loaded:', realMetrics.value)
       // Load analytics data
       await loadAnalyticsData()
       console.log('Data loaded, store overview:', analyticsStore.overview)

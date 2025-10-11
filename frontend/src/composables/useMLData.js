@@ -15,6 +15,7 @@ export function useMLData() {
   const mlStatus = ref(null)
   const mlStats = ref(null)
   const mlPredictions = ref([])
+  const realMetrics = ref(null)
   const loading = ref(false)
   const error = ref(null)
 
@@ -67,6 +68,22 @@ export function useMLData() {
   }
 
   /**
+   * Fetch real metrics from database
+   */
+  const fetchRealMetrics = async () => {
+    try {
+      const response = await fetch('/api/metrics')
+      const data = await response.json()
+      realMetrics.value = data
+      return data
+    } catch (err) {
+      console.error('Error fetching real metrics:', err)
+      error.value = err.message
+      return null
+    }
+  }
+
+  /**
    * Fetch all ML data at once
    */
   const fetchAllMLData = async () => {
@@ -77,7 +94,8 @@ export function useMLData() {
       await Promise.all([
         fetchMLStatus(),
         fetchMLStats(),
-        fetchMLPredictions()
+        fetchMLPredictions(),
+        fetchRealMetrics()
       ])
     } catch (err) {
       console.error('Error fetching ML data:', err)
@@ -188,6 +206,7 @@ export function useMLData() {
     mlStatus,
     mlStats,
     mlPredictions,
+    realMetrics,
     loading,
     error,
 
@@ -205,6 +224,7 @@ export function useMLData() {
     fetchMLStatus,
     fetchMLStats,
     fetchMLPredictions,
+    fetchRealMetrics,
     fetchAllMLData
   }
 }
