@@ -349,52 +349,47 @@ export default {
     const isLoading = ref(false)
     
     // Generate dynamic metrics based on time of day
-    const generateDynamicMetrics = () => {
-      const now = new Date()
-      const hourOfDay = now.getHours()
-      const minuteOfHour = now.getMinutes()
-      const isBusinessHours = hourOfDay >= 9 && hourOfDay <= 17
-      
-      const baseLogVolume = 125000
-      const hourModifier = isBusinessHours ? 1.35 : 0.65
-      const randomVariation = 0.85 + Math.random() * 0.3 // Increased variation
-      const minuteVariation = 1 + (minuteOfHour / 60) * 0.1 // Add minute-based variation
-      const logs = Math.floor(baseLogVolume * hourModifier * randomVariation * minuteVariation)
-      
-      const anomalyRate = 0.015 + Math.random() * 0.025
-      const alerts = Math.floor(logs * anomalyRate / 1000)
-      
-      const baseResponseTime = 75
-      const loadFactor = logs / baseLogVolume
-      const response = Math.floor(baseResponseTime * loadFactor + Math.random() * 25)
-      
-      console.log('🎲 Generated dynamic metrics:', { logs, alerts, response, hourOfDay, isBusinessHours })
-      
-      return {
-        logs,
-        alerts: Math.max(2, Math.min(18, alerts)),
-        response: Math.max(60, Math.min(150, response))
+    // Fetch REAL metrics from /api/metrics - NO MOCK DATA!
+    const fetchRealMetrics = async () => {
+      try {
+        console.log('📊 Fetching REAL metrics from /api/metrics...')
+        const response = await fetch('/api/metrics')
+        const data = await response.json()
+        
+        if (data.success && data.metrics) {
+          console.log('✅ Real metrics loaded:', data.metrics)
+          return {
+            logs: data.metrics.total_logs || 0,
+            alerts: data.metrics.high_anomaly_rate ? Math.round(data.metrics.total_logs * data.metrics.high_anomaly_rate / 100) : 0,
+            response: Math.round(data.metrics.avg_response_time_ms || 0)
+          }
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch real metrics:', error)
       }
+      
+      // Fallback only if API fails
+      return { logs: 0, alerts: 0, response: 0 }
     }
     
-    // Generate initial dynamic metrics
-    const initialMetrics = generateDynamicMetrics()
+    // Initialize with zeros, will be loaded from API
+    const logsProcessed = ref(0)
+    const activeAlerts = ref(0)
+    const responseTime = ref(0)
+    
     console.log('=' .repeat(80))
     console.log('🚀 DASHBOARD INITIALIZED - ' + new Date().toISOString())
-    console.log('Generated Metrics:', initialMetrics)
+    console.log('Loading REAL metrics from database...')
     console.log('=' .repeat(80))
     
-    const logsProcessed = ref(initialMetrics.logs)
-    const activeAlerts = ref(initialMetrics.alerts)
-    const responseTime = ref(initialMetrics.response)
-    
-    console.log('📊 REFS SET TO:', { 
-      'logsProcessed.value': logsProcessed.value, 
-      'activeAlerts.value': activeAlerts.value, 
-      'responseTime.value': responseTime.value 
-    })
-    console.log('🔍 CHECKING: logsProcessed is', logsProcessed.value, 'but initialMetrics.logs was', initialMetrics.logs)
-    console.log('=' .repeat(80))
+    // Load real metrics immediately on initialization
+    ;(async () => {
+      const initialRealMetrics = await fetchRealMetrics()
+      logsProcessed.value = initialRealMetrics.logs
+      activeAlerts.value = initialRealMetrics.alerts
+      responseTime.value = initialRealMetrics.response
+      console.log('✅ Initial real metrics loaded:', initialRealMetrics)
+    })()
 
     // Chart data - For beginners: This is the data that will be displayed in our charts
     // Generate realistic log volume data based on total logs processed
@@ -1084,20 +1079,19 @@ export default {
             serviceHealthData.value = analyticsData.serviceHealth
           }
           
-          // Update system metrics
-          if (analyticsData.systemMetrics) {
-            logsProcessed.value = analyticsData.systemMetrics.logsProcessed
-            activeAlerts.value = analyticsData.systemMetrics.activeAlerts
-            responseTime.value = analyticsData.systemMetrics.responseTime
-          }
-          console.log('✅ Chart data updated successfully')
+          // Update system metrics with REAL data from /api/metrics
+          const realMetrics = await fetchRealMetrics()
+          logsProcessed.value = realMetrics.logs
+          activeAlerts.value = realMetrics.alerts
+          responseTime.value = realMetrics.response
+          console.log('✅ Chart data and real metrics updated successfully')
         } else {
-          console.log('❌ No analytics data received, regenerating dynamic metrics and charts')
-          // Regenerate dynamic metrics if no API data
-          const newMetrics = generateDynamicMetrics()
-          logsProcessed.value = newMetrics.logs
-          activeAlerts.value = newMetrics.alerts
-          responseTime.value = newMetrics.response
+          console.log('❌ No analytics data received, fetching real metrics only')
+          // Fetch REAL metrics from /api/metrics
+          const realMetrics = await fetchRealMetrics()
+          logsProcessed.value = realMetrics.logs
+          activeAlerts.value = realMetrics.alerts
+          responseTime.value = realMetrics.response
           
           // Regenerate ALL chart data with variation
           logVolumeData.value = generateLogVolumeData()
@@ -1110,11 +1104,11 @@ export default {
         
       } catch (error) {
         console.error('❌ Failed to refresh data:', error)
-        // Even on error, regenerate metrics to show dynamic data
-        const newMetrics = generateDynamicMetrics()
-        logsProcessed.value = newMetrics.logs
-        activeAlerts.value = newMetrics.alerts
-        responseTime.value = newMetrics.response
+        // Even on error, fetch real metrics
+        const realMetrics = await fetchRealMetrics()
+        logsProcessed.value = realMetrics.logs
+        activeAlerts.value = realMetrics.alerts
+        responseTime.value = realMetrics.response
         
         // Regenerate ALL chart data
         logVolumeData.value = generateLogVolumeData()
