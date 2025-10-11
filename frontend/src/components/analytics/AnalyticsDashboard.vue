@@ -220,6 +220,7 @@ export default {
       const storeMetrics = analyticsStore.keyMetrics
       console.log('🔍 Computing keyMetrics...')
       console.log('Store metrics:', storeMetrics)
+      console.log('ML anomalyCount:', anomalyCount.value)
       console.log('Store overview:', analyticsStore.overview)
       console.log('Store metrics length:', storeMetrics?.length)
       
@@ -231,70 +232,71 @@ export default {
       
       // Otherwise generate fallback
       console.log('⚠️ Using fallback metrics')
-      if (true) { // Always generate fallback if needed
-        const now = new Date()
-        const hourOfDay = now.getHours()
-        const minuteOfHour = now.getMinutes()
-        const isBusinessHours = hourOfDay >= 9 && hourOfDay <= 17
-        
-        // Generate dynamic values based on time of day (match Dashboard calculation)
-        const baseLogVolume = 125000
-        const hourModifier = isBusinessHours ? 1.35 : 0.65
-        const randomVariation = 0.85 + Math.random() * 0.3
-        const minuteVariation = 1 + (minuteOfHour / 60) * 0.1
-        const total_logs = Math.floor(baseLogVolume * hourModifier * randomVariation * minuteVariation)
-        
-        // Use real ML anomaly count if available, otherwise fallback
-        const mlAnomalies = anomalyCount.value || Math.floor(total_logs * (0.015 + Math.random() * 0.025))
-        const responseTime = Math.floor(75 + Math.random() * 35)
-        const systemHealth = parseFloat((94 + Math.random() * 5).toFixed(1))
-        
-        console.log('📊 Analytics Metrics Generated:', { 
-          total_logs, 
-          mlAnomalies, 
-          usingRealML: anomalyCount.value > 0,
-          responseTime, 
-          systemHealth, 
-          hourOfDay, 
-          isBusinessHours 
-        })
-        
-        return [
-          {
-            id: 'total_logs',
-            title: 'Total Logs Processed',
-            value: total_logs,
-            format: 'number',
-            trend: -2 + Math.random() * 20,
-            color: 'blue'
-          },
-          {
-            id: 'anomalies_detected',
-            title: 'Anomalies Detected',
-            value: mlAnomalies,
-            format: 'number',
-            trend: -15 + Math.random() * 20,
-            color: 'red',
-            description: anomalyCount.value > 0 ? '🤖 Live ML Data' : null
-          },
-          {
-            id: 'avg_response_time',
-            title: 'Avg Response Time',
-            value: responseTime,
-            format: 'duration',
-            trend: -10 + Math.random() * 15,
-            color: 'green'
-          },
-          {
-            id: 'system_health',
-            title: 'System Health',
-            value: systemHealth,
-            format: 'percentage',
-            trend: -5 + Math.random() * 8,
-            color: 'emerald'
-          }
-        ]
-      }
+      const now = new Date()
+      const hourOfDay = now.getHours()
+      const minuteOfHour = now.getMinutes()
+      const isBusinessHours = hourOfDay >= 9 && hourOfDay <= 17
+      
+      // Generate dynamic values based on time of day (match Dashboard calculation)
+      const baseLogVolume = 125000
+      const hourModifier = isBusinessHours ? 1.35 : 0.65
+      const randomVariation = 0.85 + Math.random() * 0.3
+      const minuteVariation = 1 + (minuteOfHour / 60) * 0.1
+      const total_logs = Math.floor(baseLogVolume * hourModifier * randomVariation * minuteVariation)
+      
+      // Use real ML anomaly count if available, otherwise fallback
+      // IMPORTANT: Read anomalyCount.value here so Vue tracks it as a dependency
+      const currentAnomalyCount = anomalyCount.value
+      const mlAnomalies = currentAnomalyCount > 0 ? currentAnomalyCount : Math.floor(total_logs * (0.015 + Math.random() * 0.025))
+      const responseTime = Math.floor(75 + Math.random() * 35)
+      const systemHealth = parseFloat((94 + Math.random() * 5).toFixed(1))
+      
+      console.log('📊 Analytics Metrics Generated:', { 
+        total_logs, 
+        mlAnomalies, 
+        currentAnomalyCount,
+        usingRealML: currentAnomalyCount > 0,
+        responseTime, 
+        systemHealth, 
+        hourOfDay, 
+        isBusinessHours 
+      })
+      
+      return [
+        {
+          id: 'total_logs',
+          title: 'Total Logs Processed',
+          value: total_logs,
+          format: 'number',
+          trend: -2 + Math.random() * 20,
+          color: 'blue'
+        },
+        {
+          id: 'anomalies_detected',
+          title: 'Anomalies Detected',
+          value: mlAnomalies,
+          format: 'number',
+          trend: -15 + Math.random() * 20,
+          color: 'red',
+          description: currentAnomalyCount > 0 ? '🤖 Live ML Data' : null
+        },
+        {
+          id: 'avg_response_time',
+          title: 'Avg Response Time',
+          value: responseTime,
+          format: 'duration',
+          trend: -10 + Math.random() * 15,
+          color: 'green'
+        },
+        {
+          id: 'system_health',
+          title: 'System Health',
+          value: systemHealth,
+          format: 'percentage',
+          trend: -5 + Math.random() * 8,
+          color: 'emerald'
+        }
+      ]
     })
 
     // Report templates
