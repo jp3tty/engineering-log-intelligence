@@ -131,6 +131,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useAnalyticsStore } from '@/stores/analytics'
 import { useNotificationStore } from '@/stores/notifications'
+import { useMLData } from '@/composables/useMLData'
 import {
   ChartBarIcon,
   ArrowPathIcon,
@@ -169,6 +170,13 @@ export default {
   setup() {
     const analyticsStore = useAnalyticsStore()
     const notificationStore = useNotificationStore()
+
+    // ML Data composable
+    const {
+      mlStats,
+      anomalyCount,
+      fetchMLStats
+    } = useMLData()
 
     // Reactive state
     const loading = ref(false)
@@ -236,11 +244,20 @@ export default {
         const minuteVariation = 1 + (minuteOfHour / 60) * 0.1
         const total_logs = Math.floor(baseLogVolume * hourModifier * randomVariation * minuteVariation)
         
-        const anomalies = Math.floor(total_logs * (0.015 + Math.random() * 0.025))
+        // Use real ML anomaly count if available, otherwise fallback
+        const mlAnomalies = anomalyCount.value || Math.floor(total_logs * (0.015 + Math.random() * 0.025))
         const responseTime = Math.floor(75 + Math.random() * 35)
         const systemHealth = parseFloat((94 + Math.random() * 5).toFixed(1))
         
-        console.log('📊 Analytics Fallback Generated:', { total_logs, anomalies, responseTime, systemHealth, hourOfDay, isBusinessHours })
+        console.log('📊 Analytics Metrics Generated:', { 
+          total_logs, 
+          mlAnomalies, 
+          usingRealML: anomalyCount.value > 0,
+          responseTime, 
+          systemHealth, 
+          hourOfDay, 
+          isBusinessHours 
+        })
         
         return [
           {
@@ -254,10 +271,11 @@ export default {
           {
             id: 'anomalies_detected',
             title: 'Anomalies Detected',
-            value: anomalies,
+            value: mlAnomalies,
             format: 'number',
             trend: -15 + Math.random() * 20,
-            color: 'red'
+            color: 'red',
+            description: anomalyCount.value > 0 ? '🤖 Live ML Data' : null
           },
           {
             id: 'avg_response_time',
@@ -405,6 +423,11 @@ export default {
     // Load data on component mount
     onMounted(async () => {
       console.log('AnalyticsDashboard mounted, loading data...')
+      // Load ML data
+      await fetchMLStats()
+      console.log('ML Stats loaded:', mlStats.value)
+      console.log('ML Anomaly Count:', anomalyCount.value)
+      // Load analytics data
       await loadAnalyticsData()
       console.log('Data loaded, store overview:', analyticsStore.overview)
       console.log('Computed keyMetrics:', keyMetrics.value)
