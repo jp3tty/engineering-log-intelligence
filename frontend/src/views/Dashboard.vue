@@ -121,6 +121,11 @@
         </div>
       </div>
 
+      <!-- ML Summary Widget -->
+      <div class="mb-8">
+        <MLSummaryWidget />
+      </div>
+
       <!-- Charts and Analytics -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <!-- Log Volume Chart -->
@@ -326,6 +331,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useSystemStore } from '@/stores/system'
 import { LineChart, BarChart, PieChart, TreeMapChart } from '@/components/charts'
 import { fetchDashboardAnalytics } from '@/services/analytics'
+import MLSummaryWidget from '@/components/dashboard/MLSummaryWidget.vue'
 
 export default {
   name: 'Dashboard',
@@ -333,7 +339,8 @@ export default {
     LineChart,
     BarChart,
     PieChart,
-    TreeMapChart
+    TreeMapChart,
+    MLSummaryWidget
   },
   setup() {
     const systemStore = useSystemStore()

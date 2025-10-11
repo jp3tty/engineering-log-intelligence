@@ -55,8 +55,51 @@
 
       <!-- Anomaly Detection -->
       <div class="insight-section">
-        <h3 class="subsection-title">Anomaly Detection</h3>
-        <div class="anomaly-grid">
+        <div class="subsection-header">
+          <h3 class="subsection-title">Anomaly Detection (ML-Powered)</h3>
+          <span v-if="mlAnomalies.length > 0" class="ml-badge">
+            🤖 Live ML Data
+          </span>
+        </div>
+        
+        <!-- ML Loading State -->
+        <div v-if="mlLoading" class="ml-loading">
+          <div class="spinner-small"></div>
+          <span>Loading ML anomalies...</span>
+        </div>
+        
+        <!-- ML Anomalies -->
+        <div v-else-if="mlAnomalies.length > 0" class="anomaly-grid">
+          <div
+            v-for="anomaly in mlAnomalies.slice(0, 6)"
+            :key="anomaly.id"
+            class="anomaly-card"
+            :class="getAnomalySeverityClass(anomaly.severity)"
+          >
+            <div class="anomaly-header">
+              <div class="anomaly-severity">
+                <component :is="getSeverityIcon(anomaly.severity)" class="w-5 h-5" />
+                <span class="severity-text">{{ anomaly.severity }}</span>
+              </div>
+              <span class="anomaly-time">{{ formatTime(anomaly.detected_at) }}</span>
+            </div>
+            <h4 class="anomaly-title">{{ anomaly.title }}</h4>
+            <p class="anomaly-description">{{ truncateText(anomaly.description, 100) }}</p>
+            <div class="anomaly-metrics">
+              <div class="metric">
+                <span class="metric-label">ML Confidence:</span>
+                <span class="metric-value">{{ Math.round(anomaly.confidence * 100) }}%</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Log ID:</span>
+                <span class="metric-value mono">{{ anomaly.log_id }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Fallback to mock data -->
+        <div v-else-if="insights?.anomalies && insights.anomalies.length > 0" class="anomaly-grid">
           <div
             v-for="anomaly in insights.anomalies"
             :key="anomaly.id"
@@ -83,6 +126,18 @@
               </div>
             </div>
           </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div v-else class="empty-anomalies">
+          <p>✅ No anomalies detected in the last 24 hours</p>
+        </div>
+        
+        <!-- View All Link -->
+        <div v-if="mlAnomalies.length > 6" class="view-all-link">
+          <router-link to="/ml-analytics" class="link-primary">
+            View all {{ mlAnomalies.length }} anomalies →
+          </router-link>
         </div>
       </div>
 
@@ -168,7 +223,8 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useMLData } from '@/composables/useMLData'
 import {
   LightBulbIcon,
   ArrowPathIcon,
@@ -200,7 +256,28 @@ export default {
     }
   },
   emits: ['refresh'],
-  setup() {
+  setup(props) {
+    // Use ML Data composable
+    const {
+      formattedAnomalies,
+      loading: mlLoading,
+      fetchAllMLData
+    } = useMLData()
+
+    // Fetch ML data on mount
+    onMounted(() => {
+      fetchAllMLData()
+    })
+
+    // Alias for template
+    const mlAnomalies = formattedAnomalies
+
+    // Helper function
+    const truncateText = (text, length) => {
+      if (!text) return ''
+      return text.length > length ? text.substring(0, length) + '...' : text
+    }
+
     // Trend icon mapping
     const getTrendIcon = (type) => {
       const iconMap = {
@@ -308,6 +385,11 @@ export default {
     }
 
     return {
+      // ML Data
+      mlAnomalies,
+      mlLoading,
+      truncateText,
+      // Icon/Class mappings
       getTrendIcon,
       getTrendIconClass,
       getImpactClass,
@@ -541,5 +623,38 @@ export default {
 
 .empty-description {
   @apply text-gray-600;
+}
+
+/* ML Integration Styles */
+.subsection-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.ml-badge {
+  @apply px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-semibold rounded-full;
+}
+
+.ml-loading {
+  @apply flex items-center justify-center gap-2 py-8 text-gray-500;
+}
+
+.spinner-small {
+  @apply w-5 h-5 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin;
+}
+
+.empty-anomalies {
+  @apply text-center py-8 text-gray-500 bg-green-50 rounded-lg border border-green-200;
+}
+
+.view-all-link {
+  @apply mt-4 text-center;
+}
+
+.link-primary {
+  @apply text-blue-600 hover:text-blue-700 font-semibold transition-colors;
+}
+
+.mono {
+  @apply font-mono text-xs;
 }
 </style>
