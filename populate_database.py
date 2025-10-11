@@ -21,7 +21,7 @@ def generate_log_entries(count=10000):
     print(f"Generating {count} log entries...")
     
     log_levels = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL']
-    level_weights = [0.20, 0.50, 0.15, 0.12, 0.03]  # Realistic distribution
+    level_weights = [0.20, 0.65, 0.12, 0.025, 0.005]  # Realistic production ratios (96-98% health)
     
     source_types = ['splunk', 'sap', 'application']
     source_weights = [0.4, 0.3, 0.3]

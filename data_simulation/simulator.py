@@ -262,34 +262,34 @@ def create_default_config() -> Dict[str, Any]:
         },
         "splunk": {
             "log_levels": ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
-            "log_level_weights": [0.1, 0.7, 0.15, 0.04, 0.01],
+            "log_level_weights": [0.20, 0.65, 0.12, 0.025, 0.005],  # Realistic production ratios
             "categories": ["system", "application", "security", "network"],
             "hosts": ["web-server-01", "web-server-02", "db-server-01", "app-server-01"],
             "services": ["webapp", "database", "api", "auth", "scheduler"],
-            "anomaly_rate": 0.05,
-            "error_rate": 0.02,
+            "anomaly_rate": 0.03,  # Reduced to 3% (more realistic)
+            "error_rate": 0.01,    # Reduced to 1% (more realistic)
             "environment": "development",
             "random_tags": ["production", "staging", "test", "critical", "monitoring"]
         },
         "sap": {
             "log_levels": ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
-            "log_level_weights": [0.1, 0.7, 0.15, 0.04, 0.01],
+            "log_level_weights": [0.20, 0.65, 0.12, 0.025, 0.005],  # Realistic production ratios
             "categories": ["financial", "sales", "purchase", "inventory", "hr", "system", "security", "performance"],
             "hosts": ["sap-erp-01", "sap-crm-01", "sap-scm-01", "sap-hcm-01"],
             "services": ["sap_erp", "sap_crm", "sap_scm", "sap_hcm"],
-            "anomaly_rate": 0.05,
-            "error_rate": 0.02,
+            "anomaly_rate": 0.03,  # Reduced to 3% (more realistic)
+            "error_rate": 0.01,    # Reduced to 1% (more realistic)
             "environment": "development",
             "random_tags": ["production", "staging", "test", "critical", "financial"]
         },
         "application": {
             "log_levels": ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
-            "log_level_weights": [0.1, 0.7, 0.15, 0.04, 0.01],
+            "log_level_weights": [0.20, 0.65, 0.12, 0.025, 0.005],  # Realistic production ratios
             "categories": ["application", "security", "performance", "business"],
             "hosts": ["web-server-01", "api-server-01", "auth-server-01", "microservice-01"],
             "services": ["webapp", "api", "auth", "microservice"],
-            "anomaly_rate": 0.05,
-            "error_rate": 0.02,
+            "anomaly_rate": 0.03,  # Reduced to 3% (more realistic)
+            "error_rate": 0.01,    # Reduced to 1% (more realistic)
             "environment": "development",
             "random_tags": ["production", "staging", "test", "critical", "api"]
         }
