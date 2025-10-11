@@ -1,0 +1,44 @@
+name: ML Log Analysis
+
+# Run ML analysis on a schedule and when manually triggered
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'Number of logs to analyze'
+        required: false
+        default: '1000'
+
+jobs:
+  analyze_logs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          pip install scikit-learn==1.7.2 numpy==2.3.3 psycopg2-binary==2.9.9 python-dotenv==1.0.0
+      
+      - name: Run ML analysis
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python scripts/ml_batch_analysis.py
+      
+      - name: Upload analysis results
+        uses: actions/upload-artifact@v3
+        with:
+          name: ml-analysis-results
+          path: analysis_results.json
+          retention-days: 7
+
