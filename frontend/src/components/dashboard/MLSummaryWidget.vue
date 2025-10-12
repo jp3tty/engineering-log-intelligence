@@ -63,11 +63,23 @@ const {
   anomalyCount,
   highSeverityCount,
   anomalyRate,
+  fetchMLStatus,
   fetchMLStats
 } = useMLData()
 
-onMounted(() => {
-  fetchMLStats()
+onMounted(async () => {
+  // Fetch both status and stats to properly initialize the widget
+  loading.value = true
+  try {
+    await Promise.all([
+      fetchMLStatus(),  // Needed for isMLActive check
+      fetchMLStats()     // Needed for anomaly counts
+    ])
+  } catch (error) {
+    console.error('Error loading ML data for widget:', error)
+  } finally {
+    loading.value = false
+  }
 })
 
 const formatLastUpdate = computed(() => {

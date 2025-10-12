@@ -2,8 +2,8 @@ name: Daily Log Generation
 
 on:
   schedule:
-    # Run daily at 2 AM UTC (9 PM EST / 6 PM PST)
-    - cron: '0 2 * * *'
+    # Run daily at 8 AM PST (4 PM UTC / 11 AM EST)
+    - cron: '0 16 * * *'
   
   # Allow manual triggering from GitHub UI
   workflow_dispatch:
@@ -11,7 +11,7 @@ on:
       log_count:
         description: 'Number of logs to generate'
         required: false
-        default: '1000'
+        default: '50000'
         type: string
 
 jobs:
@@ -35,8 +35,8 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          # Use manual input if provided, otherwise use default 1000
-          LOG_COUNT=${{ github.event.inputs.log_count || '1000' }}
+          # Use manual input if provided, otherwise use default 50000
+          LOG_COUNT=${{ github.event.inputs.log_count || '50000' }}
           echo "🚀 Generating $LOG_COUNT log entries..."
           echo "📊 Verifying DATABASE_URL is set..."
           if [ -z "$DATABASE_URL" ]; then
