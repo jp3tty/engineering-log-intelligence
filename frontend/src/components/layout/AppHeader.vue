@@ -211,23 +211,10 @@ export default {
         icon: 'BeakerIcon',
       },
       {
-        name: 'DashboardBuilder',
-        path: '/dashboard-builder',
-        title: 'Dashboard Builder',
-        icon: 'PuzzlePieceIcon',
-      },
-      {
         name: 'LogAnalysis',
         path: '/logs',
         title: 'Log Analysis',
         icon: 'DocumentTextIcon',
-      },
-      {
-        name: 'ABTesting',
-        path: '/ab-testing',
-        title: 'A/B Testing',
-        icon: 'BeakerIcon',
-        requiresRole: ['analyst', 'admin'],
       },
       {
         name: 'Monitoring',
@@ -236,11 +223,25 @@ export default {
         icon: 'ChartPieIcon',
       },
       {
+        name: 'DashboardBuilder',
+        path: '/dashboard-builder',
+        title: 'Dashboard Builder',
+        icon: 'PuzzlePieceIcon',
+      },
+      {
         name: 'Settings',
         path: '/settings',
         title: 'Settings',
         icon: 'CogIcon',
       },
+      // A/B Testing - Commented out for future development
+      // {
+      //   name: 'ABTesting',
+      //   path: '/ab-testing',
+      //   title: 'A/B Testing',
+      //   icon: 'BeakerIcon',
+      //   requiresRole: ['analyst', 'admin'],
+      // },
     ]
 
     // Computed properties

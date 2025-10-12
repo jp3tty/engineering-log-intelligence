@@ -19,7 +19,7 @@ import { useAuthStore } from '@/stores/auth'
 // Import page components
 import Dashboard from '@/views/Dashboard.vue'
 import LogAnalysis from '@/views/LogAnalysis.vue'
-import ABTesting from '@/views/ABTesting.vue'
+// import ABTesting from '@/views/ABTesting.vue' // Commented out for future development
 import Monitoring from '@/views/Monitoring.vue'
 import Settings from '@/views/Settings.vue'
 import Login from '@/views/Login.vue'
@@ -95,18 +95,19 @@ const routes = [
       icon: 'document-text',
     },
   },
-  {
-    path: '/ab-testing',
-    name: 'ABTesting',
-    component: ABTesting,
-    meta: {
-      title: 'A/B Testing',
-      description: 'Manage and monitor A/B tests for ML models',
-      requiresAuth: true,
-      icon: 'beaker',
-      roles: ['analyst', 'admin'],
-    },
-  },
+  // A/B Testing - Commented out for future development
+  // {
+  //   path: '/ab-testing',
+  //   name: 'ABTesting',
+  //   component: ABTesting,
+  //   meta: {
+  //     title: 'A/B Testing',
+  //     description: 'Manage and monitor A/B tests for ML models',
+  //     requiresAuth: true,
+  //     icon: 'beaker',
+  //     roles: ['analyst', 'admin'],
+  //   },
+  // },
   {
     path: '/monitoring',
     name: 'Monitoring',
