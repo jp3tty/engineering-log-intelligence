@@ -6,6 +6,7 @@ Generates realistic log entries and inserts them into the database.
 
 import os
 import random
+import uuid
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import psycopg2
@@ -102,7 +103,7 @@ def generate_log_entries(count=10000):
             http_status = random.choice([200, 201, 204, 301, 302])
         
         log_entry = {
-            'log_id': f'log-{i+1:06d}-{random.randint(1000, 9999)}',
+            'log_id': f'log-{uuid.uuid4().hex[:12]}',
             'timestamp': timestamp,
             'level': level,
             'message': message,

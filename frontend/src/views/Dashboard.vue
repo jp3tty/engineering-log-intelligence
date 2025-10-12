@@ -48,7 +48,8 @@
     <div class="container-custom py-8">
       <!-- System Status Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="card">
+        <!-- System Health Card - Links to Monitoring -->
+        <router-link to="/monitoring" class="card card-clickable">
           <div class="card-body">
             <div class="flex items-center">
               <div class="flex-shrink-0">
@@ -58,15 +59,21 @@
                   </svg>
                 </div>
               </div>
-              <div class="ml-4">
+              <div class="ml-4 flex-1">
                 <p class="text-sm font-medium text-gray-600">System Health</p>
                 <p class="text-2xl font-semibold text-gray-900">{{ systemHealth.status || 'Unknown' }}</p>
               </div>
+              <div class="ml-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
+        </router-link>
 
-        <div class="card">
+        <!-- Logs Processed Card - Links to Log Analysis -->
+        <router-link to="/logs" class="card card-clickable">
           <div class="card-body">
             <div class="flex items-center">
               <div class="flex-shrink-0">
@@ -76,15 +83,21 @@
                   </svg>
                 </div>
               </div>
-              <div class="ml-4">
+              <div class="ml-4 flex-1">
                 <p class="text-sm font-medium text-gray-600">Logs Processed</p>
                 <p class="text-2xl font-semibold text-gray-900">{{ formatNumber(logsProcessed) }}</p>
               </div>
+              <div class="ml-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
+        </router-link>
 
-        <div class="card">
+        <!-- Active Alerts Card - Links to ML Analytics -->
+        <router-link to="/ml-analytics" class="card card-clickable">
           <div class="card-body">
             <div class="flex items-center">
               <div class="flex-shrink-0">
@@ -94,15 +107,21 @@
                   </svg>
                 </div>
               </div>
-              <div class="ml-4">
+              <div class="ml-4 flex-1">
                 <p class="text-sm font-medium text-gray-600">Active Alerts</p>
                 <p class="text-2xl font-semibold text-gray-900">{{ activeAlerts }}</p>
               </div>
+              <div class="ml-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
+        </router-link>
 
-        <div class="card">
+        <!-- Response Time Card - Links to Monitoring -->
+        <router-link to="/monitoring" class="card card-clickable">
           <div class="card-body">
             <div class="flex items-center">
               <div class="flex-shrink-0">
@@ -112,13 +131,18 @@
                   </svg>
                 </div>
               </div>
-              <div class="ml-4">
+              <div class="ml-4 flex-1">
                 <p class="text-sm font-medium text-gray-600">Response Time</p>
                 <p class="text-2xl font-semibold text-gray-900">{{ responseTime }}ms</p>
               </div>
+              <div class="ml-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
+        </router-link>
       </div>
 
       <!-- ML Summary Widget -->
@@ -1231,3 +1255,28 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+/* Clickable card styling */
+.card-clickable {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-clickable:active {
+  transform: translateY(0);
+}
+
+/* Ensure the arrow icon becomes more visible on hover */
+.card-clickable:hover svg {
+  color: #4b5563;
+}
+</style>

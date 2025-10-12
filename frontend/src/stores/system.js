@@ -28,10 +28,15 @@ export const useSystemStore = defineStore('system', () => {
   const lastUpdate = ref(null)
 
   // Getters
-  const isHealthy = computed(() => systemHealth.value.status === 'healthy')
-  const isDegraded = computed(() => systemHealth.value.status === 'degraded')
-  const isUnhealthy = computed(() => systemHealth.value.status === 'unhealthy')
+  const isHealthy = computed(() => 
+    systemHealth.value.status === 'Excellent' || systemHealth.value.status === 'Healthy'
+  )
+  const isDegraded = computed(() => systemHealth.value.status === 'Degraded')
+  const isUnhealthy = computed(() => systemHealth.value.status === 'Critical')
   const hasError = computed(() => !!error.value)
+  
+  // Helper to get health percentage
+  const healthPercentage = computed(() => systemHealth.value.percentage || 0)
 
   // Actions
   const checkSystemHealth = async () => {
@@ -39,24 +44,67 @@ export const useSystemStore = defineStore('system', () => {
       isLoading.value = true
       error.value = null
 
-      // Always use mock health data for now
-      console.log('Using mock system health')
-      systemHealth.value = {
-        status: 'healthy',
-        services: {
-          database: { status: 'healthy', responseTime: 45 },
-          elasticsearch: { status: 'healthy', responseTime: 23 },
-          kafka: { status: 'healthy', responseTime: 12 },
-          api: { status: 'healthy', responseTime: 89 }
-        },
-        lastChecked: new Date().toISOString(),
+      // Fetch REAL health data from /api/metrics
+      console.log('📊 Fetching REAL system health from /api/metrics...')
+      const response = await fetch('/api/metrics')
+      const data = await response.json()
+      
+      if (data.success && data.metrics) {
+        const healthPercentage = data.metrics.system_health || 0
+        
+        // Map percentage to status text (realistic enterprise thresholds)
+        // Most production systems run between 85-95%
+        let status = 'healthy'
+        if (healthPercentage >= 97) {
+          status = 'Excellent'
+        } else if (healthPercentage >= 88) {
+          status = 'Healthy'
+        } else if (healthPercentage >= 80) {
+          status = 'Degraded'
+        } else {
+          status = 'Critical'
+        }
+        
+        console.log(`✅ Real system health: ${healthPercentage}% (${status})`)
+        
+        systemHealth.value = {
+          status: status,
+          percentage: healthPercentage,
+          services: {
+            database: { 
+              status: healthPercentage >= 90 ? 'healthy' : 'degraded', 
+              responseTime: Math.round(data.metrics.avg_response_time_ms || 0) 
+            },
+            api: { 
+              status: healthPercentage >= 90 ? 'healthy' : 'degraded', 
+              responseTime: Math.round(data.metrics.avg_response_time_ms || 0) 
+            }
+          },
+          metrics: {
+            total_logs: data.metrics.total_logs,
+            error_rate: data.metrics.error_rate,
+            fatal_rate: data.metrics.fatal_rate,
+            high_anomaly_rate: data.metrics.high_anomaly_rate
+          },
+          lastChecked: new Date().toISOString(),
+        }
+        lastUpdate.value = new Date()
+        return { success: true, data: systemHealth.value }
+      } else {
+        throw new Error('Invalid response from metrics API')
       }
-      lastUpdate.value = new Date()
-      return { success: true, data: systemHealth.value }
     } catch (err) {
+      console.error('❌ Failed to fetch system health:', err)
       const errorMessage = err.message || 'Health check failed'
       error.value = errorMessage
-      systemHealth.value.status = 'unhealthy'
+      
+      // Fallback to unknown status
+      systemHealth.value = {
+        status: 'Unknown',
+        percentage: 0,
+        services: {},
+        lastChecked: new Date().toISOString(),
+      }
       return { success: false, error: errorMessage }
     } finally {
       isLoading.value = false
@@ -110,6 +158,7 @@ export const useSystemStore = defineStore('system', () => {
     isDegraded,
     isUnhealthy,
     hasError,
+    healthPercentage,
     
     // Actions
     checkSystemHealth,
