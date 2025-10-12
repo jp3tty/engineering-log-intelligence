@@ -1,12 +1,12 @@
 {
-  "trained_at": "2025-10-11T13:03:22.215874",
+  "trained_at": "2025-10-11T21:01:43.520934",
   "num_training_samples": 8000,
   "classifier_accuracy": 1.0,
-  "anomaly_detector_accuracy": 0.981,
+  "anomaly_detector_accuracy": 0.9785,
   "features": 55,
   "log_levels": [
-    "WARN",
     "INFO",
+    "WARN",
     "DEBUG",
     "FATAL",
     "ERROR"

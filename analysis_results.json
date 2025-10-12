@@ -1,0 +1,29 @@
+{
+  "timestamp": "2025-10-11T21:34:55.106734",
+  "logs_analyzed": 1000,
+  "predictions_stored": 1000,
+  "model_version": "2025-10-11T21:01:43.520934",
+  "model_accuracy": {
+    "classifier": 1.0,
+    "anomaly_detector": 0.9785
+  },
+  "statistics": {
+    "severity": [
+      {
+        "severity": "info",
+        "count": 4249
+      },
+      {
+        "severity": "low",
+        "count": 597
+      },
+      {
+        "severity": "high",
+        "count": 154
+      }
+    ],
+    "total_predictions": 5000,
+    "anomalies_detected": 154,
+    "anomaly_rate": 0.0308
+  }
+}

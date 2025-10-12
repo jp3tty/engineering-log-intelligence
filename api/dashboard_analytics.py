@@ -284,7 +284,7 @@ def get_database_connection() -> tuple:
         if not database_url:
             return None, "DATABASE_URL environment variable not set"
         
-        conn = psycopg2.connect(database_url)
+        conn = psycopg2.connect(database_url, sslmode='require')
         conn.autocommit = True  # Prevent transaction abort issues
         return conn, None
     except Exception as e:

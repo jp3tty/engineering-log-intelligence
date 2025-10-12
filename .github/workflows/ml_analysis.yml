@@ -1,45 +1,60 @@
-name: ML Log Analysis
+name: ML Batch Analysis
 
-# Run ML analysis on a schedule and when manually triggered
+# Run ML batch analysis to populate ml_predictions table
+# This runs every 6 hours and can be triggered manually
+
 on:
   schedule:
     # Run every 6 hours
     - cron: '0 */6 * * *'
+  
   workflow_dispatch:
+    # Allow manual trigger
     inputs:
-      batch_size:
+      log_limit:
         description: 'Number of logs to analyze'
         required: false
         default: '1000'
 
 jobs:
-  analyze_logs:
+  ml-analysis:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
       
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.10'
       
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install scikit-learn==1.7.2 numpy==2.3.3 pandas==2.3.2 scipy psycopg2-binary==2.9.9 python-dotenv==1.0.0
+          python -m pip install --upgrade pip
+          pip install psycopg2-binary scikit-learn numpy python-dotenv
       
-      - name: Run ML analysis
+      - name: Run ML batch analysis
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
+          cd engineering_log_intelligence
           python scripts/ml_batch_analysis.py
       
       - name: Upload analysis results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: ml-analysis-results
-          path: analysis_results.json
-          retention-days: 7
-
+          path: engineering_log_intelligence/analysis_results.json
+          retention-days: 30
+      
+      - name: Display summary
+        run: |
+          cd engineering_log_intelligence
+          if [ -f analysis_results.json ]; then
+            echo "✅ ML Analysis Complete!"
+            echo ""
+            cat analysis_results.json | python -m json.tool
+          else
+            echo "⚠️  No results file generated"
+          fi

@@ -3,14 +3,14 @@ Consolidated ML API
 ==================
 
 This Vercel Function consolidates all ML functionality:
-- Log analysis and classification
+- Log analysis and classification (queries ml_predictions table)
 - Real-time processing
 - A/B testing for models
 
 Routes via action parameter: ?action=analyze|realtime|abtest
 
 Author: Engineering Log Intelligence Team
-Date: October 10, 2025
+Date: October 12, 2025
 """
 
 from http.server import BaseHTTPRequestHandler
@@ -18,6 +18,32 @@ import json
 import os
 import random
 from datetime import datetime, timedelta
+
+# Database connection
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    DB_AVAILABLE = True
+except ImportError:
+    DB_AVAILABLE = False
+    print("⚠️  psycopg2 not available - using mock data only")
+
+def get_db_connection():
+    """Get database connection"""
+    if not DB_AVAILABLE:
+        return None
+    
+    try:
+        database_url = os.environ.get('DATABASE_URL')
+        if not database_url:
+            print("⚠️  DATABASE_URL not set")
+            return None
+        
+        conn = psycopg2.connect(database_url, sslmode='require')
+        return conn
+    except Exception as e:
+        print(f"⚠️  Database connection failed: {e}")
+        return None
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -147,22 +173,93 @@ class handler(BaseHTTPRequestHandler):
         }
     
     def handle_analyze(self, data=None):
-        """Handle log analysis and classification"""
+        """Handle log analysis and classification - queries ml_predictions table"""
         if data and data.get('log_data'):
-            # Analyze provided log data
+            # Analyze provided log data by looking up predictions in database
             log_data = data.get('log_data', [])
             results = []
             
-            for log in log_data[:10]:  # Limit to 10 logs
-                results.append({
-                    "log_id": log.get('id', f"log_{random.randint(1000, 9999)}"),
-                    "classification": random.choice(["error", "warning", "info", "debug", "security"]),
-                    "confidence": round(random.uniform(0.7, 0.95), 3),
-                    "anomaly_score": round(random.uniform(0.1, 0.8), 3),
-                    "is_anomaly": random.choice([True, False]),
-                    "severity": random.choice(["low", "medium", "high", "critical"]),
-                    "timestamp": datetime.utcnow().isoformat()
-                })
+            # Try to get predictions from database
+            conn = get_db_connection()
+            
+            if conn:
+                try:
+                    cursor = conn.cursor(cursor_factory=RealDictCursor)
+                    
+                    for log in log_data[:10]:  # Limit to 10 logs
+                        log_id = log.get('id')
+                        
+                        # Query ml_predictions table
+                        cursor.execute("""
+                            SELECT 
+                                mp.predicted_level,
+                                mp.level_confidence,
+                                mp.is_anomaly,
+                                mp.anomaly_score,
+                                mp.anomaly_confidence,
+                                mp.severity,
+                                mp.predicted_at,
+                                le.message,
+                                le.level as actual_level
+                            FROM ml_predictions mp
+                            JOIN log_entries le ON mp.log_entry_id = le.id
+                            WHERE le.id = %s
+                            ORDER BY mp.predicted_at DESC
+                            LIMIT 1
+                        """, (log_id,))
+                        
+                        prediction = cursor.fetchone()
+                        
+                        if prediction:
+                            # Use real prediction from database
+                            results.append({
+                                "log_id": log_id,
+                                "classification": prediction['predicted_level'],
+                                "confidence": float(prediction['level_confidence']) if prediction['level_confidence'] else 0.0,
+                                "anomaly_score": float(prediction['anomaly_score']) if prediction['anomaly_score'] else 0.0,
+                                "is_anomaly": prediction['is_anomaly'],
+                                "severity": prediction['severity'],
+                                "timestamp": prediction['predicted_at'].isoformat() if prediction['predicted_at'] else datetime.utcnow().isoformat(),
+                                "source": "ml_predictions_table"
+                            })
+                        else:
+                            # No prediction found - return fallback
+                            results.append({
+                                "log_id": log_id,
+                                "classification": log.get('level', 'info').lower(),
+                                "confidence": 0.5,
+                                "anomaly_score": 0.0,
+                                "is_anomaly": False,
+                                "severity": "info",
+                                "timestamp": datetime.utcnow().isoformat(),
+                                "source": "fallback_no_prediction",
+                                "note": "Run batch analysis to generate predictions"
+                            })
+                    
+                    cursor.close()
+                    conn.close()
+                    
+                except Exception as e:
+                    print(f"❌ Database query error: {e}")
+                    if conn:
+                        conn.close()
+                    # Fall through to mock data
+                    conn = None
+            
+            # If no database connection, use mock data
+            if not conn:
+                print("⚠️  Using mock data - database not available")
+                for log in log_data[:10]:
+                    results.append({
+                        "log_id": log.get('id', f"log_{random.randint(1000, 9999)}"),
+                        "classification": random.choice(["error", "warning", "info", "debug", "security"]),
+                        "confidence": round(random.uniform(0.7, 0.95), 3),
+                        "anomaly_score": round(random.uniform(0.1, 0.8), 3),
+                        "is_anomaly": random.choice([True, False]),
+                        "severity": random.choice(["low", "medium", "high", "critical"]),
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "source": "mock_data"
+                    })
             
             return {
                 "success": True,
@@ -172,14 +269,101 @@ class handler(BaseHTTPRequestHandler):
                 "timestamp": datetime.utcnow().isoformat()
             }
         else:
-            # Return recent analysis
+            # Return recent analysis from ml_predictions table
+            conn = get_db_connection()
+            
+            if conn:
+                try:
+                    cursor = conn.cursor(cursor_factory=RealDictCursor)
+                    
+                    # Get model metadata
+                    cursor.execute("""
+                        SELECT 
+                            COUNT(*) as total_predictions,
+                            COUNT(CASE WHEN is_anomaly THEN 1 END) as anomaly_count,
+                            AVG(level_confidence) as avg_confidence,
+                            MAX(predicted_at) as last_prediction
+                        FROM ml_predictions
+                        WHERE predicted_at > NOW() - INTERVAL '24 hours'
+                    """)
+                    
+                    stats = cursor.fetchone()
+                    
+                    # Get recent predictions
+                    cursor.execute("""
+                        SELECT 
+                            mp.id,
+                            le.log_id,
+                            mp.predicted_level,
+                            mp.level_confidence,
+                            mp.anomaly_score,
+                            mp.is_anomaly,
+                            mp.severity,
+                            mp.predicted_at
+                        FROM ml_predictions mp
+                        JOIN log_entries le ON mp.log_entry_id = le.id
+                        WHERE mp.predicted_at > NOW() - INTERVAL '1 hour'
+                        ORDER BY mp.predicted_at DESC
+                        LIMIT 10
+                    """)
+                    
+                    recent_predictions = cursor.fetchall()
+                    
+                    cursor.close()
+                    conn.close()
+                    
+                    return {
+                        "success": True,
+                        "data": {
+                            "model_status": {
+                                "classification_model": "active",
+                                "anomaly_detection_model": "active",
+                                "total_predictions_24h": stats['total_predictions'],
+                                "anomalies_detected_24h": stats['anomaly_count'],
+                                "avg_confidence": float(stats['avg_confidence']) if stats['avg_confidence'] else 0.0,
+                                "last_prediction": stats['last_prediction'].isoformat() if stats['last_prediction'] else None,
+                                "source": "ml_predictions_table"
+                            },
+                            "recent_analysis": [
+                                {
+                                    "id": f"analysis_{p['id']}",
+                                    "log_id": p['log_id'],
+                                    "classification": p['predicted_level'],
+                                    "confidence": float(p['level_confidence']) if p['level_confidence'] else 0.0,
+                                    "anomaly_score": float(p['anomaly_score']) if p['anomaly_score'] else 0.0,
+                                    "is_anomaly": p['is_anomaly'],
+                                    "severity": p['severity'],
+                                    "timestamp": p['predicted_at'].isoformat()
+                                }
+                                for p in recent_predictions
+                            ],
+                            "insights": [
+                                {
+                                    "type": "ml_predictions_active",
+                                    "description": f"ML predictions running from database with {stats['total_predictions']} predictions in last 24h",
+                                    "severity": "info",
+                                    "recommendation": "Real ML predictions active"
+                                }
+                            ]
+                        },
+                        "timestamp": datetime.utcnow().isoformat()
+                    }
+                    
+                except Exception as e:
+                    print(f"❌ Database query error: {e}")
+                    if conn:
+                        conn.close()
+            
+            # Fallback to mock data if database unavailable
             return {
                 "success": True,
                 "data": {
                     "model_status": {
-                        "classification_model": "active",
-                        "anomaly_detection_model": "active",
-                        "accuracy": round(random.uniform(0.85, 0.95), 3)
+                        "classification_model": "mock",
+                        "anomaly_detection_model": "mock",
+                        "accuracy": round(random.uniform(0.85, 0.95), 3),
+                        "source": "mock_data",
+                        "note": "Database unavailable - run batch analysis to populate predictions"
                     },
                     "recent_analysis": [
                         {
@@ -189,28 +373,14 @@ class handler(BaseHTTPRequestHandler):
                             "confidence": round(random.uniform(0.8, 0.95), 3),
                             "anomaly_score": round(random.uniform(0.1, 0.3), 3),
                             "timestamp": datetime.utcnow().isoformat()
-                        },
-                        {
-                            "id": f"analysis_{random.randint(1000, 9999)}",
-                            "log_id": f"log_{random.randint(10000, 99999)}",
-                            "classification": random.choice(["info", "debug"]),
-                            "confidence": round(random.uniform(0.9, 0.98), 3),
-                            "anomaly_score": round(random.uniform(0.05, 0.15), 3),
-                            "timestamp": (datetime.utcnow() - timedelta(minutes=5)).isoformat()
                         }
                     ],
                     "insights": [
                         {
-                            "type": "pattern_detected",
-                            "description": "Recurring error pattern identified in database logs",
+                            "type": "mock_data_warning",
+                            "description": "Using mock data - ml_predictions table needs to be populated",
                             "severity": "medium",
-                            "recommendation": "Investigate database connection pool configuration"
-                        },
-                        {
-                            "type": "anomaly_detected",
-                            "description": "Unusual spike in authentication failures",
-                            "severity": "high",
-                            "recommendation": "Check for potential security breach"
+                            "recommendation": "Run batch ML analysis to generate real predictions"
                         }
                     ]
                 },

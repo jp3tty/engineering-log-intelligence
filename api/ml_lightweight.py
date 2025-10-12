@@ -127,7 +127,7 @@ class handler(BaseHTTPRequestHandler):
             return None
         
         try:
-            conn = psycopg2.connect(database_url)
+            conn = psycopg2.connect(database_url, sslmode='require')
             return conn
         except:
             return None
