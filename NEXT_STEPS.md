@@ -249,6 +249,48 @@ Once this is working, you could:
 
 ---
 
+## 📋 Pending Enhancements (To-Do)
+
+### 🌊 Kafka Streaming Implementation
+**Status:** 🔴 Not Started  
+**Priority:** Medium  
+**Effort:** ~2-3 hours  
+**Added:** October 13, 2025
+
+**What:** Enable real-time log streaming through Kafka instead of batch processing.
+
+**Current State:**
+- ✅ Confluent Cloud account with credentials configured
+- ✅ Topic schemas designed (`external-services/kafka/topics.json`)
+- ✅ Infrastructure code written (`KafkaManager`, `RealTimeProcessor`)
+- ❌ Topics not created in Confluent Cloud
+- ❌ Producer/consumer scripts not implemented
+- ❌ Health check shows "degraded - configured but streaming inactive"
+
+**What Needs to Be Done:**
+1. Create topics in Confluent Cloud console (`log-ingestion`, `log-processing`, `alerts`)
+2. Install `confluent-kafka` Python library
+3. Create Kafka producer script to publish logs continuously
+4. Create Kafka consumer script to read from Kafka and save to database
+5. Update health check to detect active streaming
+6. Test end-to-end streaming flow
+
+**Benefits:**
+- Real-time log ingestion (vs daily batch)
+- Event-driven architecture
+- Scalable to thousands of logs/second
+- Decoupled producers and consumers
+- Dashboard updates continuously
+
+**Resources:**
+- Setup guide: `KAFKA_STREAMING_SETUP.md`
+- Existing infrastructure: `src/api/utils/kafka.py`, `external-services/ml/real_time_processor.py`
+- Topic configs: `external-services/kafka/topics.json`
+
+**Note:** Paused after creating setup documentation. Resume when ready to implement streaming.
+
+---
+
 ## 🤝 Need Help?
 
 1. **Quick issues:** Check `ML_QUICK_START.md`
