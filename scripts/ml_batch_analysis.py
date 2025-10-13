@@ -84,10 +84,10 @@ cursor.execute("""
         id SERIAL PRIMARY KEY,
         log_entry_id INTEGER REFERENCES log_entries(id),
         predicted_level VARCHAR(10),
-        level_confidence DECIMAL(5,3),
+        level_confidence REAL,
         is_anomaly BOOLEAN,
-        anomaly_score DECIMAL(5,3),
-        anomaly_confidence DECIMAL(5,3),
+        anomaly_score REAL,
+        anomaly_confidence REAL,
         severity VARCHAR(20),
         model_version VARCHAR(50),
         predicted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -164,6 +164,12 @@ for log in logs_to_analyze:
         anomaly_proba = anomaly_detector.predict_proba(X)[0]
         anomaly_score = float(anomaly_proba[1] if len(anomaly_proba) > 1 else anomaly_proba[0])
         anomaly_confidence = float(max(anomaly_proba))
+        
+        # Ensure all confidence values are in valid range [0, 1]
+        # This prevents database overflow errors
+        level_confidence = max(0.0, min(1.0, level_confidence))
+        anomaly_score = max(0.0, min(1.0, anomaly_score))
+        anomaly_confidence = max(0.0, min(1.0, anomaly_confidence))
         
         # Determine severity
         if is_anomaly:

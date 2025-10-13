@@ -281,7 +281,7 @@ class handler(BaseHTTPRequestHandler):
             cursor.execute("""
                 SELECT 
                     COUNT(*) as total,
-                    SUM(CASE WHEN is_anomaly THEN 1 ELSE 0 END) as anomalies
+                    COALESCE(SUM(CASE WHEN is_anomaly THEN 1 ELSE 0 END), 0) as anomalies
                 FROM ml_predictions
                 WHERE predicted_at > NOW() - INTERVAL '24 hours'
             """)
@@ -291,11 +291,14 @@ class handler(BaseHTTPRequestHandler):
             conn.close()
             
             # Convert to JSON-serializable format
+            total = anomaly_stats['total'] or 0
+            anomalies = anomaly_stats['anomalies'] or 0
+            
             serializable_stats = convert_to_json_serializable({
                 "severity_distribution": [dict(s) for s in severity_stats],
-                "total_predictions": anomaly_stats['total'],
-                "anomalies_detected": anomaly_stats['anomalies'],
-                "anomaly_rate": anomaly_stats['anomalies'] / max(anomaly_stats['total'], 1)
+                "total_predictions": total,
+                "anomalies_detected": anomalies,
+                "anomaly_rate": anomalies / max(total, 1)
             })
             
             return {
