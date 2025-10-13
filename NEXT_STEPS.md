@@ -291,6 +291,52 @@ Once this is working, you could:
 
 ---
 
+### 🔍 Database Tables Validation (Correlations, Alerts, Dashboards)
+**Status:** 🔴 Not Started  
+**Priority:** Low  
+**Effort:** ~30-60 minutes  
+**Added:** October 13, 2025
+
+**What:** Validate and test the operational tables that are currently empty by design.
+
+**Current State:**
+- ✅ Tables exist and schema is defined (`correlations`, `alerts`, `dashboards`)
+- ✅ Data models created (Python classes in `src/api/models/`)
+- ✅ Frontend components built for dashboards
+- ✅ Alert and correlation logic implemented
+- ❌ No data in these tables (expected - they populate during operation)
+- ❌ No validation tests to verify functionality
+
+**What Needs to Be Done:**
+1. Create test script to validate correlation detection logic
+2. Create test alerts based on sample log patterns
+3. Test dashboard creation and storage via frontend or API
+4. Verify alert lifecycle (open → acknowledged → resolved → closed)
+5. Verify correlation scoring and multi-system log linking
+6. Document expected population scenarios
+
+**Tables to Validate:**
+- **`correlations`** - Cross-system log linking (request_id, session_id, ip_address)
+- **`alerts`** - Automated alerts triggered by anomalies or thresholds
+- **`dashboards`** - User-created custom dashboard configurations
+
+**Benefits:**
+- Confirm operational features work end-to-end
+- Validate data models and schema design
+- Test alert workflow and escalation
+- Verify dashboard persistence and sharing
+- Document how these features activate in production
+
+**Resources:**
+- Schema: `external-services/postgresql/schema.sql`
+- Models: `src/api/models/alert.py`, `src/api/models/correlation.py`, `src/api/models/dashboard.py`
+- Frontend: `frontend/src/stores/dashboard.js`, `frontend/src/components/dashboard/DashboardBuilder.vue`
+- Test examples: `test_cross_system_correlation.py`
+
+**Note:** These tables are intentionally empty in development - they populate during real system operation when users interact with the UI, ML models detect anomalies, or correlation patterns are found.
+
+---
+
 ## 🤝 Need Help?
 
 1. **Quick issues:** Check `ML_QUICK_START.md`

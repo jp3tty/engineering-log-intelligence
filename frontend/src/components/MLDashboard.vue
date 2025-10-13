@@ -1,7 +1,15 @@
 <template>
   <div class="ml-dashboard">
     <div class="ml-header">
-      <h2>🤖 Machine Learning Analytics</h2>
+      <div class="header-content">
+        <div class="header-text">
+          <h2>🤖 Machine Learning Analytics</h2>
+          <p class="header-subtitle">Real-time anomaly detection and severity prediction using advanced ML models</p>
+        </div>
+        <div class="header-meta">
+          <span class="last-updated">Last updated: {{ formatTime(lastUpdated) }}</span>
+        </div>
+      </div>
       <button @click="refreshData" class="refresh-btn" :disabled="loading">
         <span v-if="!loading">🔄 Refresh</span>
         <span v-else>⏳ Loading...</span>
@@ -119,6 +127,7 @@ const loading = ref(false)
 const mlStatus = ref(null)
 const stats = ref(null)
 const predictions = ref([])
+const lastUpdated = ref(null)
 
 const refreshData = async () => {
   loading.value = true
@@ -135,6 +144,9 @@ const refreshData = async () => {
     const predictionsResponse = await fetch('/api/ml_lightweight?action=analyze')
     const predictionsData = await predictionsResponse.json()
     predictions.value = predictionsData.results || []
+    
+    // Update last refreshed timestamp
+    lastUpdated.value = new Date().toISOString()
     
     console.log('✅ ML Dashboard data loaded', { mlStatus: mlStatus.value, stats: stats.value, predictions: predictions.value.length })
   } catch (error) {
@@ -186,14 +198,39 @@ onMounted(() => {
 .ml-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 24px;
+  gap: 20px;
 }
 
-.ml-header h2 {
+.header-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header-text h2 {
   margin: 0;
   font-size: 28px;
   color: #1a1a1a;
+}
+
+.header-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 15px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.header-meta {
+  margin-top: 4px;
+}
+
+.last-updated {
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 500;
 }
 
 .refresh-btn {
