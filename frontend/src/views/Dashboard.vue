@@ -651,209 +651,76 @@ export default {
     
     const recentActivity = ref(generateRecentActivity())
 
-    // Service health data for TreeMap with drill-down capability
-    const serviceHealthData = ref([
-      {
-        name: 'Database Services',
-        status: 'healthy',
-        importance: 100,
-        responseTime: 15,
-        uptime: 99.9,
-        description: 'Core database infrastructure and data storage systems',
-        children: [
-          {
-            name: 'PostgreSQL Primary',
-            status: 'healthy',
-            importance: 90,
-            responseTime: 12,
-            uptime: 99.9,
-            description: 'Primary database for structured data storage',
-            children: [
-              {
-                name: 'Connection Pool',
-                status: 'healthy',
-                importance: 85,
-                responseTime: 5,
-                uptime: 99.8,
-                description: 'Database connection management'
-              },
-              {
-                name: 'Query Processor',
-                status: 'warning',
-                importance: 80,
-                responseTime: 25,
-                uptime: 98.5,
-                description: 'SQL query execution engine'
-              },
-              {
-                name: 'Storage Engine',
-                status: 'healthy',
-                importance: 75,
-                responseTime: 8,
-                uptime: 99.9,
-                description: 'Data persistence layer'
-              }
-            ]
-          },
-          {
-            name: 'PostgreSQL Replica',
-            status: 'healthy',
-            importance: 70,
-            responseTime: 18,
-            uptime: 99.7,
-            description: 'Read-only replica for load balancing',
-            children: [
-              {
-                name: 'Replication Process',
-                status: 'healthy',
-                importance: 65,
-                responseTime: 10,
-                uptime: 99.5,
-                description: 'Data synchronization from primary'
-              }
-            ]
-          },
-          {
-            name: 'Redis Cache',
-            status: 'healthy',
-            importance: 60,
-            responseTime: 2,
-            uptime: 99.8,
-            description: 'In-memory caching layer'
-          }
-        ]
-      },
-      {
-        name: 'API Services',
-        status: 'healthy',
-        importance: 95,
-        responseTime: 45,
-        uptime: 99.8,
-        description: 'RESTful API endpoints and microservices',
-        children: [
-          {
-            name: 'Authentication API',
-            status: 'healthy',
-            importance: 90,
-            responseTime: 25,
-            uptime: 99.8,
-            description: 'JWT authentication and authorization',
-            children: [
-              {
-                name: 'Token Validator',
-                status: 'healthy',
-                importance: 85,
-                responseTime: 5,
-                uptime: 99.9,
-                description: 'JWT token validation service'
-              },
-              {
-                name: 'User Manager',
-                status: 'healthy',
-                importance: 80,
-                responseTime: 15,
-                uptime: 99.7,
-                description: 'User account management'
-              }
-            ]
-          },
-          {
-            name: 'Analytics API',
-            status: 'healthy',
-            importance: 85,
-            responseTime: 120,
-            uptime: 99.5,
-            description: 'Data analytics and reporting endpoints',
-            children: [
-              {
-                name: 'Query Engine',
-                status: 'healthy',
-                importance: 80,
-                responseTime: 100,
-                uptime: 99.4,
-                description: 'Analytics query processing'
-              },
-              {
-                name: 'Report Generator',
-                status: 'warning',
-                importance: 75,
-                responseTime: 200,
-                uptime: 98.8,
-                description: 'Automated report generation'
-              }
-            ]
-          },
-          {
-            name: 'Log Processing API',
-            status: 'degraded',
-            importance: 80,
-            responseTime: 150,
-            uptime: 98.5,
-            description: 'Log ingestion and processing endpoints'
-          }
-        ]
-      },
-      {
-        name: 'Frontend Services',
-        status: 'healthy',
-        importance: 75,
-        responseTime: 65,
-        uptime: 99.7,
-        description: 'User interface and client-side applications',
-        children: [
-          {
-            name: 'Web Application',
-            status: 'healthy',
-            importance: 70,
-            responseTime: 50,
-            uptime: 99.6,
-            description: 'Main Vue.js dashboard application'
-          },
-          {
-            name: 'Admin Dashboard',
-            status: 'healthy',
-            importance: 60,
-            responseTime: 45,
-            uptime: 99.5,
-            description: 'Administrative interface'
-          }
-        ]
-      },
-      {
-        name: 'Infrastructure Services',
-        status: 'warning',
-        importance: 70,
-        responseTime: 200,
-        uptime: 97.2,
-        description: 'Core infrastructure and monitoring systems',
-        children: [
-          {
-            name: 'Elasticsearch Cluster',
-            status: 'healthy',
-            importance: 85,
-            responseTime: 45,
-            uptime: 99.8,
-            description: 'Search engine for log analysis and queries'
-          },
-          {
-            name: 'Kafka Streaming',
-            status: 'degraded',
-            importance: 80,
-            responseTime: 120,
-            uptime: 98.5,
-            description: 'Real-time message streaming platform'
-          },
-          {
-            name: 'Monitoring System',
-            status: 'warning',
-            importance: 75,
-            responseTime: 200,
-            uptime: 97.2,
-            description: 'System health monitoring and alerting'
-          }
-        ]
+    // Fetch real service health data from API
+    const fetchServiceHealth = async () => {
+      try {
+        console.log('🏥 Fetching REAL service health from /api/service_health...')
+        const response = await fetch('/api/service_health')
+        const data = await response.json()
+        
+        if (data.success && data.services) {
+          console.log('✅ Real service health loaded:', data.services)
+          return data.services
+        } else {
+          console.warn('⚠️ Service health API returned no data, using fallback')
+          return generateFallbackServiceHealth()
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch service health:', error)
+        return generateFallbackServiceHealth()
       }
-    ])
+    }
+    
+    // Fallback service health data if API fails
+    const generateFallbackServiceHealth = () => {
+      return [
+        {
+          name: 'Database Services',
+          status: 'unknown',
+          importance: 100,
+          responseTime: 0,
+          uptime: 0,
+          description: 'Health check unavailable',
+          children: [
+            {
+              name: 'PostgreSQL Primary',
+              status: 'unknown',
+              importance: 90,
+              responseTime: 0,
+              uptime: 0,
+              description: 'Unable to check health'
+            }
+          ]
+        },
+        {
+          name: 'API Services',
+          status: 'unknown',
+          importance: 95,
+          responseTime: 0,
+          uptime: 0,
+          description: 'Health check unavailable',
+          children: []
+        },
+        {
+          name: 'Infrastructure Services',
+          status: 'unknown',
+          importance: 70,
+          responseTime: 0,
+          uptime: 0,
+          description: 'Health check unavailable',
+          children: []
+        }
+      ]
+    }
+
+    // Service health data for TreeMap - Loaded from API
+    const serviceHealthData = ref([])
+    
+    // Load service health immediately on initialization
+    ;(async () => {
+      serviceHealthData.value = await fetchServiceHealth()
+      console.log('✅ Initial service health loaded')
+    })()
 
     // Chart options - For beginners: These control how the charts look and behave
     const logVolumeOptions = ref({
@@ -1087,6 +954,10 @@ export default {
         // Fetch system health
         await systemStore.checkSystemHealth()
         
+        // Fetch service health data
+        serviceHealthData.value = await fetchServiceHealth()
+        console.log('✅ Service health refreshed')
+        
         // Fetch analytics data
         const analyticsData = await fetchDashboardAnalytics()
         console.log('📊 Analytics data received:', analyticsData)
@@ -1097,11 +968,6 @@ export default {
           logVolumeData.value = analyticsData.logVolume
           logDistributionData.value = analyticsData.logDistribution
           responseTimeData.value = analyticsData.responseTime
-          
-          // Update service health data if available
-          if (analyticsData.serviceHealth) {
-            serviceHealthData.value = analyticsData.serviceHealth
-          }
           
           // Update system metrics with REAL data from /api/metrics
           const realMetrics = await fetchRealMetrics()
