@@ -148,12 +148,13 @@ class DataSimulator:
         
         return all_logs
     
-    def generate_sample_data(self, count: int = 1000) -> List[Dict[str, Any]]:
+    def generate_sample_data(self, count: int = 1000, enable_correlation: bool = True) -> List[Dict[str, Any]]:
         """
-        Generate a sample of log data.
+        Generate a sample of log data with optional cross-system correlation.
         
         Args:
             count: Number of log entries to generate
+            enable_correlation: If True, creates correlated logs across systems
             
         Returns:
             List of log entry dictionaries
@@ -165,14 +166,60 @@ class DataSimulator:
         logs_per_generator = count // len(generator_names) if generator_names else 0
         remaining_logs = count % len(generator_names) if generator_names else 0
         
+        # Step 1: Generate application logs first (they create request_ids)
+        if 'application' in self.generators:
+            app_logs_to_generate = logs_per_generator + (1 if remaining_logs > 0 else 0)
+            try:
+                app_logs = self.generators['application'].generate_batch(app_logs_to_generate)
+                all_logs.extend(app_logs)
+                
+                # Extract request_ids for correlation (if enabled)
+                shared_request_ids = []
+                if enable_correlation:
+                    shared_request_ids = [
+                        log.get('request_id') 
+                        for log in app_logs 
+                        if log.get('request_id')
+                    ]
+                    
+                    # Use a subset (30%) for cross-system correlation
+                    correlation_count = int(len(shared_request_ids) * 0.3)
+                    shared_request_ids = random.sample(shared_request_ids, min(correlation_count, len(shared_request_ids)))
+                
+                logger.info(
+                    "Application logs generated",
+                    count=len(app_logs),
+                    shared_request_ids=len(shared_request_ids)
+                )
+            except Exception as e:
+                logger.error("Application generator error", error=str(e))
+                shared_request_ids = []
+        else:
+            shared_request_ids = []
+        
+        # Step 2: Generate SAP and SPLUNK logs with optional correlation
         for i, (generator_name, generator) in enumerate(self.generators.items()):
+            if generator_name == 'application':
+                continue  # Already generated
+            
             logs_to_generate = logs_per_generator
-            if i < remaining_logs:
+            if generator_name in ['sap', 'splunk'] and remaining_logs > 1:
                 logs_to_generate += 1
+                remaining_logs -= 1
             
             if logs_to_generate > 0:
                 try:
-                    logs = generator.generate_batch(logs_to_generate)
+                    # Generate logs with correlation support
+                    if enable_correlation and shared_request_ids:
+                        logs = self._generate_correlated_logs(
+                            generator, 
+                            generator_name,
+                            logs_to_generate, 
+                            shared_request_ids
+                        )
+                    else:
+                        logs = generator.generate_batch(logs_to_generate)
+                    
                     all_logs.extend(logs)
                 except Exception as e:
                     logger.error(
@@ -185,10 +232,59 @@ class DataSimulator:
             "Sample data generated",
             requested=count,
             generated=len(all_logs),
-            generators=len(self.generators)
+            generators=len(self.generators),
+            correlation_enabled=enable_correlation
         )
         
         return all_logs
+    
+    def _generate_correlated_logs(
+        self, 
+        generator: BaseLogGenerator,
+        generator_name: str,
+        count: int, 
+        shared_request_ids: List[str]
+    ) -> List[Dict[str, Any]]:
+        """
+        Generate logs with some entries using shared request_ids for cross-system correlation.
+        
+        Args:
+            generator: The log generator instance
+            generator_name: Name of the generator (for logging)
+            count: Number of logs to generate
+            shared_request_ids: Pool of request_ids from application logs
+            
+        Returns:
+            List of log entries with correlation data
+        """
+        import uuid
+        
+        logs = generator.generate_batch(count)
+        
+        # Inject request_ids into a subset of logs (40% for realistic correlation)
+        correlation_probability = 0.4
+        correlated_count = 0
+        
+        for log in logs:
+            if random.random() < correlation_probability and shared_request_ids:
+                # Use a shared request_id
+                request_id = random.choice(shared_request_ids)
+                log['request_id'] = request_id
+                
+                # Also add to metadata if it exists
+                if 'metadata' in log:
+                    log['metadata']['request_id'] = request_id
+                
+                correlated_count += 1
+        
+        logger.info(
+            "Correlated logs generated",
+            generator=generator_name,
+            total=count,
+            correlated=correlated_count
+        )
+        
+        return logs
     
     def generate_anomalies(self, count: int = 10) -> List[Dict[str, Any]]:
         """

@@ -4,7 +4,10 @@
       <div class="header-content">
         <div class="header-text">
           <h2>🤖 Machine Learning Analytics</h2>
-          <p class="header-subtitle">Real-time anomaly detection and severity prediction using advanced ML models</p>
+          <p class="header-subtitle">
+            Real-time anomaly detection and severity prediction using 
+            <strong>RandomForest</strong> ensemble models (100 decision trees)
+          </p>
         </div>
         <div class="header-meta">
           <span class="last-updated">Last updated: {{ formatTime(lastUpdated) }}</span>
@@ -221,6 +224,11 @@ onMounted(() => {
   font-size: 15px;
   color: #6b7280;
   line-height: 1.5;
+}
+
+.header-subtitle strong {
+  color: #3b82f6;
+  font-weight: 600;
 }
 
 .header-meta {
