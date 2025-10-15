@@ -283,6 +283,12 @@
                       </div>
                     </div>
                     <div class="flex items-center space-x-3">
+                      <div class="w-4 h-4 rounded-full bg-orange-500 flex-shrink-0"></div>
+                      <div>
+                        <p class="text-xs text-gray-600">Degraded services, requires attention</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
                       <div class="w-4 h-4 rounded-full bg-red-500 flex-shrink-0"></div>
                       <div>
                         <p class="text-xs text-gray-600">Critical issues, service failures</p>

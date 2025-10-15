@@ -192,6 +192,7 @@ export default {
       const colors = {
         'healthy': '#10b981',  // green
         'warning': '#f59e0b',  // yellow/orange
+        'degraded': '#f97316', // orange
         'critical': '#ef4444', // red
         'unknown': '#6b7280'   // gray
       }
