@@ -273,20 +273,22 @@ def generate_system_metrics() -> Dict[str, Any]:
 
 def get_database_connection() -> tuple:
     """
-    Establish connection to PostgreSQL database.
+    Get connection from shared pool (reduces Railway connection count).
     Returns (connection, error_message) tuple.
     """
     if not DATABASE_AVAILABLE:
         return None, "psycopg2 not available"
     
     try:
-        database_url = os.environ.get('DATABASE_URL')
-        if not database_url:
-            return None, "DATABASE_URL environment variable not set"
+        # Import shared connection pool
+        from api._db_pool import get_db_connection_safe
         
-        conn = psycopg2.connect(database_url, sslmode='require')
-        conn.autocommit = True  # Prevent transaction abort issues
-        return conn, None
+        conn, error = get_db_connection_safe()
+        if conn:
+            conn.autocommit = True  # Prevent transaction abort issues
+            return conn, None
+        else:
+            return None, error or "Failed to get connection from pool"
     except Exception as e:
         error_msg = f"Connection failed: {str(e)}"
         return None, error_msg

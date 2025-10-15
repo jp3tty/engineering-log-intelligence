@@ -18,17 +18,14 @@ except ImportError:
     DATABASE_AVAILABLE = False
 
 def get_database_connection():
-    """Establish connection to PostgreSQL database."""
+    """Get connection from shared pool (reduces Railway connection count)."""
     if not DATABASE_AVAILABLE:
         return None, "psycopg2 not available"
     
     try:
-        database_url = os.environ.get('DATABASE_URL')
-        if not database_url:
-            return None, "DATABASE_URL not set"
-        
-        conn = psycopg2.connect(database_url, sslmode='require')
-        return conn, None
+        # Import shared connection pool
+        from api._db_pool import get_db_connection_safe
+        return get_db_connection_safe()
     except Exception as e:
         return None, str(e)
 

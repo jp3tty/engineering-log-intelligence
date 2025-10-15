@@ -226,8 +226,20 @@ class handler(BaseHTTPRequestHandler):
                     "total_logs": 0
                 }
             
-            # Test connection and query
-            conn = psycopg2.connect(database_url, sslmode='require', connect_timeout=5)
+            # Get connection from shared pool (reduces Railway connection count)
+            from api._db_pool import get_db_connection
+            conn = get_db_connection()
+            if not conn:
+                return {
+                    "service": "PostgreSQL Database",
+                    "status": "unknown",
+                    "connection_status": "failed",
+                    "query_status": "unknown",
+                    "response_time_ms": 0,
+                    "uptime": 0,
+                    "message": "Failed to get connection from pool",
+                    "total_logs": 0
+                }
             cursor = conn.cursor()
             
             # Run a simple query to test functionality
@@ -430,7 +442,19 @@ class handler(BaseHTTPRequestHandler):
                     "recent_logs_count": 0
                 }
             
-            conn = psycopg2.connect(database_url, sslmode='require', connect_timeout=5)
+            # Get connection from shared pool (reduces Railway connection count)
+            from api._db_pool import get_db_connection
+            conn = get_db_connection()
+            if not conn:
+                return {
+                    "service": "Log Processing API",
+                    "status": "unknown",
+                    "api_status": "unknown",
+                    "response_time_ms": 0,
+                    "logs_uptime": 0,
+                    "uptime": 0,
+                    "recent_logs_count": 0
+                }
             cursor = conn.cursor()
             
             # Check recent log activity (indicates log processing API is working)

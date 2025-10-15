@@ -118,17 +118,11 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
     
     def get_db_connection(self):
-        """Get database connection"""
-        import psycopg2
-        from psycopg2.extras import RealDictCursor
-        
-        database_url = os.environ.get('DATABASE_URL')
-        if not database_url:
-            return None
-        
+        """Get connection from shared pool (reduces Railway connection count)"""
         try:
-            conn = psycopg2.connect(database_url, sslmode='require')
-            return conn
+            # Import shared connection pool
+            from api._db_pool import get_db_connection
+            return get_db_connection()
         except:
             return None
     

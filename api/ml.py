@@ -29,18 +29,14 @@ except ImportError:
     print("⚠️  psycopg2 not available - using mock data only")
 
 def get_db_connection():
-    """Get database connection"""
+    """Get connection from shared pool (reduces Railway connection count)"""
     if not DB_AVAILABLE:
         return None
     
     try:
-        database_url = os.environ.get('DATABASE_URL')
-        if not database_url:
-            print("⚠️  DATABASE_URL not set")
-            return None
-        
-        conn = psycopg2.connect(database_url, sslmode='require')
-        return conn
+        # Import shared connection pool
+        from api._db_pool import get_db_connection
+        return get_db_connection()
     except Exception as e:
         print(f"⚠️  Database connection failed: {e}")
         return None
