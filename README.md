@@ -4,15 +4,17 @@ An AI-powered log analysis platform that processes engineering logs from multipl
 
 ## 🌐 **Live Application**
 
-**Production URL**: https://engineeringlogintelligence-fjbthr6qg-jp3ttys-projects.vercel.app  
+**Production URL**: https://engineeringlogintelligence.vercel.app  
 *Latest deployment with fully functional API endpoints and production stability*
 
 **API Endpoints** (All Working ✅):
-- **Analytics API**: `/api/analytics` - AI-powered insights and analytics data
+- **Metrics API**: `/api/metrics` - System metrics and KPIs
+- **Dashboard Analytics API**: `/api/dashboard_analytics` - Dashboard chart data
 - **Logs API**: `/api/logs` - Log processing and search functionality  
-- **Auth API**: `/api/auth` - Authentication and user management
-- **ML Analysis API**: `/api/ml/analyze` - Machine learning log analysis
-- **Health Check API**: `/api/health_public` - System health monitoring
+- **ML Lightweight API**: `/api/ml_lightweight` - Machine learning predictions (stats, analyze, status)
+- **Monitoring API**: `/api/monitoring` - System monitoring data
+- **Service Health API**: `/api/service_health` - Service health checks
+- **Health Check API**: `/api/health` - Basic system health
 
 **Demo Credentials:**
 - **Admin**: `admin` / `password123`
@@ -21,15 +23,15 @@ An AI-powered log analysis platform that processes engineering logs from multipl
 
 **Status**: ✅ **Fully Functional** - Complete enterprise-grade platform with working API endpoints and production stability
 
-**Latest Achievements** (October 14, 2025):  
-- 🔗 **Cross-System Correlation**: End-to-end request tracing across Application → SAP → SPLUNK
-- 📊 **Multi-System Request Traces**: Query #12 now shows requests spanning 2-3 systems
-- 🔧 **SAP Transaction Codes Fixed**: All SAP logs now have T-codes (FB01, VA01, ME21N, etc.)
-- 📈 **30+ Fields Mapped**: Source-specific fields properly extracted from metadata to database columns
-- 🎯 **61% Correlation Rate**: Majority of logs now include cross-system correlation IDs
-- 💡 **Root Cause Analysis**: Trace error propagation across entire infrastructure
-- ⚡ **Query Performance**: Multi-system traces execute in 10-50ms
-- 🚀 **Enterprise-Ready**: Full end-to-end observability across systems
+**Latest Achievements** (October 16, 2025):  
+- ✅ **Fresh Database Setup**: New Railway PostgreSQL with 30,000 logs
+- 🤖 **ML Predictions Active**: 1,000 predictions in database with real analytics
+- 🔄 **GitHub Actions Configured**: Daily log generation and ML batch analysis workflows
+- 🔧 **Direct Database Connections**: Simplified architecture optimized for Vercel serverless
+- ✅ **All API Endpoints Working**: 7 endpoints operational with real database data
+- 📊 **ML Analytics Live**: Frontend displaying real predictions from ml_predictions table
+- 🐛 **Critical Fixes Applied**: Fixed DATABASE_URL formatting, metrics.py variable scope, ml_lightweight.py queries
+- 🚀 **Production Ready**: Complete system with automated data generation and ML analysis
 
 **Previous Achievements** (October 11, 2025 - Evening):  
 - 🤖 **Real ML Predictions Deployed**: Log Analysis now uses trained ML models instead of mock data
@@ -309,10 +311,10 @@ MIT License - see LICENSE file for details
 
 ## Status
 
-🎉 **Advanced Features Complete** - Custom Dashboards & Advanced Analytics!
-🚀 **Enterprise Ready** - Complete enterprise-grade log intelligence system with advanced features!
+🎉 **Production System Operational** - All Features Working!
+🚀 **Enterprise Ready** - Complete enterprise-grade log intelligence system with automated ML!
 
-### Current Progress (Advanced Features Complete - October 11, 2025 ✅)
+### Current Progress (Production System Complete - October 16, 2025 ✅)
 - ✅ **Project Foundation** (Days 1-3): Complete Vercel + External Services architecture
 - ✅ **Code Quality** (Day 4): Automated formatting, linting, type checking, security scanning
 - ✅ **CI/CD Pipeline** (Day 4): GitHub Actions with automated testing and deployment
@@ -520,6 +522,8 @@ MIT License - see LICENSE file for details
 
 ---
 
-**Last Updated**: October 11, 2025  
-**Version**: 2.4.0  
-**Phase**: Documentation Current - Ready for ML Enablement
+**Last Updated**: October 16, 2025  
+**Version**: 2.6.0  
+**Phase**: Production System Complete - All Features Operational
+
+**Quick Start Documentation**: See `CURRENT_SYSTEM_STATUS.md` for the latest system state and configuration.
