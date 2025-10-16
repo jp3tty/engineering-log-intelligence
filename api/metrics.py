@@ -110,6 +110,11 @@ class handler(BaseHTTPRequestHandler):
             error_rate = (error_count / max(total_count, 1)) * 100
             
             # Get high-severity ML anomalies only (not all anomalies)
+            # Initialize defaults in case ml_predictions table doesn't exist
+            high_anomaly_count = 0
+            total_predictions = 0
+            high_anomaly_rate = 0
+            
             try:
                 cursor.execute("""
                     SELECT 
@@ -123,7 +128,8 @@ class handler(BaseHTTPRequestHandler):
                 total_predictions = ml_result['total_predictions'] if ml_result else 0
                 high_anomaly_rate = (high_anomaly_count / max(total_predictions, 1)) * 100
             except:
-                high_anomaly_rate = 0
+                # ml_predictions table doesn't exist yet - use defaults
+                pass
             
             # Calculate system health (Industry Standard Approach)
             # Similar to AWS CloudWatch, DataDog, New Relic
