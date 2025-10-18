@@ -54,7 +54,13 @@
                   <span class="text-sm font-medium text-gray-600">Database Size</span>
                   <span class="text-sm font-semibold text-gray-900">{{ monitoringData.resources.database.size_formatted }}</span>
                 </div>
-                <div class="text-xs text-gray-500">{{ monitoringData.resources.database.total_logs.toLocaleString() }} total logs</div>
+                <div class="text-xs text-gray-500">
+                  {{ monitoringData.resources.database.total_logs.toLocaleString() }} total logs • 
+                  Max: {{ monitoringData.resources.database.max_size_formatted }}
+                  <span v-if="monitoringData.resources.database.usage_percent" class="ml-1" :class="getUsageColorClass(monitoringData.resources.database.usage_percent)">
+                    ({{ monitoringData.resources.database.usage_percent }}% used)
+                  </span>
+                </div>
               </div>
               
               <div>
@@ -62,7 +68,7 @@
                   <span class="text-sm font-medium text-gray-600">Growth Rate</span>
                   <span class="text-sm font-semibold text-gray-900">{{ monitoringData.resources.database.growth_rate }}</span>
                 </div>
-                <div class="text-xs text-gray-500">{{ monitoringData.resources.throughput.logs_per_minute }} logs/min</div>
+                <div class="text-xs text-gray-500">{{ monitoringData.resources.throughput.logs_per_hour.toLocaleString() }} logs/hour</div>
               </div>
               
               <div>
@@ -256,6 +262,13 @@ export default {
       return date.toLocaleString()
     }
 
+    const getUsageColorClass = (percent) => {
+      if (percent >= 90) return 'text-red-600 font-semibold'
+      if (percent >= 75) return 'text-orange-600'
+      if (percent >= 50) return 'text-yellow-600'
+      return 'text-green-600'
+    }
+
     onMounted(() => {
       fetchMonitoringData()
       
@@ -268,7 +281,8 @@ export default {
       loading,
       error,
       refreshData,
-      formatTime
+      formatTime,
+      getUsageColorClass
     }
   }
 }

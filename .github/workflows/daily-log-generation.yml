@@ -11,7 +11,7 @@ on:
       log_count:
         description: 'Number of logs to generate'
         required: false
-        default: '50000'
+        default: '5000'
         type: string
 
 jobs:
@@ -35,8 +35,8 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          # Use manual input if provided, otherwise use default 50000
-          LOG_COUNT=${{ github.event.inputs.log_count || '50000' }}
+          # Use manual input if provided, otherwise use default 5000
+          LOG_COUNT=${{ github.event.inputs.log_count || '5000' }}
           echo "🚀 Generating $LOG_COUNT log entries..."
           echo "📊 Verifying DATABASE_URL is set..."
           if [ -z "$DATABASE_URL" ]; then

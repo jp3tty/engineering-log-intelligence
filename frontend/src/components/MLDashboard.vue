@@ -45,8 +45,8 @@
       
       <div class="stat-card anomaly">
         <h4>Anomalies Detected</h4>
-        <div class="stat-value">{{ stats.statistics?.anomalies_detected?.toLocaleString() || '0' }}</div>
-        <div class="stat-label">{{ ((stats.statistics?.anomaly_rate || 0) * 100).toFixed(1) }}% rate</div>
+        <div class="stat-value">{{ stats.statistics?.anomaly_count?.toLocaleString() || '0' }}</div>
+        <div class="stat-label">{{ (stats.statistics?.anomaly_rate || 0).toFixed(1) }}% rate</div>
       </div>
       
       <div class="stat-card severity">

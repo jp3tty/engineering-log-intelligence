@@ -140,8 +140,8 @@ export function useMLData() {
    */
   const anomalyCount = computed(() => {
     // If we have stats data, use it (more efficient)
-    if (mlStats.value?.statistics?.anomalies_detected != null) {
-      return mlStats.value.statistics.anomalies_detected
+    if (mlStats.value?.statistics?.anomaly_count != null) {
+      return mlStats.value.statistics.anomaly_count
     }
     // Otherwise fall back to counting predictions
     return mlAnomalies.value.length
@@ -152,9 +152,9 @@ export function useMLData() {
    * Prioritizes mlStats over calculating from predictions
    */
   const anomalyRate = computed(() => {
-    // If we have stats data, use it
+    // If we have stats data, use it (API already returns as percentage)
     if (mlStats.value?.statistics?.anomaly_rate != null) {
-      return mlStats.value.statistics.anomaly_rate * 100 // Convert to percentage
+      return mlStats.value.statistics.anomaly_rate // Already a percentage from API
     }
     // Otherwise calculate from predictions
     if (mlPredictions.value.length === 0) return 0

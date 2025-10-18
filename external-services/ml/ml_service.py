@@ -5,11 +5,13 @@ ML Service - Machine Learning Pipeline Coordinator
 This module coordinates all machine learning models and provides a unified
 interface for ML operations in the log intelligence system.
 
+Updated: October 17, 2025 - Enhanced to support business severity prediction
+
 For beginners: This is like a manager that coordinates all the AI models
 and makes sure they work together properly.
 
 Author: Engineering Log Intelligence Team
-Date: September 21, 2025
+Date: October 17, 2025
 """
 
 import logging
@@ -141,14 +143,16 @@ class MLService:
         """
         Analyze a single log entry using all available models.
         
+        Updated to support enhanced multi-feature business severity prediction.
+        
         For beginners: This takes a single log entry and runs it through
-        all our AI models to get a complete analysis.
+        all our AI models to get a complete analysis including business severity.
         
         Args:
-            log_entry: Log entry to analyze
+            log_entry: Log entry to analyze (should include message, service, endpoint, level, etc.)
             
         Returns:
-            Dictionary with complete analysis results
+            Dictionary with complete analysis results including business severity
         """
         if not self.is_initialized:
             raise ValueError("ML service must be initialized before analyzing logs")
@@ -156,31 +160,37 @@ class MLService:
         logger.info(f"Analyzing log entry: {log_entry.get('message', '')[:50]}...")
         
         analysis = {
-            'log_id': log_entry.get('log_id', 'unknown'),
+            'log_id': log_entry.get('log_id', log_entry.get('id', 'unknown')),
             'timestamp': datetime.now().isoformat(),
             'analysis': {}
         }
         
         try:
-            # Classify the log
+            # Predict business severity using enhanced model
+            # Pass the full log_entry with all features (message, service, endpoint, level, http_status, response_time_ms)
             if self.log_classifier.is_trained:
-                classification = self.log_classifier.predict(log_entry.get('message', ''))
-                analysis['analysis']['classification'] = classification
+                severity_prediction = self.log_classifier.predict(log_entry)
+                analysis['analysis']['severity'] = severity_prediction
+                
+                # Store the primary severity for easy access
+                analysis['business_severity'] = severity_prediction.get('predicted_severity', 'medium')
+                analysis['severity_confidence'] = severity_prediction.get('confidence', 0.0)
             
             # Detect anomalies
             if self.anomaly_detector.is_trained:
                 anomaly = self.anomaly_detector.detect_anomaly(log_entry)
                 analysis['analysis']['anomaly'] = anomaly
             
-            # Combine results
-            analysis['summary'] = self._generate_analysis_summary(analysis['analysis'])
+            # Combine results with enhanced summary
+            analysis['summary'] = self._generate_analysis_summary(analysis['analysis'], log_entry)
             
-            logger.info(f"Log analysis completed for {log_entry.get('log_id', 'unknown')}")
+            logger.info(f"Log analysis completed for {log_entry.get('log_id', 'unknown')}: {analysis.get('business_severity', 'unknown').upper()}")
             return analysis
             
         except Exception as e:
             logger.error(f"Error analyzing log: {str(e)}")
             analysis['error'] = str(e)
+            analysis['business_severity'] = 'unknown'
             return analysis
     
     def analyze_logs_batch(self, log_entries: List[Dict]) -> List[Dict[str, any]]:
@@ -214,9 +224,11 @@ class MLService:
         logger.info(f"Batch analysis completed: {len(results)} results")
         return results
     
-    def _generate_analysis_summary(self, analysis: Dict) -> Dict[str, any]:
+    def _generate_analysis_summary(self, analysis: Dict, log_entry: Dict = None) -> Dict[str, any]:
         """
         Generate a summary of the analysis results.
+        
+        Updated to use business severity predictions.
         
         For beginners: This creates a simple summary that humans can
         easily understand, combining all the AI analysis results.
@@ -227,18 +239,39 @@ class MLService:
             'key_insights': []
         }
         
-        # Check classification results
-        if 'classification' in analysis:
-            classification = analysis['classification']
-            category = classification.get('category', 'unknown')
-            confidence = classification.get('confidence', 0)
+        # Check business severity prediction
+        if 'severity' in analysis:
+            severity_data = analysis['severity']
+            severity = severity_data.get('predicted_severity', 'medium')
+            confidence = severity_data.get('confidence', 0)
             
-            if category in ['security', 'error'] and confidence > 0.8:
-                summary['risk_level'] = 'high'
+            # Map business severity to risk level
+            severity_risk_map = {
+                'critical': 'critical',
+                'high': 'high',
+                'medium': 'medium',
+                'low': 'low'
+            }
+            summary['risk_level'] = severity_risk_map.get(severity, 'medium')
+            
+            # Set action required for critical/high severity
+            if severity in ['critical', 'high'] and confidence > 0.7:
                 summary['action_required'] = True
-                summary['key_insights'].append(f"High-confidence {category} issue detected")
+                summary['key_insights'].append(f"{severity.upper()} business severity detected (confidence: {confidence:.1%})")
+            elif severity in ['critical', 'high']:
+                summary['action_required'] = True
+                summary['key_insights'].append(f"{severity.upper()} business severity detected (low confidence: {confidence:.1%})")
+            
+            # Add service context if available
+            if log_entry:
+                service = log_entry.get('service', log_entry.get('source_type', ''))
+                endpoint = log_entry.get('endpoint', '')
+                if service:
+                    summary['key_insights'].append(f"Service: {service}")
+                if endpoint:
+                    summary['key_insights'].append(f"Endpoint: {endpoint}")
         
-        # Check anomaly results
+        # Check anomaly results (still use this for additional insights)
         if 'anomaly' in analysis:
             anomaly = analysis['anomaly']
             if anomaly.get('is_anomaly', False):
@@ -246,11 +279,12 @@ class MLService:
                 confidence = anomaly.get('confidence', 0)
                 
                 if confidence > 0.8:
-                    summary['risk_level'] = 'high'
+                    # Only escalate risk if it's not already critical
+                    if summary['risk_level'] not in ['critical', 'high']:
+                        summary['risk_level'] = 'high'
                     summary['action_required'] = True
                     summary['key_insights'].append(f"High-confidence {anomaly_type} anomaly detected")
                 else:
-                    summary['risk_level'] = 'medium'
                     summary['key_insights'].append(f"Potential {anomaly_type} anomaly detected")
         
         return summary

@@ -204,6 +204,14 @@ class handler(BaseHTTPRequestHandler):
         """)
         recent_logs = cursor.fetchone()['recent_logs']
         
+        # Logs in last 24 hours (for daily growth rate)
+        cursor.execute("""
+            SELECT COUNT(*) as logs_24h 
+            FROM log_entries 
+            WHERE timestamp > NOW() - INTERVAL '24 hours'
+        """)
+        logs_24h = cursor.fetchone()['logs_24h']
+        
         # Log levels distribution (last 24h)
         cursor.execute("""
             SELECT 
@@ -229,14 +237,23 @@ class handler(BaseHTTPRequestHandler):
         except:
             ml_prediction_count = 0
         
+        # Max database size (typical limits: Railway free = 1GB, Pro = 8GB)
+        max_db_size_mb = 1024  # 1 GB for Railway free tier
+        db_usage_percent = (db_size_mb / max_db_size_mb) * 100 if max_db_size_mb > 0 else 0
+        
         return {
             "database": {
                 "size_mb": round(db_size_mb, 2),
                 "size_formatted": f"{db_size_mb:.2f} MB",
+                "max_size_mb": max_db_size_mb,
+                "max_size_formatted": f"{max_db_size_mb:.0f} MB",
+                "usage_percent": round(db_usage_percent, 1),
                 "total_logs": total_logs,
-                "growth_rate": f"{recent_logs} logs/hour"
+                "growth_rate": f"{logs_24h:,} logs/day",
+                "logs_per_day": logs_24h
             },
             "throughput": {
+                "logs_per_day": logs_24h,
                 "logs_per_hour": recent_logs,
                 "logs_per_minute": round(recent_logs / 60, 2),
                 "logs_per_second": round(recent_logs / 3600, 2)

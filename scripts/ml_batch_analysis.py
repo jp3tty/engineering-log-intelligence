@@ -3,11 +3,13 @@ ML Batch Analysis Script
 =========================
 This script runs ML analysis on logs and stores predictions in the database.
 
+Updated: October 17, 2025 - Using enhanced business severity model
+
 This runs in GitHub Actions (not Vercel), so we can use heavy ML libraries
 without impacting the serverless function performance.
 
 Author: Engineering Log Intelligence Team
-Date: October 11, 2025
+Date: October 17, 2025
 """
 
 import os
@@ -17,6 +19,7 @@ import json
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta
+from scipy.sparse import csr_matrix, hstack
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -28,31 +31,40 @@ except:
     pass
 
 print("="*70)
-print("🤖 ML BATCH ANALYSIS - Running in GitHub Actions")
+print("🤖 ML BATCH ANALYSIS - Enhanced Severity Model")
 print("="*70)
 print()
 
 # =============================================================================
-# STEP 1: Load ML Models
+# STEP 1: Load Enhanced ML Models
 # =============================================================================
-print("📂 Loading ML models...")
+print("📂 Loading enhanced ML models...")
 
 try:
-    with open('models/log_classifier_simple.pkl', 'rb') as f:
+    # Load enhanced business severity classifier
+    with open('models/severity_classifier_enhanced.pkl', 'rb') as f:
         classifier = pickle.load(f)
+    with open('models/severity_vectorizer_enhanced.pkl', 'rb') as f:
+        severity_vectorizer = pickle.load(f)
+    with open('models/severity_encoders_enhanced.pkl', 'rb') as f:
+        encoders = pickle.load(f)
+    with open('models/severity_metadata_enhanced.json', 'r') as f:
+        metadata = json.load(f)
+    
+    # Load anomaly detector with its own vectorizer
     with open('models/anomaly_detector_simple.pkl', 'rb') as f:
         anomaly_detector = pickle.load(f)
     with open('models/vectorizer_simple.pkl', 'rb') as f:
-        vectorizer = pickle.load(f)
-    with open('models/metadata_simple.json', 'r') as f:
-        metadata = json.load(f)
+        anomaly_vectorizer = pickle.load(f)
     
-    print("✅ Models loaded successfully")
-    print(f"   Classifier accuracy: {metadata['classifier_accuracy']*100:.1f}%")
-    print(f"   Anomaly detector accuracy: {metadata['anomaly_detector_accuracy']*100:.1f}%")
+    print("✅ Enhanced models loaded successfully")
+    print(f"   Business Severity Model: {metadata['accuracy']*100:.1f}% accuracy")
+    print(f"   Total features: {metadata['total_features']}")
+    print(f"   Severity levels: {', '.join(metadata['severity_levels'])}")
     print()
 except Exception as e:
     print(f"❌ Failed to load models: {e}")
+    print("💡 Make sure you've run train_models_severity_enhanced.py first")
     sys.exit(1)
 
 # =============================================================================
@@ -116,9 +128,11 @@ print()
 print("📋 Fetching logs that need ML analysis...")
 
 # Get logs from the last 24 hours that don't have predictions yet
+# Include all features needed for enhanced severity prediction
 cursor.execute("""
     SELECT 
-        le.id, le.log_id, le.message, le.level, le.timestamp
+        le.id, le.log_id, le.message, le.level, le.timestamp,
+        le.service, le.endpoint, le.http_status, le.response_time_ms
     FROM log_entries le
     LEFT JOIN ml_predictions mp ON le.id = mp.log_entry_id
     WHERE 
@@ -151,44 +165,85 @@ predictions = []
 
 for log in logs_to_analyze:
     try:
-        # Convert message to numbers
-        X = vectorizer.transform([log['message']])
+        # Extract features with defaults
+        message = log.get('message', '')
+        service = log.get('service', 'unknown')
+        endpoint = log.get('endpoint', 'unknown')
+        level = log.get('level', 'INFO').upper()
+        http_status = int(log.get('http_status') or 200)
+        response_time = float(log.get('response_time_ms') or 0)
         
-        # Predict with classifier
-        level = classifier.predict(X)[0]
-        level_proba = classifier.predict_proba(X)[0]
-        level_confidence = float(max(level_proba))
+        # STEP 1: Vectorize message text (using severity vectorizer)
+        X_text = severity_vectorizer.transform([message])
         
-        # Predict with anomaly detector
-        is_anomaly = anomaly_detector.predict(X)[0]
-        anomaly_proba = anomaly_detector.predict_proba(X)[0]
+        # STEP 2: Encode categorical features (handle unknown categories gracefully)
+        try:
+            service_encoded = csr_matrix(
+                encoders['service_encoder'].transform([service]).reshape(-1, 1)
+            )
+        except ValueError:
+            # Unknown service - use 'unknown' or first known service
+            service_encoded = csr_matrix(
+                encoders['service_encoder'].transform(['unknown'] if 'unknown' in encoders['service_encoder'].classes_ else [encoders['service_encoder'].classes_[0]]).reshape(-1, 1)
+            )
+        
+        try:
+            endpoint_encoded = csr_matrix(
+                encoders['endpoint_encoder'].transform([endpoint]).reshape(-1, 1)
+            )
+        except ValueError:
+            # Unknown endpoint - use first known endpoint
+            endpoint_encoded = csr_matrix(
+                encoders['endpoint_encoder'].transform([encoders['endpoint_encoder'].classes_[0]]).reshape(-1, 1)
+            )
+        
+        try:
+            level_encoded = csr_matrix(
+                encoders['level_encoder'].transform([level]).reshape(-1, 1)
+            )
+        except ValueError:
+            # Unknown level - use INFO
+            level_encoded = csr_matrix(
+                encoders['level_encoder'].transform(['INFO']).reshape(-1, 1)
+            )
+        
+        # STEP 3: Normalize numerical features
+        http_status_normalized = http_status / 100.0
+        response_time_normalized = min(response_time / 1000.0, 10.0)
+        
+        # Apply scaling
+        X_numerical_raw = [[http_status_normalized, response_time_normalized]]
+        X_numerical_scaled = encoders['scaler'].transform(X_numerical_raw)
+        X_numerical = csr_matrix(X_numerical_scaled)
+        
+        # STEP 4: Combine all features
+        X = hstack([X_text, service_encoded, endpoint_encoded, level_encoded, X_numerical])
+        
+        # STEP 5: Predict business severity with enhanced model
+        severity = classifier.predict(X)[0]
+        severity_proba = classifier.predict_proba(X)[0]
+        severity_confidence = float(max(severity_proba))
+        
+        # STEP 6: Predict anomalies (using anomaly vectorizer)
+        X_anomaly = anomaly_vectorizer.transform([message])
+        is_anomaly = anomaly_detector.predict(X_anomaly)[0]
+        anomaly_proba = anomaly_detector.predict_proba(X_anomaly)[0]
         anomaly_score = float(anomaly_proba[1] if len(anomaly_proba) > 1 else anomaly_proba[0])
         anomaly_confidence = float(max(anomaly_proba))
         
         # Ensure all confidence values are in valid range [0, 1]
-        # This prevents database overflow errors
-        level_confidence = max(0.0, min(1.0, level_confidence))
+        severity_confidence = max(0.0, min(1.0, severity_confidence))
         anomaly_score = max(0.0, min(1.0, anomaly_score))
         anomaly_confidence = max(0.0, min(1.0, anomaly_confidence))
         
-        # Determine severity
-        if is_anomaly:
-            severity = "high"
-        elif level in ['ERROR', 'FATAL']:
-            severity = "medium"
-        elif level == 'WARN':
-            severity = "low"
-        else:
-            severity = "info"
-        
         predictions.append({
             'log_entry_id': log['id'],
-            'predicted_level': level,
-            'level_confidence': level_confidence,
+            'predicted_level': level,  # Use actual log level
+            'level_confidence': severity_confidence,  # Using severity confidence here
             'is_anomaly': bool(is_anomaly),
             'anomaly_score': anomaly_score,
             'anomaly_confidence': anomaly_confidence,
-            'severity': severity,
+            'severity': severity,  # Business severity from enhanced model
             'model_version': metadata['trained_at']
         })
         
@@ -298,9 +353,10 @@ results = {
     "logs_analyzed": analyzed_count,
     "predictions_stored": stored_count,
     "model_version": metadata['trained_at'],
+    "model_type": "business_severity_enhanced",
     "model_accuracy": {
-        "classifier": metadata['classifier_accuracy'],
-        "anomaly_detector": metadata['anomaly_detector_accuracy']
+        "severity_classifier": metadata['accuracy'],
+        "total_features": metadata['total_features']
     },
     "statistics": {
         "severity": [dict(s) for s in severity_stats],

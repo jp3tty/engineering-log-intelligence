@@ -37,7 +37,9 @@ def calculate_business_severity(log: Dict) -> str:
     # ========================================================================
     # Factor 1: Service Criticality (0-40 points)
     # ========================================================================
-    source_type = log.get('source_type', '').lower()
+    # Check both 'service' (new realistic data) and 'source_type' (old data)
+    service = log.get('service', log.get('source_type', '')).lower()
+    source_type = service  # For compatibility
     
     # Critical services - revenue/auth impacting
     if any(keyword in source_type for keyword in [
@@ -64,20 +66,20 @@ def calculate_business_severity(log: Dict) -> str:
         score += 25
     
     # ========================================================================
-    # Factor 2: Log Level (0-30 points)
+    # Factor 2: Log Level (0-25 points) - Less weight than service criticality
     # ========================================================================
     level = log.get('level', 'INFO').upper()
     
     if level == 'FATAL':
-        score += 30
-    elif level == 'ERROR':
         score += 25
+    elif level == 'ERROR':
+        score += 20
     elif level == 'WARN':
-        score += 15
+        score += 12
     elif level == 'DEBUG':
-        score += 3
+        score += 2
     else:  # INFO
-        score += 5
+        score += 4
     
     # ========================================================================
     # Factor 3: Message Content - Error Type (0-20 points)
@@ -182,14 +184,23 @@ def calculate_business_severity(log: Dict) -> str:
         score += 10
     
     # ========================================================================
+    # Special Adjustments - Test/Dev Environments
+    # ========================================================================
+    # If it's a test/dev service, significantly reduce severity
+    if any(keyword in source_type for keyword in ['test', 'dev', 'debug', 'staging']):
+        # Test environments should rarely be critical/high
+        score = int(score * 0.5)  # Reduce score by 50%
+    
+    # ========================================================================
     # Convert Score to Severity Level (0-100+ scale)
     # ========================================================================
+    # Adjusted thresholds to be more conservative
     
-    if score >= 85:
+    if score >= 90:  # Raised from 85 - truly critical only
         return 'critical'
-    elif score >= 60:
+    elif score >= 65:  # Raised from 60 - significant issues
         return 'high'
-    elif score >= 35:
+    elif score >= 38:  # Slightly raised from 35
         return 'medium'
     else:
         return 'low'
