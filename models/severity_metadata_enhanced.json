@@ -1,0 +1,30 @@
+{
+  "trained_at": "2025-10-17T15:54:17.835282",
+  "model_type": "RandomForestClassifier_MultiFeature",
+  "num_training_samples": 7338,
+  "num_test_samples": 1835,
+  "accuracy": 0.9634877384196185,
+  "total_features": 229,
+  "feature_breakdown": {
+    "text_features": 224,
+    "service_feature": 1,
+    "endpoint_feature": 1,
+    "level_feature": 1,
+    "http_status_feature": 1,
+    "response_time_feature": 1
+  },
+  "severity_levels": [
+    "critical",
+    "high",
+    "medium",
+    "low"
+  ],
+  "severity_distribution": {
+    "critical": 49,
+    "high": 408,
+    "medium": 5003,
+    "low": 3713
+  },
+  "n_estimators": 200,
+  "purpose": "business_severity_prediction_enhanced"
+}
