@@ -91,6 +91,8 @@ external-services/*.pem
 
 # Vercel
 .vercel
+.vercel/
+*.vercel.json
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -102,6 +104,29 @@ external-services/*.pem
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# ML Models (large binary files - regenerate as needed)
+models/*.pkl
+models/*.joblib
+*.pkl
+*.joblib
+
+# Training data (can be regenerated)
+*_training_data.json
+severity_training_data.json
+analysis_results.json
+
+# Temporary/generated files
 railway_aws.txt
-*.txt
+*.txt.bak
 .env*.local
+
+# Summary/notes files (personal)
+OCT*_SUMMARY.txt
+*_SUMMARY.txt
+*_NOTES.txt
+
+# BUT keep requirements files!
+!requirements.txt
+!requirements-*.txt
+!**/requirements.txt
