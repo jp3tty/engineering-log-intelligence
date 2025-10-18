@@ -254,7 +254,7 @@ class handler(BaseHTTPRequestHandler):
                     "source": "empty"
                 }
             
-            # Get recent predictions
+            # Get recent predictions with log details
             cursor.execute("""
                 SELECT 
                     mp.id,
@@ -264,8 +264,11 @@ class handler(BaseHTTPRequestHandler):
                     mp.is_anomaly,
                     mp.anomaly_score,
                     mp.severity,
-                    mp.predicted_at
+                    mp.predicted_at,
+                    le.log_id,
+                    le.message
                 FROM ml_predictions mp
+                JOIN log_entries le ON mp.log_entry_id = le.id
                 WHERE mp.predicted_at > NOW() - INTERVAL '24 hours'
                 ORDER BY mp.predicted_at DESC
                 LIMIT 100
@@ -287,7 +290,9 @@ class handler(BaseHTTPRequestHandler):
                     "is_anomaly": row[4],
                     "anomaly_score": float(row[5]) if row[5] is not None else None,
                     "severity": row[6],
-                    "predicted_at": row[7].isoformat() if row[7] else None
+                    "predicted_at": row[7].isoformat() if row[7] else None,
+                    "log_id": row[8],
+                    "message": row[9]
                 })
             
             return {
