@@ -34,16 +34,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install psycopg2-binary scikit-learn==1.3.2 numpy python-dotenv scipy
       
+      - name: Train anomaly detector models
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "🤖 Training anomaly detector models..."
+          python train_models_simple.py
+      
       - name: Generate training data
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          echo "📊 Generating training data from database..."
+          echo "📊 Generating training data for severity model..."
           python generate_severity_training_data.py
       
-      - name: Train ML models
+      - name: Train severity classifier models
         run: |
-          echo "🤖 Training ML models..."
+          echo "🤖 Training enhanced severity classifier..."
           python train_models_severity_enhanced.py
       
       - name: Fix ML predictions schema (if needed)
