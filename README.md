@@ -23,15 +23,15 @@ An AI-powered log analysis platform that processes engineering logs from multipl
 
 **Status**: ✅ **Fully Functional** - Complete enterprise-grade platform with working API endpoints and production stability
 
-**Latest Achievements** (October 16, 2025):  
-- ✅ **Fresh Database Setup**: New Railway PostgreSQL with 30,000 logs
-- 🤖 **ML Predictions Active**: 1,000 predictions in database with real analytics
-- 🔄 **GitHub Actions Configured**: Daily log generation and ML batch analysis workflows
-- 🔧 **Direct Database Connections**: Simplified architecture optimized for Vercel serverless
-- ✅ **All API Endpoints Working**: 7 endpoints operational with real database data
-- 📊 **ML Analytics Live**: Frontend displaying real predictions from ml_predictions table
-- 🐛 **Critical Fixes Applied**: Fixed DATABASE_URL formatting, metrics.py variable scope, ml_lightweight.py queries
-- 🚀 **Production Ready**: Complete system with automated data generation and ML analysis
+**Latest Achievements** (October 18, 2025):  
+- 🤖 **Enhanced ML System**: Upgraded to 96.3% accuracy business severity prediction model
+- 🗄️ **Storage Crisis Resolved**: Reduced daily log generation from 50K to 5K logs/day (90% reduction)
+- 🔄 **Automated Cleanup**: Daily cleanup workflow maintains 7-day retention policy
+- 🐛 **Bug Fixes**: Fixed anomaly rate display (was 830%, now 8.3%), ML predictions table now shows log details
+- 📊 **Database Optimized**: Freed 41 MB of space, reduced usage from 80% to 55%
+- 🎯 **Multi-Feature ML**: Enhanced model uses text + service + endpoint + HTTP status + response time
+- 📈 **Improved Monitoring**: Dashboard now shows logs/day growth rate and max database size
+- ✅ **Production Stable**: System runs indefinitely on Railway free tier with automated maintenance
 
 **Previous Achievements** (October 11, 2025 - Evening):  
 - 🤖 **Real ML Predictions Deployed**: Log Analysis now uses trained ML models instead of mock data
@@ -55,9 +55,10 @@ An AI-powered log analysis platform that processes engineering logs from multipl
 ### 🔍 **Log Intelligence**
 - **Multi-Source Log Processing**: SPLUNK, SAP, and Application logs with full field extraction
 - **Real-Time Analysis**: Process 60,000+ logs per second
-- **ML-Powered Classification**: Trained RandomForest models with ~90% accuracy
-- **Anomaly Detection**: ML-based detection with confidence scoring
-- **Database-Backed Predictions**: Persistent, consistent ML predictions
+- **ML-Powered Classification**: Enhanced RandomForest models with **96.3% accuracy**
+- **Business Severity Prediction**: Predicts business impact (critical, high, medium, low) based on multiple features
+- **Anomaly Detection**: ML-based detection with confidence scoring (8.3% detection rate)
+- **Database-Backed Predictions**: Persistent, consistent ML predictions with automated batch analysis
 - **Cross-System Correlation**: End-to-end request tracing across Application → SAP → SPLUNK
   - 61% correlation rate with shared request_ids
   - Multi-system request traces spanning 2-3 systems
@@ -258,29 +259,42 @@ vercel --prod
 vercel
 ```
 
-### Automated Log Generation
+### Automated Log Generation & Maintenance
 
-The system includes automated daily log generation via GitHub Actions:
+The system includes automated daily workflows via GitHub Actions:
 
+**Log Generation:**
 ```bash
-# The workflow runs automatically every day at 2 AM UTC
-# Generates 1000 new log entries daily
+# The workflow runs automatically every day at 4 PM UTC
+# Generates 5,000 new log entries daily (optimized for Railway free tier)
 
 # Manual generation (for testing)
-python populate_database.py 1000
+python populate_database.py 5000
+```
+
+**Automated Cleanup:**
+```bash
+# Runs automatically every day at 2 AM UTC
+# Maintains 7-day retention policy
+# Prevents database from filling up
+
+# Manual cleanup (for testing)
+python cleanup_old_logs.py --days 7
 ```
 
 **Setup Instructions:**
 1. Add `DATABASE_URL` to GitHub Secrets (Settings → Secrets → Actions)
 2. See `.github/workflows/DAILY_LOG_GENERATION_SETUP.md` for details
-3. Test workflow: Actions tab → Daily Log Generation → Run workflow
+3. Test workflows: Actions tab → Run workflow
 
 **Features:**
-- ✅ Automated daily execution (2 AM UTC)
+- ✅ Automated daily log generation (5,000 logs/day)
+- ✅ Automated daily cleanup (7-day retention)
+- ✅ ML batch analysis every 6 hours
 - ✅ Manual trigger option via GitHub UI
-- ✅ Configurable log count per run
+- ✅ Configurable retention period
 - ✅ Free (uses GitHub Actions free tier)
-- ✅ Generates realistic multi-source logs (SPLUNK, SAP, Application)
+- ✅ Sustainable on Railway free tier (166 MB limit)
 
 ## Documentation
 
@@ -522,8 +536,35 @@ MIT License - see LICENSE file for details
 
 ---
 
-**Last Updated**: October 16, 2025  
-**Version**: 2.6.0  
-**Phase**: Production System Complete - All Features Operational
+## 📋 Recent Updates (October 18, 2025)
+
+### Storage & Performance
+- **Database Optimization**: Reduced storage from 133 MB (80%) to 92 MB (55%)
+- **Sustainable Growth**: 5K logs/day with automated 7-day retention
+- **Cleanup Scripts**: Manual and automated cleanup tools available
+
+### ML Enhancements
+- **96.3% Accuracy**: Upgraded from text-only (60.3%) to multi-feature model
+- **229 Features**: Text + service + endpoint + level + HTTP status + response time
+- **Business Severity**: Predicts critical/high/medium/low business impact
+- **Production Integration**: Enhanced model deployed to GitHub Actions workflows
+
+### Bug Fixes
+- **Anomaly Rate Display**: Fixed double percentage conversion (830% → 8.3%)
+- **ML Predictions Table**: Added log_id and message to Recent Predictions display
+- **Foreign Key Handling**: Fixed cleanup script deletion order
+
+### Monitoring Dashboard
+- **Growth Rate Tracking**: Now displays logs/day growth rate
+- **Max Database Size**: Shows Railway limit and usage percentage
+- **Color-Coded Alerts**: Usage percentage shown with appropriate warning colors
+
+---
+
+**Last Updated**: October 18, 2025  
+**Version**: 2.7.0  
+**Phase**: Production System Optimized - Enhanced ML & Automated Maintenance
 
 **Quick Start Documentation**: See `CURRENT_SYSTEM_STATUS.md` for the latest system state and configuration.
+
+**For Storage Management**: See `STORAGE_CRISIS_SOLUTION.md` and `RAILWAY_STORAGE_EMERGENCY_GUIDE.md` for database optimization guides.
