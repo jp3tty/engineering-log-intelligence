@@ -260,7 +260,15 @@ export default {
           format: 'number',
           trend: -8.3, // Negative is good (fewer anomalies)
           color: 'red',
-          description: '🤖 ML Predictions (24h)'
+          description: '🤖 ML Predictions (24h)',
+          link: {
+            name: 'LogAnalysis',
+            query: { 
+              filter: 'anomaly',
+              sortBy: 'severity',
+              sortOrder: 'desc'
+            }
+          }
         },
         {
           id: 'avg_response_time',

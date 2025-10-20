@@ -1,5 +1,12 @@
 <template>
-  <div class="metric-card">
+  <component 
+    :is="cardComponent" 
+    :to="metric.link"
+    :class="[
+      'metric-card',
+      { 'metric-card-clickable': metric.link }
+    ]"
+  >
     <div class="metric-header">
       <div class="metric-icon" :class="iconClass">
         <component :is="metricIcon" class="w-6 h-6" />
@@ -19,7 +26,14 @@
         {{ metric.description }}
       </div>
     </div>
-  </div>
+    
+    <!-- Link indicator -->
+    <div v-if="metric.link" class="metric-link-indicator">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </div>
+  </component>
 </template>
 
 <script>
@@ -48,6 +62,11 @@ export default {
   },
   emits: [],
   setup(props) {
+    // Determine if card should be a router-link or div
+    const cardComponent = computed(() => {
+      return props.metric.link ? 'router-link' : 'div'
+    })
+
     // Icon mapping based on metric color
     const iconMap = {
       blue: ChartBarIcon,
@@ -169,6 +188,7 @@ export default {
     }
 
     return {
+      cardComponent,
       metricIcon,
       iconClass,
       valueClass,
@@ -183,7 +203,15 @@ export default {
 
 <style scoped>
 .metric-card {
-  @apply bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow;
+  @apply bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow relative;
+}
+
+.metric-card-clickable {
+  @apply cursor-pointer hover:border-blue-300 hover:shadow-lg;
+}
+
+.metric-link-indicator {
+  @apply absolute bottom-4 right-4 text-gray-400;
 }
 
 .metric-header {
