@@ -15,9 +15,9 @@ module.exports = defineConfig({
     port: 3001,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://engineeringlogintelligence.vercel.app',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       },
     },
   },
