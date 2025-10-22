@@ -360,6 +360,7 @@
 
 <script>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useNotificationStore } from '@/stores/notifications'
 import {
   MagnifyingGlassIcon,
@@ -383,6 +384,7 @@ export default {
     XMarkIcon
   },
   setup() {
+    const route = useRoute()
     const notificationStore = useNotificationStore()
 
     // Reactive state
@@ -459,8 +461,19 @@ export default {
         console.log(`📊 Parsed data:`, data)
         
         if (data.success) {
-          searchResults.value = data.data.logs
-          totalResults.value = data.data.pagination.total_count
+          let logs = data.data.logs
+          
+          // Apply client-side AI analysis filtering
+          if (aiAnalysisType.value === 'anomaly') {
+            // For development: Treat ERROR and FATAL logs as anomalies
+            console.log('🔍 Filtering for anomalies (ERROR/FATAL logs)...')
+            logs = logs.filter(log => log.level === 'ERROR' || log.level === 'FATAL')
+            console.log(`✅ Found ${logs.length} anomalous logs`)
+            console.warn('⚠️ Note: Production has 1,034+ anomalies, but mock API only returns 5 sample logs')
+          }
+          
+          searchResults.value = logs
+          totalResults.value = logs.length
           
           // Log data source for debugging
           console.log(`✅ Logs loaded from: ${data.dataSource}`)
@@ -472,10 +485,14 @@ export default {
             generateAIInsights(searchResults.value)
           }
           
+          const message = aiAnalysisType.value === 'anomaly'
+            ? `Found ${totalResults.value} anomalous logs (mock data - production has 1,034+)`
+            : `Found ${totalResults.value} logs matching your criteria (source: ${data.dataSource})`
+          
           notificationStore.addNotification({
-            type: 'success',
+            type: aiAnalysisType.value === 'anomaly' && totalResults.value < 10 ? 'info' : 'success',
             title: 'Search Complete',
-            message: `Found ${totalResults.value} logs matching your criteria (source: ${data.dataSource})`
+            message: message
           })
         } else {
           throw new Error(data.message || 'Failed to fetch logs')
@@ -695,6 +712,28 @@ export default {
       if (searchResults.value.length > 0 || totalResults.value > 0) {
         performSearch()
       }
+    })
+
+    // Initialize from query parameters (e.g., from Analytics card click)
+    onMounted(() => {
+      console.log('🔗 LogAnalysis mounted, checking for query parameters...')
+      console.log('📋 Route query:', route.query)
+      
+      // Check for filter parameter (e.g., filter=anomaly)
+      if (route.query.filter === 'anomaly') {
+        console.log('🎯 Applying anomaly filter from URL')
+        aiAnalysisType.value = 'anomaly'
+      }
+      
+      // Check for sortBy parameter
+      if (route.query.sortBy) {
+        console.log(`📊 Setting sort by: ${route.query.sortBy}`)
+        sortBy.value = route.query.sortBy
+      }
+      
+      // Note: sortOrder is handled in the API request
+      // Trigger initial search
+      performSearch()
     })
 
     return {
