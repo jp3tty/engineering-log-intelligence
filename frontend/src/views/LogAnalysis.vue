@@ -436,6 +436,10 @@ export default {
         if (sourceSystem.value) {
           params.append('source', sourceSystem.value)
         }
+        if (aiAnalysisType.value === 'anomaly') {
+          params.append('filter', 'anomaly')
+          console.log('🚨 Adding server-side anomaly filter to API request')
+        }
         
         // Fetch logs from API
         console.log(`🔍 Fetching logs with params: ${params.toString()}`)
@@ -463,17 +467,16 @@ export default {
         if (data.success) {
           let logs = data.data.logs
           
-          // Apply client-side AI analysis filtering
-          if (aiAnalysisType.value === 'anomaly') {
-            // For development: Treat ERROR and FATAL logs as anomalies
-            console.log('🔍 Filtering for anomalies (ERROR/FATAL logs)...')
+          // Server-side filtering is preferred, but apply client-side as fallback
+          // if the API didn't filter (e.g., using simulated data)
+          if (aiAnalysisType.value === 'anomaly' && data.dataSource === 'simulated') {
+            console.log('🔍 Applying client-side anomaly filter (fallback for simulated data)...')
             logs = logs.filter(log => log.level === 'ERROR' || log.level === 'FATAL')
-            console.log(`✅ Found ${logs.length} anomalous logs`)
-            console.warn('⚠️ Note: Production has 1,034+ anomalies, but mock API only returns 5 sample logs')
+            console.log(`✅ Found ${logs.length} anomalous logs (client-filtered)`)
           }
           
           searchResults.value = logs
-          totalResults.value = logs.length
+          totalResults.value = data.data.pagination?.total_count || logs.length
           
           // Log data source for debugging
           console.log(`✅ Logs loaded from: ${data.dataSource}`)
@@ -486,11 +489,11 @@ export default {
           }
           
           const message = aiAnalysisType.value === 'anomaly'
-            ? `Found ${totalResults.value} anomalous logs (mock data - production has 1,034+)`
-            : `Found ${totalResults.value} logs matching your criteria (source: ${data.dataSource})`
+            ? `Found ${totalResults.value} anomalous logs (ERROR/FATAL + ML predictions)`
+            : `Found ${totalResults.value} logs matching your criteria`
           
           notificationStore.addNotification({
-            type: aiAnalysisType.value === 'anomaly' && totalResults.value < 10 ? 'info' : 'success',
+            type: 'success',
             title: 'Search Complete',
             message: message
           })

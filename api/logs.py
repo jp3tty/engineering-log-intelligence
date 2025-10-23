@@ -42,6 +42,7 @@ class handler(BaseHTTPRequestHandler):
             log_level = params.get('level', [''])[0]
             source_system = params.get('source', [''])[0]
             time_range = params.get('timeRange', ['24h'])[0]
+            filter_type = params.get('filter', [''])[0]  # For anomaly filtering
             page = int(params.get('page', ['1'])[0])
             page_size = int(params.get('pageSize', ['50'])[0])
             
@@ -52,7 +53,7 @@ class handler(BaseHTTPRequestHandler):
             if use_real_data:
                 logs_data = fetch_logs_from_db(
                     db_conn, search_query, log_level, source_system, 
-                    time_range, page, page_size
+                    time_range, filter_type, page, page_size
                 )
                 db_conn.close()
             else:
@@ -101,10 +102,10 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.end_headers()
 
-def fetch_logs_from_db(conn, search_query, log_level, source_system, time_range, page, page_size):
+def fetch_logs_from_db(conn, search_query, log_level, source_system, time_range, filter_type, page, page_size):
     """Fetch logs from database with filtering and pagination."""
     try:
-        print(f"🔍 fetch_logs_from_db called with: search={search_query}, level={log_level}, source={source_system}, time={time_range}, page={page}, size={page_size}")
+        print(f"🔍 fetch_logs_from_db called with: search={search_query}, level={log_level}, source={source_system}, time={time_range}, filter={filter_type}, page={page}, size={page_size}")
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         
         # Parse time range
@@ -132,6 +133,12 @@ def fetch_logs_from_db(conn, search_query, log_level, source_system, time_range,
         if source_system:
             where_clauses.append("source_type = %s")
             params.append(source_system)
+        
+        # Add anomaly filtering
+        if filter_type == 'anomaly':
+            # Filter for logs that are anomalies OR have ERROR/FATAL level
+            where_clauses.append("(is_anomaly = true OR level IN ('ERROR', 'FATAL'))")
+            print("🚨 Applying anomaly filter: is_anomaly=true OR level IN ('ERROR', 'FATAL')")
         
         where_clause = " AND ".join(where_clauses)
         
