@@ -95,6 +95,22 @@ cursor.close()
 conn.close()
 print()
 
+# Check if we have data to work with
+if len(data) == 0:
+    print("⚠️  No logs found in database")
+    print()
+    print("This is expected when:")
+    print("  • The database is empty")
+    print("  • No logs have message and level fields")
+    print()
+    print("💡 Skipping model training - no training data available")
+    print()
+    print("="*70)
+    print("✅ TRAINING SKIPPED (NO DATA)")
+    print("="*70)
+    print()
+    sys.exit(0)  # Exit gracefully, not an error
+
 # Show sample
 print("📋 Sample logs:")
 for i in range(min(3, len(data))):

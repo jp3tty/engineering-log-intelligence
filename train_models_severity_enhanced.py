@@ -58,8 +58,20 @@ print("📂 Loading labeled training data...")
 training_file = 'severity_training_data.json'
 
 if not os.path.exists(training_file):
-    print(f"❌ Training data not found: {training_file}")
-    sys.exit(1)
+    print(f"⚠️  Training data not found: {training_file}")
+    print()
+    print("This is expected when:")
+    print("  • The database has no logs")
+    print("  • No logs match the filter criteria")
+    print("  • The data generation step was skipped")
+    print()
+    print("💡 Skipping model training - no training data available")
+    print()
+    print("="*70)
+    print("✅ TRAINING SKIPPED (NO DATA)")
+    print("="*70)
+    print()
+    sys.exit(0)  # Exit gracefully, not an error
 
 with open(training_file, 'r') as f:
     data = json.load(f)

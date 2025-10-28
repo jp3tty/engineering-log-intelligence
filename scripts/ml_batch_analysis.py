@@ -40,6 +40,32 @@ print()
 # =============================================================================
 print("📂 Loading enhanced ML models...")
 
+# Check if model files exist first
+models_exist = all([
+    os.path.exists('models/severity_classifier_enhanced.pkl'),
+    os.path.exists('models/severity_vectorizer_enhanced.pkl'),
+    os.path.exists('models/severity_encoders_enhanced.pkl'),
+    os.path.exists('models/severity_metadata_enhanced.json'),
+    os.path.exists('models/anomaly_detector_simple.pkl'),
+    os.path.exists('models/vectorizer_simple.pkl')
+])
+
+if not models_exist:
+    print("⚠️  ML models not found")
+    print()
+    print("This is expected when:")
+    print("  • Training was skipped due to no training data")
+    print("  • Models haven't been trained yet")
+    print("  • The database is empty")
+    print()
+    print("💡 Skipping ML analysis - no trained models available")
+    print()
+    print("="*70)
+    print("✅ ML ANALYSIS SKIPPED (NO MODELS)")
+    print("="*70)
+    print()
+    sys.exit(0)  # Exit gracefully, not an error
+
 try:
     # Load enhanced business severity classifier
     with open('models/severity_classifier_enhanced.pkl', 'rb') as f:
