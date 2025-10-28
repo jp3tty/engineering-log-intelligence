@@ -114,6 +114,21 @@ for log in logs:
 print(f"✅ Labeled {len(labeled_data):,} logs")
 print()
 
+# Check if we have any data to work with
+if len(labeled_data) == 0:
+    print("⚠️  No logs found matching criteria")
+    print("   This may happen if:")
+    print("   - The database is empty")
+    print("   - No logs match the service name filter")
+    print("   - Database connection issues")
+    print()
+    print("💡 Tip: Check that log_entries table has data with service names like:")
+    print("   - payment-api, user-api, order-service, etc.")
+    print()
+    cursor.close()
+    conn.close()
+    sys.exit(0)  # Exit gracefully, not an error
+
 # Show severity distribution
 print("📊 Severity Distribution:")
 print("-" * 40)
